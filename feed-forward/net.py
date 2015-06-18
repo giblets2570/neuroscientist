@@ -30,7 +30,7 @@ else:
         return pickle.load(f, encoding=encoding)
 
 
-BASENAME = "../R2192/20140110_R2192_track1"
+BASENAME = "../../R2192/20140110_R2192_track1"
 
 NUM_EPOCHS = 100
 BATCH_SIZE = 600
@@ -146,7 +146,7 @@ def main():
     for i in range(NUM_EPOCHS):
         for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
             cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
-        print(np.mean(np.argmax(dataset['X_test'], axis=1) == training['predict'](dataset['X_test'])))
+        print(np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test'])))
 
 
 if __name__ == '__main__':
