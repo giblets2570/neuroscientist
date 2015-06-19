@@ -37,7 +37,7 @@ BASENAME = "../../R2192/20140110_R2192_track1"
 
 NUM_EPOCHS = 10
 BATCH_SIZE = 600
-NUM_HIDDEN_UNITS = 100
+NUM_HIDDEN_UNITS = 300
 LEARNING_RATE = 0.01
 MOMENTUM = 0.9
 
@@ -48,7 +48,18 @@ LOG_EXPERIMENT = False
 
 TETRODE_NUMBER = 16
 
-CONV = False
+CONV = True
+
+class DimshuffleLayer(lasagne.layers.Layer):
+    def __init__(self, input_layer, pattern):
+        super(DimshuffleLayer, self).__init__(input_layer)
+        self.pattern = pattern
+
+    def get_output_shape_for(self, input_shape):
+        return tuple([input_shape[i] for i in self.pattern])
+
+    def get_output_for(self, input, *args, **kwargs):
+        return input.dimshuffle(self.pattern)
 
 def load_data(tetrode_number):
     """
@@ -57,10 +68,12 @@ def load_data(tetrode_number):
 
     X_train, X_test, y_train, y_test = formatData(tetrode_number,BASENAME,CONV)
 
-    X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1])
+    X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1],X_train.shape[2])
     # y_train = y_train.reshape(y_train.shape[0],1,y_train.shape[1])
-    X_test = X_test.reshape(X_test.shape[0],1,X_test.shape[1])
+    X_test = X_test.reshape(X_test.shape[0],1,X_test.shape[1],X_test.shape[2])
     # y_test = y_test.reshape(y_test.shape[0],1,y_test.shape[1])
+
+    print(X_train.shape)
 
     return dict(
         X_train=X_train,
@@ -73,58 +86,52 @@ def load_data(tetrode_number):
         output_dim=y_train.shape[-1],
     )
 
-def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden,batch_size=BATCH_SIZE):
-	"""Create a symbolic representation of a neural network with `intput_dim`
-    input nodes, `output_dim` output nodes and `num_hidden_units` per hidden
-    layer.
-    The training function of this model must have a mini-batch size of
-    `batch_size`.
-    A theano expression which represents such a network is returned.
-    """
 
-        l_in = lasagne.layers.InputLayer(shape=input_shape)
-        
-	   # l_in_dropout = lasagne.layers.DropoutLayer(l_in,p=p_drop_input)
+def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
+        """
+            Create a symbolic representation of a neural network with `intput_dim`
+            input nodes, `output_dim` output nodes and `num_hidden_units` per hidden
+            layer.
+            The training function of this model must have a mini-batch size of
+            `batch_size`.
+            A theano expression which represents such a network is returned.
+        """
+        shape = tuple([None]+list(input_shape[1:]))
 
-        l_hidden = lasagne.layers.DenseLayer(
-            l_in,
+        l_in = lasagne.layers.InputLayer(shape=shape)
+
+        l_conv2D_1 = lasagne.layers.Conv2DLayer(
+            l_in, 
+            num_filters=10,
+            filter_size=(3,3), 
+            stride=(1, 1), 
+            border_mode="valid", 
+            untie_biases=False, 
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
+
+        l_pool2D_1 = lasagne.layers.MaxPool2DLayer(
+            l_conv2D_1, 
+            pool_size=(2,2), 
+            stride=None, 
+            pad=0, 
+            ignore_border=False,
+        )
+
+        l_hidden_1 = lasagne.layers.DenseLayer(
+            l_pool2D_1,
             num_units=num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        # l_hidden_dropout = lasagne.layers.DropoutLayer(
-        #     l_hidden,
-        #     p=p_drop_hidden
-        #     )
         l_hidden_2 = lasagne.layers.DenseLayer(
-            l_hidden,
+            l_hidden_1,
             num_units=num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
-        # l_hidden_2_dropout = lasagne.layers.DropoutLayer(
-        #     l_hidden_2,
-        #     p=p_drop_hidden
-        #     )
-        l_hidden_3 = lasagne.layers.DenseLayer(
+
+        l_out = lasagne.layers.DenseLayer(
             l_hidden_2,
-            num_units=num_hidden_units,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
-        # l_hidden_3_dropout = lasagne.layers.DropoutLayer(
-        #     l_hidden_3,
-        #     p=p_drop_hidden
-        #     )
-        # l_hidden_4 = lasagne.layers.DenseLayer(
-        #     l_hidden_3,
-        #     num_units=num_hidden_units,
-        #     nonlinearity=lasagne.nonlinearities.rectify,
-        #     )
-        # l_hidden_4_dropout = lasagne.layers.DropoutLayer(
-        #     l_hidden_4,
-        #     p=p_drop_hidden
-        #     )
-	l_out = lasagne.layers.DenseLayer(
-            l_hidden_3,
             num_units=output_dim,
             nonlinearity=lasagne.nonlinearities.softmax,
             )
@@ -139,7 +146,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     """
 
     # symbolic variables 
-    X_batch = T.tensor3()
+    X_batch = T.tensor4()
     y_batch = T.matrix()
 
     # this is the cost of the network when fed throught the noisey network
@@ -174,7 +181,7 @@ def main(tetrode_number=TETRODE_NUMBER):
     print(dataset['input_shape'])
 
     print("Making the model...")
-    network = model(dataset['input_shape'],dataset['output_dim'],NUM_HIDDEN_UNITS,0.2,0.2)
+    network = model(dataset['input_shape'],dataset['output_dim'],NUM_HIDDEN_UNITS)
     print("Done!")
 
     print("Setting up the training functions...")

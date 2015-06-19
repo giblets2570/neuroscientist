@@ -4,9 +4,9 @@ import sys
 import matplotlib.pyplot as plt
 import re
 
-BASENAME = "../R2192/20140110_R2192_track1"
+BASENAME = "../../R2192/20140110_R2192_track1"
 
-def formatData(tetrodeNumber,basename):
+def formatData(tetrodeNumber,basename,twoD=False):
 
 	tetfilename = basename + "." + str(tetrodeNumber)
 	cutfilename = basename + ".clu." + str(tetrodeNumber)
@@ -27,8 +27,12 @@ def formatData(tetrodeNumber,basename):
 					val = abs(data[j][1][k])
 					if(val > m):
 						m = val
-			
-			con = list(np.asarray(data[i][1],dtype=np.float16)/m)+list(np.asarray(data[i+1][1],dtype=np.float16)/m)+list(np.asarray(data[i+2][1],dtype=np.float16)/m)+list(np.asarray(data[i+3][1],dtype=np.float16)/m)
+			con = None
+
+			if twoD:
+				con = list(np.asarray(data[i][1],dtype=np.float16)/m),list(np.asarray(data[i+1][1],dtype=np.float16)/m),list(np.asarray(data[i+2][1],dtype=np.float16)/m),list(np.asarray(data[i+3][1],dtype=np.float16)/m)
+			else:
+				con = list(np.asarray(data[i][1],dtype=np.float16)/m)+list(np.asarray(data[i+1][1],dtype=np.float16)/m)+list(np.asarray(data[i+2][1],dtype=np.float16)/m)+list(np.asarray(data[i+3][1],dtype=np.float16)/m)
 			conData = np.asarray(con,dtype=np.float16)
 			entry['data'] = conData
 			timesData.append(entry)
@@ -70,7 +74,7 @@ def formatData(tetrodeNumber,basename):
 	return getTrainingTest()
 
 if __name__=="__main__":
-	trX, teX, trY, teY = formatData(sys.argv[1],BASENAME)
+	trX, teX, trY, teY = formatData(sys.argv[1],BASENAME,twoD=True)
 
 	print(trX.shape)
 	plt.plot(trX[1])
