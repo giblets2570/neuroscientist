@@ -32,31 +32,20 @@ else:
 
 BASENAME = "../../R2192/20140110_R2192_track1"
 
-NUM_EPOCHS = 1000
+NUM_EPOCHS = 20
 BATCH_SIZE = 600
 NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
 MOMENTUM = 0.9
+
 EARLY_STOPPING = True
 STOPPING_RANGE = 10
 
-def floatX(X):
-    """
-        Returns the correct data format
-    """
-    return np.asarray(X, dtype=theano.config.floatX)
-
-def init_weights(shape):
-    """
-        This function initialises the weight of the network
-    """
-    return theano.shared(floatX(np.random.randn(*shape) * 0.01))
-
-def load_data():
+def load_data(tetrode_number):
     """
         Get data with labels, split into training and test set.
     """
-    trX, teX, trY, teY = formatData(16,BASENAME)
+    trX, teX, trY, teY = formatData(tetrode_number,BASENAME)
     X_train, y_train = trX, trY
     X_test, y_test = teX, teY
 
@@ -99,19 +88,19 @@ def model(input_dim, output_dim, num_hidden_units, p_drop_input, p_drop_hidden,b
             num_units=num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
-        # l_hidden_2_dropout = lasagne.layers.DropoutLayer(
-        #     l_hidden,
-        #     p=p_drop_hidden
-        #     )
-        # l_hidden_3 = lasagne.layers.DenseLayer(
-        #     l_hidden_2,
-        #     num_units=num_hidden_units,
-        #     nonlinearity=lasagne.nonlinearities.rectify,
-        #     )
-        # # l_hidden_3_dropout = lasagne.layers.DropoutLayer(
-        # #     l_hidden_3,
-        # #     p=p_drop_hidden
-        # #     )
+        l_hidden_2_dropout = lasagne.layers.DropoutLayer(
+            l_hidden_2,
+            p=p_drop_hidden
+            )
+        l_hidden_3 = lasagne.layers.DenseLayer(
+            l_hidden_2_dropout,
+            num_units=num_hidden_units,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
+        l_hidden_3_dropout = lasagne.layers.DropoutLayer(
+            l_hidden_3,
+            p=p_drop_hidden
+            )
         # l_hidden_4 = lasagne.layers.DenseLayer(
         #     l_hidden_3,
         #     num_units=num_hidden_units,
@@ -122,7 +111,7 @@ def model(input_dim, output_dim, num_hidden_units, p_drop_input, p_drop_hidden,b
         #     p=p_drop_hidden
         #     )
 	l_out = lasagne.layers.DenseLayer(
-            l_hidden_2,
+            l_hidden_3_dropout,
             num_units=output_dim,
             nonlinearity=lasagne.nonlinearities.softmax,
             )
@@ -156,14 +145,17 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     )
 
 def main():
-    dataset = load_data()
+    print("Loading the data...")
+    dataset = load_data(16)
+    print("Done!")
 
-    print("Making networks with shared weights")
+    print("Making the model...")
     network = model(dataset['input_dim'],dataset['output_dim'],NUM_HIDDEN_UNITS,0.2,0.2)
-    # cleanNetwork = model(dataset['input_dim'],dataset['output_dim'],NUM_HIDDEN_UNITS,0.,0.,w_h1,w_h2,w_h3,w_h4,w_o)
-    print("Done")
+    print("Done!")
 
+    print("Setting up the training functions...")
     training = funcs(dataset,network)
+    print("Done!")
 
     accuracies = []
 
@@ -172,6 +164,7 @@ def main():
             cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
         accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test']))
         print(accuracy)
+
         if(EARLY_STOPPING):
             if(len(accuracies) < STOPPING_RANGE):
                 accuracies.append(accuracy)
