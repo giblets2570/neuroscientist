@@ -32,7 +32,7 @@ else:
 
 BASENAME = "../../R2192/20140110_R2192_track1"
 
-NUM_EPOCHS = 100
+NUM_EPOCHS = 1000
 BATCH_SIZE = 600
 NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
@@ -51,7 +51,9 @@ def init_weights(shape):
     return theano.shared(floatX(np.random.randn(*shape) * 0.01))
 
 def load_data():
-    """Get data with labels, split into training and test set."""
+    """
+        Get data with labels, split into training and test set.
+    """
     trX, teX, trY, teY = formatData(16,BASENAME)
     X_train, y_train = trX, trY
     X_test, y_test = teX, teY
@@ -67,7 +69,7 @@ def load_data():
         output_dim=y_train.shape[1],
     )
 
-def model(input_dim, output_dim, num_hidden_units, p_drop_input, p_drop_hidden, w_h, w_o,batch_size=BATCH_SIZE):
+def model(input_dim, output_dim, num_hidden_units, p_drop_input, p_drop_hidden, w_h1, w_h2, w_h3, w_h4, w_o,batch_size=BATCH_SIZE):
 	"""Create a symbolic representation of a neural network with `intput_dim`
     input nodes, `output_dim` output nodes and `num_hidden_units` per hidden
     layer.
@@ -76,30 +78,58 @@ def model(input_dim, output_dim, num_hidden_units, p_drop_input, p_drop_hidden, 
     A theano expression which represents such a network is returned.
     """
 
-	l_in = lasagne.layers.InputLayer(
-        shape=(batch_size, input_dim),
-    )
-	l_in_dropout = lasagne.layers.DropoutLayer(
-    	l_in,
-    	p=p_drop_input
-    )
-	l_hidden = lasagne.layers.DenseLayer(
-        l_in_dropout,
-        num_units=num_hidden_units,
-        nonlinearity=lasagne.nonlinearities.rectify,
-        W=w_h
-    )
-	l_hidden_dropout = lasagne.layers.DropoutLayer(
-        l_hidden,
-        p=p_drop_hidden,
-    )
+        l_in = lasagne.layers.InputLayer(shape=(batch_size, input_dim))
+        
+	# l_in_dropout = lasagne.layers.DropoutLayer(l_in,p=p_drop_input)
+
+        l_hidden = lasagne.layers.DenseLayer(
+            l_in,
+            num_units=num_hidden_units,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            W=w_h1
+            )
+
+        # l_hidden_dropout = lasagne.layers.DropoutLayer(
+        #     l_hidden,
+        #     p=p_drop_hidden
+        #     )
+        l_hidden_2 = lasagne.layers.DenseLayer(
+            l_hidden,
+            num_units=num_hidden_units,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            W=w_h2
+            )
+        # l_hidden_2_dropout = lasagne.layers.DropoutLayer(
+        #     l_hidden,
+        #     p=p_drop_hidden
+        #     )
+        # l_hidden_3 = lasagne.layers.DenseLayer(
+        #     l_hidden_2,
+        #     num_units=num_hidden_units,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     W=w_h3
+        #     )
+        # # l_hidden_3_dropout = lasagne.layers.DropoutLayer(
+        # #     l_hidden_3,
+        # #     p=p_drop_hidden
+        # #     )
+        # l_hidden_4 = lasagne.layers.DenseLayer(
+        #     l_hidden_3,
+        #     num_units=num_hidden_units,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     W=w_h4
+        #     )
+        # l_hidden_4_dropout = lasagne.layers.DropoutLayer(
+        #     l_hidden_4,
+        #     p=p_drop_hidden
+        #     )
 	l_out = lasagne.layers.DenseLayer(
-        l_hidden_dropout,
-        num_units=output_dim,
-        nonlinearity=lasagne.nonlinearities.softmax,
-        W=w_o
-    )
-	return l_out
+            l_hidden_2,
+            num_units=output_dim,
+            nonlinearity=lasagne.nonlinearities.softmax,
+            W=w_o
+            )
+        return l_out
 
 def funcs(dataset, noiseyNetworkLayer, cleanNetworkLayer, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM):
 
@@ -113,7 +143,7 @@ def funcs(dataset, noiseyNetworkLayer, cleanNetworkLayer, batch_size=BATCH_SIZE,
     cost = cost.mean()
 
     # test the performance of the netowork without noise
-    test = lasagne.layers.get_output(cleanNetworkLayer, X_batch)
+    test = lasagne.layers.get_output(cleanNetworkLayer, X_batch, deterministic=True)
     pred = T.argmax(test, axis=1)
     accuracy = T.mean(T.eq(pred, y_batch), dtype=theano.config.floatX)
 
@@ -133,12 +163,15 @@ def funcs(dataset, noiseyNetworkLayer, cleanNetworkLayer, batch_size=BATCH_SIZE,
 def main():
     dataset = load_data()
 
-    w_h = init_weights((dataset['input_dim'], NUM_HIDDEN_UNITS))
+    w_h1 = init_weights((dataset['input_dim'], NUM_HIDDEN_UNITS))
+    w_h2 = init_weights((NUM_HIDDEN_UNITS, NUM_HIDDEN_UNITS))
+    w_h3 = init_weights((NUM_HIDDEN_UNITS, NUM_HIDDEN_UNITS))
+    w_h4 = init_weights((NUM_HIDDEN_UNITS, NUM_HIDDEN_UNITS))
     w_o = init_weights((NUM_HIDDEN_UNITS, dataset['output_dim']))
 
     print("Making networks with shared weights")
-    noiseyNetwork = model(dataset['input_dim'],dataset['output_dim'],NUM_HIDDEN_UNITS,0.2,0.2,w_h,w_o)
-    cleanNetwork = model(dataset['input_dim'],dataset['output_dim'],NUM_HIDDEN_UNITS,0.,0.,w_h,w_o)
+    noiseyNetwork = model(dataset['input_dim'],dataset['output_dim'],NUM_HIDDEN_UNITS,0.2,0.2,w_h1,w_h2,w_h3,w_h4,w_o)
+    cleanNetwork = model(dataset['input_dim'],dataset['output_dim'],NUM_HIDDEN_UNITS,0.,0.,w_h1,w_h2,w_h3,w_h4,w_o)
     print("Done")
 
     training = funcs(dataset,noiseyNetwork,cleanNetwork)
@@ -146,6 +179,7 @@ def main():
     for i in range(NUM_EPOCHS):
         for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
             cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
+        print(training['predict'](dataset['X_test']).shape)
         print(np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test'])))
 
 
