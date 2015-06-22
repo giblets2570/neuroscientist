@@ -18,6 +18,8 @@ import datetime
 from neuroscientist.data import formatData
 import json
 import re
+import math
+import matplotlib.pyplot as plt
 
 PY2 = sys.version_info[0] == 2
 
@@ -35,13 +37,13 @@ else:
 
 BASENAME = "../../R2192/20140110_R2192_track1"
 
-NUM_EPOCHS = 10
+NUM_EPOCHS = 1000
 BATCH_SIZE = 600
-NUM_HIDDEN_UNITS = 300
+NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
 MOMENTUM = 0.9
 
-EARLY_STOPPING = True
+EARLY_STOPPING = False
 STOPPING_RANGE = 10
 
 LOG_EXPERIMENT = False
@@ -66,26 +68,25 @@ def load_data(tetrode_number):
         Get data with labels, split into training and test set.
     """
 
-    X_train, X_test, y_train, y_test = formatData(tetrode_number,BASENAME,CONV)
+    X_train, X_valid, X_test, y_train, y_valid, y_test = formatData(tetrode_number,BASENAME,CONV)
 
     X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1],X_train.shape[2])
-    # y_train = y_train.reshape(y_train.shape[0],1,y_train.shape[1])
+    X_valid = X_valid.reshape(X_valid.shape[0],1,X_valid.shape[1],X_valid.shape[2])
     X_test = X_test.reshape(X_test.shape[0],1,X_test.shape[1],X_test.shape[2])
-    # y_test = y_test.reshape(y_test.shape[0],1,y_test.shape[1])
-
-    print(X_train.shape)
 
     return dict(
         X_train=X_train,
         y_train=y_train,
+        X_valid=X_valid,
+        y_valid=y_valid,
         X_test=X_test,
         y_test=y_test,
         num_examples_train=X_train.shape[0],
+        num_examples_valid=X_valid.shape[0],
         num_examples_test=X_test.shape[0],
         input_shape=X_train.shape,
         output_dim=y_train.shape[-1],
     )
-
 
 def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
         """
@@ -102,24 +103,85 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
 
         l_conv2D_1 = lasagne.layers.Conv2DLayer(
             l_in, 
-            num_filters=10,
-            filter_size=(3,3), 
+            num_filters=16,
+            filter_size=(2,5), 
             stride=(1, 1), 
             border_mode="valid", 
             untie_biases=False, 
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_pool2D_1 = lasagne.layers.MaxPool2DLayer(
+        # l_pool2D_2 = lasagne.layers.MaxPool2DLayer(
+        #     l_conv2D_2, 
+        #     pool_size=(1,2), 
+        #     stride=None, 
+        #     pad=0, 
+        #     ignore_border=False,
+        # )
+
+        l_pool2D_1 = lasagne.layers.FeaturePoolLayer(
             l_conv2D_1, 
-            pool_size=(2,2), 
-            stride=None, 
-            pad=0, 
-            ignore_border=False,
+            pool_size=2, 
+        )
+
+        l_dropout_1 = lasagne.layers.DropoutLayer(
+            l_pool2D_1,
+            p=0.5
+            )
+
+        l_conv2D_2 = lasagne.layers.Conv2DLayer(
+            l_dropout_1, 
+            num_filters=32,
+            filter_size=(2,5), 
+            stride=(1, 1), 
+            border_mode="valid", 
+            untie_biases=False, 
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
+
+        # l_pool2D_1 = lasagne.layers.MaxPool2DLayer(
+        #     l_conv2D_1, 
+        #     pool_size=(1,2), 
+        #     stride=None, 
+        #     pad=0, 
+        #     ignore_border=False,
+        # )
+
+        l_pool2D_2 = lasagne.layers.FeaturePoolLayer(
+            l_conv2D_2, 
+            pool_size=2, 
+        )
+
+        l_dropout_2 = lasagne.layers.DropoutLayer(
+            l_pool2D_2,
+            p=0.5
+            )
+
+        l_conv2D_3 = lasagne.layers.Conv2DLayer(
+            l_dropout_2, 
+            num_filters=64,
+            filter_size=(2,5), 
+            stride=(1, 1), 
+            border_mode="valid", 
+            untie_biases=False, 
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
+
+        # l_pool2D_3 = lasagne.layers.MaxPool2DLayer(
+        #     l_conv2D_3, 
+        #     pool_size=(4,1), 
+        #     stride=None, 
+        #     pad=0, 
+        #     ignore_border=False,
+        # )
+
+        l_pool2D_3 = lasagne.layers.FeaturePoolLayer(
+            l_conv2D_3, 
+            pool_size=2, 
         )
 
         l_hidden_1 = lasagne.layers.DenseLayer(
-            l_pool2D_1,
+            l_pool2D_3,
             num_units=num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
@@ -136,6 +198,7 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
             nonlinearity=lasagne.nonlinearities.softmax,
             )
         return l_out
+
 
 def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM):
 
@@ -154,6 +217,11 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     cost = lasagne.objectives.categorical_crossentropy(train_output, y_batch)
     cost = cost.mean()
 
+    # validation cost
+    valid_output = lasagne.layers.get_output(network, X_batch, deterministic=True)
+    valid_cost = lasagne.objectives.categorical_crossentropy(valid_output, y_batch)
+    valid_cost = valid_cost.mean()
+
     # test the performance of the netowork without noise
     test = lasagne.layers.get_output(network, X_batch, deterministic=True)
     pred = T.argmax(test, axis=1)
@@ -163,10 +231,12 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     updates = lasagne.updates.nesterov_momentum(cost, all_params, learning_rate, momentum)
     
     train = theano.function(inputs=[X_batch, y_batch], outputs=cost, updates=updates, allow_input_downcast=True)
+    valid = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
     predict = theano.function(inputs=[X_batch], outputs=pred, allow_input_downcast=True)
 
     return dict(
         train=train,
+        valid=valid,
         predict=predict
     )
 
@@ -177,6 +247,8 @@ def main(tetrode_number=TETRODE_NUMBER):
     print("Loading the data...")
     dataset = load_data(tetrode_number)
     print("Done!")
+
+    print("Tetrode number: {}, Num outputs: {}".format(tetrode_number,dataset['output_dim']))
 
     print(dataset['input_shape'])
 
@@ -189,25 +261,55 @@ def main(tetrode_number=TETRODE_NUMBER):
     print("Done!")
 
     accuracies = []
-
+    trainvalidation = []
 
     print("Begining to train the network...")
-    for i in range(NUM_EPOCHS):
-        for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
-            cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
-        accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test']))
-        print("Epoch: {}, Accuracy: {}".format(i+1,accuracy))
 
-        if(EARLY_STOPPING):
-            if(len(accuracies) < STOPPING_RANGE):
-                accuracies.append(accuracy)
-            else:
-                test = [k for k in accuracies if k < accuracy]
-                if not test:
-                    print('Early stopping causing training to finish at epoch {}'.format(i))
-                    break
-                del accuracies[0]
-                accuracies.append(accuracy)
+    try:
+        for i in range(NUM_EPOCHS):
+            costs = []
+            valid_costs = []
+
+            # np.random.shuffle(dataset['X_train'])
+            # np.random.shuffle(dataset['y_train'])
+
+            # np.random.shuffle(dataset['X_valid'])
+            # np.random.shuffle(dataset['y_valid'])
+
+
+            for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
+                cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
+                costs.append(cost)
+            
+            for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
+                cost = training['train'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
+                valid_costs.append(cost)
+
+            meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
+            meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
+            accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test']))
+
+            print("Epoch: {}, Accuracy: {}, Training cost / validation cost: {}".format(i+1,accuracy,meanTrainCost/meanValidCost))
+
+            trainvalidation.append([meanTrainCost,meanValidCost])
+
+            if(EARLY_STOPPING):
+                if(len(accuracies) < STOPPING_RANGE):
+                    accuracies.append(accuracy)
+                else:
+                    test = [k for k in accuracies if k < accuracy]
+                    if not test:
+                        print('Early stopping causing training to finish at epoch {}'.format(i+1))
+                        break
+                    del accuracies[0]
+                    accuracies.append(accuracy)
+
+    except KeyboardInterrupt:
+        with open('trainvalidation.json',"w") as outfile:
+            outfile.write(str(trainvalidation))
+
+    # plt.plot(trainvalidation)
+    # plt.show()
 
     if(LOG_EXPERIMENT):
         print("Logging the experiment details...")
@@ -233,6 +335,4 @@ def main(tetrode_number=TETRODE_NUMBER):
 
 
 if __name__ == '__main__':
-    # for i in range(16):
-    #     main(i+1)
-    main()
+    main(1)

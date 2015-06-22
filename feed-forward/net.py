@@ -55,7 +55,7 @@ def load_data(tetrode_number):
         Get data with labels, split into training and test set.
     """
 
-    X_train, X_test, y_train, y_test = formatData(tetrode_number,BASENAME,CONV)
+    X_train, X_valid, X_test, y_train, y_valid, y_test = formatData(tetrode_number,BASENAME,CONV)
 
     X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1])
     # y_train = y_train.reshape(y_train.shape[0],1,y_train.shape[1])
@@ -65,6 +65,8 @@ def load_data(tetrode_number):
     return dict(
         X_train=X_train,
         y_train=y_train,
+        X_valid=X_valid,
+        y_valid=y_valid,
         X_test=X_test,
         y_test=y_test,
         num_examples_train=X_train.shape[0],

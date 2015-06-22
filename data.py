@@ -60,16 +60,17 @@ def formatData(tetrodeNumber,basename,twoD=False):
 	def getTrainingTest():
 		inp, td = concatanateChannels()
 		out = formatCut()
-		n = len(inp)
-		n *= 0.8
-		n = int(n)
+		n = int(len(inp)*0.8)
+		m = int(len(inp)*0.9)
 
 		trX = inp[:n]
-		teX = inp[n:]
+		tvX = inp[n:m]
+		teX = inp[m:]
 		trY = out[:n]
-		teY = out[n:]
+		tvY = out[n:m]
+		teY = out[m:]
 
-		return trX, teX, trY, teY
+		return trX, tvX, teX, trY, tvY, teY
 
 	return getTrainingTest()
 
