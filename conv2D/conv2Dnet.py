@@ -37,7 +37,7 @@ else:
 
 BASENAME = "../../R2192/20140110_R2192_track1"
 
-NUM_EPOCHS = 1000
+NUM_EPOCHS = 1
 BATCH_SIZE = 600
 NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
@@ -46,7 +46,7 @@ MOMENTUM = 0.9
 EARLY_STOPPING = False
 STOPPING_RANGE = 10
 
-LOG_EXPERIMENT = False
+LOG_EXPERIMENT = True
 
 TETRODE_NUMBER = 16
 
@@ -103,7 +103,7 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
 
         l_conv2D_1 = lasagne.layers.Conv2DLayer(
             l_in, 
-            num_filters=16,
+            num_filters=8,
             filter_size=(2,5), 
             stride=(1, 1), 
             border_mode="valid", 
@@ -124,14 +124,9 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
             pool_size=2, 
         )
 
-        l_dropout_1 = lasagne.layers.DropoutLayer(
-            l_pool2D_1,
-            p=0.5
-            )
-
         l_conv2D_2 = lasagne.layers.Conv2DLayer(
-            l_dropout_1, 
-            num_filters=32,
+            l_pool2D_1, 
+            num_filters=16,
             filter_size=(2,5), 
             stride=(1, 1), 
             border_mode="valid", 
@@ -152,14 +147,10 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
             pool_size=2, 
         )
 
-        l_dropout_2 = lasagne.layers.DropoutLayer(
-            l_pool2D_2,
-            p=0.5
-            )
 
         l_conv2D_3 = lasagne.layers.Conv2DLayer(
-            l_dropout_2, 
-            num_filters=64,
+            l_pool2D_2, 
+            num_filters=32,
             filter_size=(2,5), 
             stride=(1, 1), 
             border_mode="valid", 
@@ -314,11 +305,13 @@ def main(tetrode_number=TETRODE_NUMBER):
     if(LOG_EXPERIMENT):
         print("Logging the experiment details...")
         log = dict(
+            NET_TYPE = "2D conv",
             TETRODE_NUMBER = tetrode_number,
             BASENAME = BASENAME,
             NUM_EPOCHS = NUM_EPOCHS,
             BATCH_SIZE = BATCH_SIZE,
             NUM_HIDDEN_UNITS = NUM_HIDDEN_UNITS,
+            TRAIN_VALIDATION = trainvalidation,
             LEARNING_RATE = LEARNING_RATE,
             MOMENTUM = MOMENTUM,
             ACCURACY = accuracies[-1],
