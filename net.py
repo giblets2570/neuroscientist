@@ -28,16 +28,18 @@ def load_data(tetrode_number):
 
 class net(object):
 
-	def __init__(self,dataset,network):
-		shape = tuple([None]+list(input_shape[1:]))
-       	self.network = self.set_network(network)
-
-    def set_network(self,network):
-    	if network:
+	def __init__(self,dataset,network,X_type,batch_size,learning_rate,momentum,log=False,early_stopping=False):
+       	if network:
     		self.network = network
+	       	self.batch_size = batch_size
+	       	self.learning_rate = learning_rate
+	       	self.momentum = momentum
+	       	self.set_iter_funcs(X_type,network,batch_size,learning_rate,momentum)
+	       	self.log = log
+	    else:
+	    	self.fail = True
 
-	def set_iter_funcs(self, X_type, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM):
-
+	def set_iter_funcs(self, X_type, network, batch_size, learning_rate, momentum):
 	    """
 	        Method the returns the theano functions that are used in 
 	        training and testing. These are the train and predict functions.
@@ -80,6 +82,9 @@ class net(object):
 	    """
 	        This is the main method that sets up the experiment
 	    """
+	    if self.fail:
+	    	return
+
 	    print("Loading the data...")
 	    dataset = load_data(tetrode_number)
 	    print("Done!")
@@ -102,13 +107,6 @@ class net(object):
 	        costs = []
 	        valid_costs = []
 
-	        # np.random.shuffle(dataset['X_train'])
-	        # np.random.shuffle(dataset['y_train'])
-
-	        # np.random.shuffle(dataset['X_valid'])
-	        # np.random.shuffle(dataset['y_valid'])
-
-
 	        for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
 	            cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
 	            costs.append(cost)
@@ -125,8 +123,8 @@ class net(object):
 
 	        trainvalidation.append(meanTrainCost/meanValidCost)
 
-	        if(EARLY_STOPPING):
-	            if(len(accuracies) < STOPPING_RANGE):
+	        if(early_stopping):
+	            if(len(accuracies) < 30):
 	                accuracies.append(accuracy)
 	            else:
 	                test = [k for k in accuracies if k < accuracy]
@@ -142,7 +140,7 @@ class net(object):
 	    # plt.plot(trainvalidation)
 	    # plt.show()
 
-	    if(LOG_EXPERIMENT):
+	    if(self.log):
 	        print("Logging the experiment details...")
 	        log = dict(
 	            TETRODE_NUMBER = tetrode_number,

@@ -38,7 +38,7 @@ else:
 BASENAME = "../R2192/20140110_R2192_track1"
 
 NUM_EPOCHS = 200
-BATCH_SIZE = 600
+BATCH_SIZE = 400
 NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
 MOMENTUM = 0.9
@@ -246,7 +246,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
         print("Epoch: {}, Accuracy: {}, Training cost / validation cost: {}".format(i+1,accuracy,meanTrainCost/meanValidCost))
 
-        trainvalidation.append(meanTrainCost/meanValidCost)
+        trainvalidation.append([meanTrainCost,meanValidCost])
 
         if(EARLY_STOPPING):
             if(len(accuracies) < STOPPING_RANGE):
