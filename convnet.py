@@ -169,15 +169,16 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     X_batch = T.tensor3()
     y_batch = T.matrix()
 
+
+    reg = 0.0001*lasagne.regularization.l2(network)
     # this is the cost of the network when fed throught the noisey network
     train_output = lasagne.layers.get_output(network, X_batch)
-    cost = lasagne.objectives.categorical_crossentropy(train_output, y_batch)
-    cost = cost.mean()
-
+    cost = lasagne.objectives.categorical_crossentropy(train_output, y_batch) + reg
+    cost = cost.mean() 
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch)
-    valid_cost = lasagne.objectives.categorical_crossentropy(valid_output, y_batch)
-    valid_cost = valid_cost.mean()
+    valid_cost = lasagne.objectives.categorical_crossentropy(valid_output, y_batch) + reg
+    valid_cost = valid_cost.mean() 
 
     # test the performance of the netowork without noise
     test = lasagne.layers.get_output(network, X_batch, deterministic=True)
