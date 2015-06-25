@@ -134,13 +134,13 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        # l_dropout_1 = lasagne.layers.DropoutLayer(
-        #     l_hidden_1,
-        #     p=0.4
-        #     )
+        l_dropout_1 = lasagne.layers.DropoutLayer(
+            l_hidden_1,
+            p=0.4
+            )
 
         l_hidden_2 = lasagne.layers.DenseLayer(
-            l_hidden_1,
+            l_dropout_1,
             num_units=num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
