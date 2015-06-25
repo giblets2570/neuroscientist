@@ -37,7 +37,7 @@ else:
 
 BASENAME = "../R2192/20140110_R2192_track1"
 
-NUM_EPOCHS = 200
+NUM_EPOCHS = 100
 BATCH_SIZE = 400
 NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
@@ -247,10 +247,10 @@ def main(tetrode_number=TETRODE_NUMBER):
         print("Epoch: {}, Accuracy: {}, Training cost / validation cost: {}".format(i+1,accuracy,meanTrainCost/meanValidCost))
 
         trainvalidation.append([meanTrainCost,meanValidCost])
-
+	accuracies.append(accuracy)
         if(EARLY_STOPPING):
             if(len(accuracies) < STOPPING_RANGE):
-                accuracies.append(accuracy)
+                pass
             else:
                 test = [k for k in accuracies if k < accuracy]
                 if not test:
@@ -276,6 +276,7 @@ def main(tetrode_number=TETRODE_NUMBER):
             NUM_HIDDEN_UNITS = NUM_HIDDEN_UNITS,
             LEARNING_RATE = LEARNING_RATE,
             MOMENTUM = MOMENTUM,
+            TRAIN_VALIDATION = trainvalidation,
             ACCURACY = accuracies[-1],
             NETWORK_LAYERS = [str(type(layer)) for layer in lasagne.layers.get_all_layers(network)],
             OUTPUT_DIM = dataset['output_dim'],
@@ -283,11 +284,12 @@ def main(tetrode_number=TETRODE_NUMBER):
         )
         now = datetime.datetime.now()
         filename = "experiments/conv1D/{}_{}_{}_NUMLAYERS_{}_OUTPUTDIM_{}".format(now,NUM_EPOCHS,NUM_HIDDEN_UNITS,len(log['NETWORK_LAYERS']),log['OUTPUT_DIM'])
-        filename = re.sub("[^A-Za-z0-9_/ ,-:]", "", filename)
+        filename = re.sub("[^A-Za-z0-9_/,-:]", "", filename)
         with open(filename,"w") as outfile:
-            json.dump(log, outfile)
+            outfile.write(str(log))
 
 
 
 if __name__ == '__main__':
-    main()
+    for i in range(8,16):
+        main(i+1)
