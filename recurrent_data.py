@@ -3,82 +3,103 @@ import numpy as np
 import sys
 import matplotlib.pyplot as plt
 import re
+import json
 
-BASENAME = "../../R2192/20140110_R2192_track1"
+BASENAME = "../R2192/20140110_R2192_track1"
 
-def formatData(tetrodeNumber,basename,twoD=False):
 
-	tetfilename = basename + "." + str(tetrodeNumber)
-	cutfilename = basename + ".clu." + str(tetrodeNumber)
+def getTotalInputDimension(basename=BASENAME):
+	total = 0
+	dims = []
+	for i in range(16):
+		# get the tetrode number
+		cutfilename = basename + ".clu." + str(i+1)
 
-	def concatanateChannels():
-		header, data = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
-		# print(header)
-		timesData = []
-		inputData = []
-		for i in range(0,len(data),4):
-			if i+3 > len(data):
-				break
-			entry = {}
-			entry['time'] = data[i][0]
-			m = 0
-			for j in range(4):
-				for k in range(50):
-					val = abs(data[j][1][k])
-					if(val > m):
-						m = val
-			con = None
+		# get the number of output dimensions for this tetrode
+		for j in open(cutfilename,'r'):
+			total += int(re.sub("[^0-9]", "", j))
+			dims.append(int(re.sub("[^0-9]", "", j)))
+			break
+	return total,dims
 
-			if twoD:
-				con = list(np.asarray(data[i][1],dtype=np.float16)/m),list(np.asarray(data[i+1][1],dtype=np.float16)/m),list(np.asarray(data[i+2][1],dtype=np.float16)/m),list(np.asarray(data[i+3][1],dtype=np.float16)/m)
+def getCutTimes(tetfilename,cutfilename):
+	timesData = []
+	header, data = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
+	labels = []
+	for i,j in enumerate(open(cutfilename,'r')):
+		if(i == 0):
+			continue
+		labels.append(int(re.sub("[^0-9]", "", j))-1)
+	for i,j in zip(range(0,len(data),4),labels):
+		if i+3 > len(data):
+			break
+		entry = {}
+		entry['time'] = data[i][0]
+		entry['label'] = j
+
+		timesData.append(entry)
+
+	return timesData
+
+def getData(basename=BASENAME):
+	inputDimension,dims = getTotalInputDimension(basename)
+	currentBase = 0
+	data = {}
+	for i in range(16):
+		dimension = dims[i]
+		times = getCutTimes(basename+".{}".format(i),basename+".clu.1")
+		for j in times:
+			if str(j['time']) in data:
+				data[str(j['time'])][currentBase + j['label']] = data[str(j['time'])][currentBase + j['label']] + 1
 			else:
-				con = list(np.asarray(data[i][1],dtype=np.float16)/m)+list(np.asarray(data[i+1][1],dtype=np.float16)/m)+list(np.asarray(data[i+2][1],dtype=np.float16)/m)+list(np.asarray(data[i+3][1],dtype=np.float16)/m)
-			conData = np.asarray(con,dtype=np.float16)
-			entry['data'] = conData
-			timesData.append(entry)
-			inputData.append(conData)
+				data[str(j['time'])] = np.zeros(inputDimension)
+				data[str(j['time'])][currentBase + j['label']] = 1
+		currentBase += dimension
 
-		return np.asarray(inputData),timesData
+	return data
 
-	def formatCut():
-		numclusters = 0
-		output = []
-		for (n,i) in enumerate(open(cutfilename,'r')):
-			i = re.sub("[^0-9]", "", i)
-			i = int(i)
-			if n == 0:
-				numclusters = i
-				continue
+# def getTimeSteps(basename=BASENAME):
+# 	dimension = getTotalInputDimension(basename)
+# 	data = {}
+# 	for i in range(16):
+# 		# get the tetrode number
+# 		cutfilename = basename + ".clu." + str(i+1)
 
-			datapoint = np.zeros(numclusters)
-			datapoint[i-1] = 1
-			output.append(datapoint)
-		
-		return np.asarray(output)
+# 		# get the number of output dimensions for this tetrode
+# 		for n,j in enumnerate(open(cutfilename,'r')):
+# 			if n == 0:
+# 				continue
+# 			if j in data:
+# 				data[j] = data[j] + 1
 
-	
-	def getTrainingTest():
-		inp, td = concatanateChannels()
-		out = formatCut()
-		n = int(len(inp)*0.8)
-		m = int(len(inp)*0.9)
-
-		trX = inp[:n]
-		tvX = inp[n:m]
-		teX = inp[m:]
-		trY = out[:n]
-		tvY = out[n:m]
-		teY = out[m:]
-
-		return trX, tvX, teX, trY, tvY, teY
-
-	return getTrainingTest()
+# 	return total
 
 if __name__=="__main__":
-	trX, teX, trY, teY = formatData(sys.argv[1],BASENAME,twoD=True)
+	# inputDimension = getTotalInputDimension()
+	# print(inputDimension)
+	# trX, tvX, teX, trY, tvY, teY = formatData(1,BASENAME,twoD=False)
 
-	print(trX.shape)
-	plt.plot(trX[1])
-	plt.show()
+	# print(trX.shape)
+	# print(trY.shape)
+	# filename = BASENAME+".1"
+	# cutfilename = BASENAME+".clu.1"
+	# print(getCutTimes(filename,cutfilename)[:3])
+	data = getData()
+	print(len(data))
+	j = open('data.json','w')
+	f = open('data.json','a+')
+	for i, thing in enumerate(data):
+		f.write(thing+ ' ')
+		f.write(str(list(data[thing])) + '\n')
+		# print(thing,list(data[thing]))
+		# if i == 4:
+		# 	break
+		print(i)
+	# print("stringed the data")
+	# with open('data.json','w') as f:
+	# 	f.write(thing)
+	# plt.plot(trX[1])
+	# plt.show()
 
 	# print(trX.shape, teX.shape, trY.shape, teY.shape)
+

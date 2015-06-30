@@ -218,50 +218,46 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     accuracies = []
     trainvalidation = []
+    epochsDone = 0
 
     print("Begining to train the network...")
-    for i in range(NUM_EPOCHS):
-        costs = []
-        valid_costs = []
+    try:
+        for i in range(NUM_EPOCHS):
+            costs = []
+            valid_costs = []
 
-        # np.random.shuffle(dataset['X_train'])
-        # np.random.shuffle(dataset['y_train'])
+            for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
+                cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
+                costs.append(cost)
+            
+            
+            for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
+                cost = training['train'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
+                valid_costs.append(cost)
+                break
 
-        # np.random.shuffle(dataset['X_valid'])
-        # np.random.shuffle(dataset['y_valid'])
+            meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
+            meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
+            accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test']))
 
+            print("Epoch: {}, Accuracy: {}, Training cost / validation cost: {}".format(i+1,accuracy,meanTrainCost/meanValidCost))
 
-        for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
-            cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
-            costs.append(cost)
-        
-        
-        for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
-            cost = training['train'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
-            valid_costs.append(cost)
-            break
+            trainvalidation.append([meanTrainCost,meanValidCost])
+    	accuracies.append(accuracy)
+            if(EARLY_STOPPING):
+                if(len(accuracies) < STOPPING_RANGE):
+                    pass
+                else:
+                    test = [k for k in accuracies if k < accuracy]
+                    if not test:
+                        print('Early stopping causing training to finish at epoch {}'.format(i+1))
+                        break
+                    del accuracies[0]
+                    accuracies.append(accuracy)
 
-        meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
-        meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
-        accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test']))
-
-        print("Epoch: {}, Accuracy: {}, Training cost / validation cost: {}".format(i+1,accuracy,meanTrainCost/meanValidCost))
-
-        trainvalidation.append([meanTrainCost,meanValidCost])
-	accuracies.append(accuracy)
-        if(EARLY_STOPPING):
-            if(len(accuracies) < STOPPING_RANGE):
-                pass
-            else:
-                test = [k for k in accuracies if k < accuracy]
-                if not test:
-                    print('Early stopping causing training to finish at epoch {}'.format(i+1))
-                    break
-                del accuracies[0]
-                accuracies.append(accuracy)
-
-    with open('trainvalidation.json',"w") as outfile:
-        outfile.write(str(trainvalidation))
+            epochsDone = epochsDone + 1
+    except KeyboardInterrupt:
+        pass
 
     # plt.plot(trainvalidation)
     # plt.show()
@@ -272,7 +268,7 @@ def main(tetrode_number=TETRODE_NUMBER):
             Net_TYPE = "1D conv",
             TETRODE_NUMBER = tetrode_number,
             BASENAME = BASENAME,
-            NUM_EPOCHS = NUM_EPOCHS,
+            NUM_EPOCHS = epochsDone,
             BATCH_SIZE = BATCH_SIZE,
             NUM_HIDDEN_UNITS = NUM_HIDDEN_UNITS,
             LEARNING_RATE = LEARNING_RATE,

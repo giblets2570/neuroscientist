@@ -28,18 +28,24 @@ def load_data(tetrode_number):
 
 class net(object):
 
+
 	def __init__(self,dataset,network,X_type,batch_size,learning_rate,momentum,log=False,early_stopping=False):
+		"""
+			Initialise the parameters of the net
+		"""
+	
        	if network:
     		self.network = network
 	       	self.batch_size = batch_size
 	       	self.learning_rate = learning_rate
 	       	self.momentum = momentum
-	       	self.set_iter_funcs(X_type,network,batch_size,learning_rate,momentum)
+	       	self.set_iter_funcs(X_type)
 	       	self.log = log
-	    else:
+	       	self.dataset = dataset
+		else:
 	    	self.fail = True
 
-	def set_iter_funcs(self, X_type, network, batch_size, learning_rate, momentum):
+	def set_iter_funcs(self, X_type):
 	    """
 	        Method the returns the theano functions that are used in 
 	        training and testing. These are the train and predict functions.
@@ -51,22 +57,22 @@ class net(object):
 	    y_batch = T.matrix()
 
 	    # this is the cost of the network when fed throught the noisey network
-	    train_output = lasagne.layers.get_output(network, X_batch)
+	    train_output = lasagne.layers.get_output(self.network, X_batch)
 	    cost = lasagne.objectives.categorical_crossentropy(train_output, y_batch)
 	    cost = cost.mean()
 
 	    # validation cost
-	    valid_output = lasagne.layers.get_output(network, X_batch)
+	    valid_output = lasagne.layers.get_output(self.network, X_batch)
 	    valid_cost = lasagne.objectives.categorical_crossentropy(valid_output, y_batch)
 	    valid_cost = valid_cost.mean()
 
 	    # test the performance of the netowork without noise
-	    test = lasagne.layers.get_output(network, X_batch, deterministic=True)
+	    test = lasagne.layers.get_output(self.network, X_batch, deterministic=True)
 	    pred = T.argmax(test, axis=1)
 	    accuracy = T.mean(T.eq(pred, y_batch), dtype=theano.config.floatX)
 
-	    all_params = lasagne.layers.get_all_params(network)
-	    updates = lasagne.updates.nesterov_momentum(cost, all_params, learning_rate, momentum)
+	    all_params = lasagne.layers.get_all_params(self.network)
+	    updates = lasagne.updates.nesterov_momentum(cost, all_params, self.learning_rate, self.momentum)
 	    
 	    train = theano.function(inputs=[X_batch, y_batch], outputs=cost, updates=updates, allow_input_downcast=True)
 	    valid = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
@@ -78,11 +84,12 @@ class net(object):
 	        predict=predict
 	    )
 
-	def fit(self):
+	def fit(self,tetrode_number):
 	    """
 	        This is the main method that sets up the experiment
 	    """
 	    if self.fail:
+	    	print("The net has not been initialised properly, exiting...")
 	    	return
 
 	    print("Loading the data...")

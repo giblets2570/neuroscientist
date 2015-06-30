@@ -107,21 +107,21 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2,num_code_
         print(shape)
         l_in = lasagne.layers.InputLayer(shape=shape)
 
-        l_hidden_1 = lasagne.layers.DenseLayer(
-            l_in,
-            num_units=num_hidden_units,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_1 = lasagne.layers.DenseLayer(
+        #     l_in,
+        #     num_units=num_hidden_units,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
         l_hidden_2 = lasagne.layers.DenseLayer(
-            l_hidden_1,
+            l_in,
             num_units=num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
         l_code_layer = lasagne.layers.DenseLayer(
             l_hidden_2,
-            num_units=num_hidden_units,
+            num_units=num_code_units,
             nonlinearity=lasagne.nonlinearities.softmax,
             )
 
@@ -132,14 +132,14 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2,num_code_
             )
 
 
-        l_hidden_4 = lasagne.layers.DenseLayer(
-            l_hidden_3,
-            num_units=num_hidden_units,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_4 = lasagne.layers.DenseLayer(
+        #     l_hidden_3,
+        #     num_units=num_hidden_units,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
         l_out = lasagne.layers.DenseLayer(
-            l_hidden_4,
+            l_hidden_3,
             num_units=output_dim,
             nonlinearity=None,
             )
@@ -159,14 +159,14 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     y_batch = T.matrix()
 
 
-    reg = 0.0001*lasagne.regularization.l2(network)
+    # reg = 0.0001*lasagne.regularization.l2(network)
     # this is the cost of the network when fed throught the noisey network
     train_output = lasagne.layers.get_output(network, X_batch)
-    cost = lasagne.objectives.categorical_crossentropy(train_output, y_batch) + reg
+    cost = lasagne.objectives.categorical_crossentropy(train_output, y_batch) 
     cost = cost.mean() 
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch)
-    valid_cost = lasagne.objectives.categorical_crossentropy(valid_output, y_batch) + reg
+    valid_cost = lasagne.objectives.categorical_crossentropy(valid_output, y_batch) 
     valid_cost = valid_cost.mean() 
 
     # test the performance of the netowork without noise

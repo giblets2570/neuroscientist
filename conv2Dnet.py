@@ -88,7 +88,7 @@ def load_data(tetrode_number):
         output_dim=y_train.shape[-1],
     )
 
-def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
+def model(input_shape, output_dim, num_hidden_units,filter_size,pool_size,batch_size=BATCH_SIZE):
         """
             Create a symbolic representation of a neural network with `intput_dim`
             input nodes, `output_dim` output nodes and `num_hidden_units` per hidden
@@ -104,24 +104,24 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
         l_conv2D_1 = lasagne.layers.Conv2DLayer(
             l_in, 
             num_filters=16,
-            filter_size=(4,1), 
+            filter_size=filter_size, 
             stride=(1, 1), 
             border_mode="valid", 
             untie_biases=False, 
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        # l_pool2D_2 = lasagne.layers.MaxPool2DLayer(
-        #     l_conv2D_2, 
-        #     pool_size=(1,2), 
-        #     stride=None, 
-        #     pad=0, 
-        #     ignore_border=False,
-        # )
+        l_pool2D_1 = lasagne.layers.MaxPool2DLayer(
+            l_conv2D_1, 
+            pool_size=pool_size, 
+            stride=None, 
+            pad=0, 
+            ignore_border=False,
+        )
 
         # l_pool2D_1 = lasagne.layers.FeaturePoolLayer(
         #     l_conv2D_1, 
-        #     pool_size=4, 
+        #     pool_size=pool_size, 
         # )
 
         # l_conv2D_2 = lasagne.layers.Conv2DLayer(
@@ -148,19 +148,19 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
         # )
 
         l_hidden_1 = lasagne.layers.DenseLayer(
-            l_conv2D_1,
+            l_pool2D_1,
             num_units=num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_hidden_2 = lasagne.layers.DenseLayer(
-            l_hidden_1,
-            num_units=num_hidden_units,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_2 = lasagne.layers.DenseLayer(
+        #     l_hidden_1,
+        #     num_units=num_hidden_units,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
         l_out = lasagne.layers.DenseLayer(
-            l_hidden_2,
+            l_hidden_1,
             num_units=output_dim,
             nonlinearity=lasagne.nonlinearities.softmax,
             )
@@ -207,7 +207,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
         predict=predict
     )
 
-def main(tetrode_number=TETRODE_NUMBER):
+def main(filter_size,pool_size,tetrode_number=TETRODE_NUMBER):
     """
         This is the main method that sets up the experiment
     """
@@ -220,7 +220,7 @@ def main(tetrode_number=TETRODE_NUMBER):
     print(dataset['input_shape'])
 
     print("Making the model...")
-    network = model(dataset['input_shape'],dataset['output_dim'],NUM_HIDDEN_UNITS)
+    network = model(dataset['input_shape'],dataset['output_dim'],NUM_HIDDEN_UNITS,filter_size,pool_size)
     print("Done!")
 
     print("Setting up the training functions...")
@@ -231,7 +231,7 @@ def main(tetrode_number=TETRODE_NUMBER):
     trainvalidation = []
 
     print("Begining to train the network...")
-
+    epochsDone = 0
     try:
         for i in range(NUM_EPOCHS):
             costs = []
@@ -258,6 +258,10 @@ def main(tetrode_number=TETRODE_NUMBER):
 
             print("Epoch: {}, Accuracy: {}, Training cost / validation cost: {}".format(i+1,accuracy,meanTrainCost/meanValidCost))
 
+            if(accuracy==0.0):
+                print("Nan value")
+                break
+
             trainvalidation.append([meanTrainCost,meanValidCost])
             accuracies.append(accuracy)
             if(EARLY_STOPPING):
@@ -271,9 +275,10 @@ def main(tetrode_number=TETRODE_NUMBER):
                     del accuracies[0]
                     accuracies.append(accuracy)
 
+            epochsDone = epochsDone + 1
+
     except KeyboardInterrupt:
-        with open('trainvalidation.json',"w") as outfile:
-            outfile.write(str(trainvalidation))
+        pass
 
     # plt.plot(trainvalidation)
     # plt.show()
@@ -281,10 +286,10 @@ def main(tetrode_number=TETRODE_NUMBER):
     if(LOG_EXPERIMENT):
         print("Logging the experiment details...")
         log = dict(
-            NET_TYPE = "2D conv",
+            NET_TYPE = "2D conv, filter_size {}, pool_size {} 1 hidden".format(filter_size,pool_size),
             TETRODE_NUMBER = tetrode_number,
             BASENAME = BASENAME,
-            NUM_EPOCHS = NUM_EPOCHS,
+            NUM_EPOCHS = epochsDone,
             BATCH_SIZE = BATCH_SIZE,
             NUM_HIDDEN_UNITS = NUM_HIDDEN_UNITS,
             TRAIN_VALIDATION = trainvalidation,
@@ -306,4 +311,8 @@ def main(tetrode_number=TETRODE_NUMBER):
 if __name__ == '__main__':
     # for i in range(16):
     #     main(1+i)
-    main()
+    filter_sizes = [(4,1),(4,3),(4,5),(4,7)]
+    pool_sizes = [(1,2),(1,4),(1,8)]
+    for fil in filter_sizes:
+        for pol in pool_sizes:
+            main(fil,pol)
