@@ -19,6 +19,9 @@ from data import formatData
 import json
 import re
 import math
+import matplotlib
+from random import randint
+matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab!
 import matplotlib.pyplot as plt
 
 PY2 = sys.version_info[0] == 2
@@ -37,7 +40,7 @@ else:
 
 BASENAME = "../R2192/20140110_R2192_track1"
 
-NUM_EPOCHS = 200
+NUM_EPOCHS = 1000000
 BATCH_SIZE = 600
 NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
@@ -48,7 +51,7 @@ STOPPING_RANGE = 10
 
 LOG_EXPERIMENT = True
 
-TETRODE_NUMBER = 9
+TETRODE_NUMBER = 11
 
 CONV = True
 
@@ -88,7 +91,7 @@ def load_data(tetrode_number):
         output_dim=y_train.shape[-1],
     )
 
-def model(input_shape, output_dim, num_hidden_units,filter_size,pool_size,batch_size=BATCH_SIZE):
+def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_size_2, num_hidden_units_1, num_hidden_units_2, num_hidden_units_3, batch_size=BATCH_SIZE):
         """
             Create a symbolic representation of a neural network with `intput_dim`
             input nodes, `output_dim` output nodes and `num_hidden_units` per hidden
@@ -98,12 +101,13 @@ def model(input_shape, output_dim, num_hidden_units,filter_size,pool_size,batch_
             A theano expression which represents such a network is returned.
         """
         shape = tuple([None]+list(input_shape[1:]))
-
+        print(shape)
+        print(filter_size, pool_size, filter_size_2, pool_size_2, num_hidden_units_1, num_hidden_units_2, num_hidden_units_3)
         l_in = lasagne.layers.InputLayer(shape=shape)
 
         l_conv2D_1 = lasagne.layers.Conv2DLayer(
             l_in, 
-            num_filters=16,
+            num_filters=32,
             filter_size=filter_size, 
             stride=(1, 1), 
             border_mode="valid", 
@@ -111,56 +115,62 @@ def model(input_shape, output_dim, num_hidden_units,filter_size,pool_size,batch_
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_pool2D_1 = lasagne.layers.MaxPool2DLayer(
-            l_conv2D_1, 
-            pool_size=pool_size, 
-            stride=None, 
-            pad=0, 
-            ignore_border=False,
-        )
+        # l_pool2D_1 = lasagne.layers.MaxPool2DLayer(
+        #     l_conv2D_1, 
+        #     pool_size=pool_size, 
+        #     stride=None, 
+        #     pad=0, 
+        #     ignore_border=False,
+        # )
 
         # l_pool2D_1 = lasagne.layers.FeaturePoolLayer(
         #     l_conv2D_1, 
         #     pool_size=pool_size, 
         # )
 
-        # l_conv2D_2 = lasagne.layers.Conv2DLayer(
-        #     l_pool2D_1, 
-        #     num_filters=32,
-        #     filter_size=(1,5), 
-        #     stride=(1, 1), 
-        #     border_mode="valid", 
-        #     untie_biases=False, 
-        #     nonlinearity=lasagne.nonlinearities.rectify,
-        #     )
-
-        # l_pool2D_1 = lasagne.layers.MaxPool2DLayer(
-        #     l_conv2D_1, 
-        #     pool_size=(1,2), 
-        #     stride=None, 
-        #     pad=0, 
-        #     ignore_border=False,
-        # )
-
-        # l_pool2D_2 = lasagne.layers.FeaturePoolLayer(
-        #     l_conv2D_2, 
-        #     pool_size=2, 
-        # )
-
-        l_hidden_1 = lasagne.layers.DenseLayer(
-            l_pool2D_1,
-            num_units=num_hidden_units,
+        l_conv2D_2 = lasagne.layers.Conv2DLayer(
+            l_conv2D_1, 
+            num_filters=32,
+            filter_size=filter_size_2, 
+            stride=(1, 1), 
+            border_mode="valid", 
+            untie_biases=False, 
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        # l_hidden_2 = lasagne.layers.DenseLayer(
-        #     l_hidden_1,
-        #     num_units=num_hidden_units,
-        #     nonlinearity=lasagne.nonlinearities.rectify,
-        #     )
+        l_pool2D_2 = lasagne.layers.MaxPool2DLayer(
+            l_conv2D_2, 
+            pool_size=pool_size_2, 
+            stride=None, 
+            pad=0, 
+            ignore_border=False,
+        )
+
+        # # l_pool2D_2 = lasagne.layers.FeaturePoolLayer(
+        # #     l_conv2D_2, 
+        # #     pool_size=2, 
+        # # )
+
+        l_hidden_1 = lasagne.layers.DenseLayer(
+            l_pool2D_2,
+            num_units=num_hidden_units_1,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
+
+        l_hidden_2 = lasagne.layers.DenseLayer(
+            l_hidden_1,
+            num_units=num_hidden_units_2,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
+
+        l_hidden_3 = lasagne.layers.DenseLayer(
+            l_hidden_2,
+            num_units=num_hidden_units_3,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
 
         l_out = lasagne.layers.DenseLayer(
-            l_hidden_1,
+            l_hidden_3,
             num_units=output_dim,
             nonlinearity=lasagne.nonlinearities.softmax,
             )
@@ -199,7 +209,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     
     train = theano.function(inputs=[X_batch, y_batch], outputs=cost, updates=updates, allow_input_downcast=True)
     valid = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
-    predict = theano.function(inputs=[X_batch], outputs=pred, allow_input_downcast=True)
+    predict = theano.function(inputs=[X_batch], outputs=test, allow_input_downcast=True)
 
     return dict(
         train=train,
@@ -207,7 +217,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
         predict=predict
     )
 
-def main(filter_size,pool_size,tetrode_number=TETRODE_NUMBER):
+def main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num_hidden_units_2, num_hidden_units_3,tetrode_number=TETRODE_NUMBER):
     """
         This is the main method that sets up the experiment
     """
@@ -218,9 +228,9 @@ def main(filter_size,pool_size,tetrode_number=TETRODE_NUMBER):
     print("Tetrode number: {}, Num outputs: {}".format(tetrode_number,dataset['output_dim']))
 
     print(dataset['input_shape'])
-
+    
     print("Making the model...")
-    network = model(dataset['input_shape'],dataset['output_dim'],NUM_HIDDEN_UNITS,filter_size,pool_size)
+    network = model(dataset['input_shape'],dataset['output_dim'],filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num_hidden_units_2, num_hidden_units_3)
     print("Done!")
 
     print("Setting up the training functions...")
@@ -237,13 +247,6 @@ def main(filter_size,pool_size,tetrode_number=TETRODE_NUMBER):
             costs = []
             valid_costs = []
 
-            # np.random.shuffle(dataset['X_train'])
-            # np.random.shuffle(dataset['y_train'])
-
-            # np.random.shuffle(dataset['X_valid'])
-            # np.random.shuffle(dataset['y_valid'])
-
-
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
                 cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
                 costs.append(cost)
@@ -252,15 +255,60 @@ def main(filter_size,pool_size,tetrode_number=TETRODE_NUMBER):
                 cost = training['train'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
                 valid_costs.append(cost)
 
+
             meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
             meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
-            accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test']))
+            accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
 
             print("Epoch: {}, Accuracy: {}, Training cost / validation cost: {}".format(i+1,accuracy,meanTrainCost/meanValidCost))
 
             if(accuracy==0.0):
                 print("Nan value")
                 break
+
+            if i%50 == 0:
+                ran = randint(0,dataset['num_examples_test']-20)
+                for j in range(10):
+                    testing = [dataset['X_test'][ran]]
+                    print(testing[0].shape)
+                    output = dataset['y_test'][ran]
+                    print(np.arange(dataset['output_dim']))
+                    print(output)
+                    prediction = training['predict'](testing)[0]
+                    print(prediction)
+                    # print(testing[0][0])
+                    plt.figure(1)
+                    plt.xlabel('Clusters')
+                    plt.ylabel('Output')
+                    plt.subplot(311)
+                    plt.plot(output, 'ro')
+                    plt.grid(True)
+
+                    plt.xlabel('Clusters')
+                    plt.ylabel('Probability')
+                    plt.subplot(312)
+                    plt.plot(prediction, 'ro')
+                    plt.grid(True)
+
+                    print(testing[0][0])
+                    inp = []
+                    for z in range(4):
+                        inp += list(testing[0][0][z])
+
+                    plt.xlabel('Time')
+                    plt.ylabel('Aplitude')
+                    plt.subplot(313)
+                    plt.plot(inp)
+                    # plt.show()
+
+                    # plt.plot(var2)
+                    # fig.tight_layout()
+                    plt.savefig('./logs/fig{}_{}.png'.format(i,j), bbox_inches='tight')
+                    plt.close()
+                    
+                    ran += 1
+                break
+
 
             trainvalidation.append([meanTrainCost,meanValidCost])
             accuracies.append(accuracy)
@@ -286,12 +334,11 @@ def main(filter_size,pool_size,tetrode_number=TETRODE_NUMBER):
     if(LOG_EXPERIMENT):
         print("Logging the experiment details...")
         log = dict(
-            NET_TYPE = "2D conv, filter_size {}, pool_size {} 1 hidden".format(filter_size,pool_size),
+            NET_TYPE = "2D conv, filter_size {}, pool_size {},filter_size_2 {}, pool_size_2 {}, 3 hidden".format(filter_size,pool_size,filter_size_2,pool_size_2),
             TETRODE_NUMBER = tetrode_number,
             BASENAME = BASENAME,
             NUM_EPOCHS = epochsDone,
             BATCH_SIZE = BATCH_SIZE,
-            NUM_HIDDEN_UNITS = NUM_HIDDEN_UNITS,
             TRAIN_VALIDATION = trainvalidation,
             LEARNING_RATE = LEARNING_RATE,
             MOMENTUM = MOMENTUM,
@@ -311,8 +358,14 @@ def main(filter_size,pool_size,tetrode_number=TETRODE_NUMBER):
 if __name__ == '__main__':
     # for i in range(16):
     #     main(1+i)
-    filter_sizes = [(4,1),(4,3),(4,5),(4,7)]
-    pool_sizes = [(1,2),(1,4),(1,8)]
-    for fil in filter_sizes:
-        for pol in pool_sizes:
-            main(fil,pol)
+    # filter_sizes = [(4,1),(4,3),(4,5),(4,7)]
+
+    # pool_sizes = [(1,2),(1,4),(1,8)]
+    filter_size = (4,3)
+    pool_size = (1,2)
+    filter_size_2 = (1,7)
+    pool_size_2 = (1,2)
+    num_hidden_units_1 = 256
+    num_hidden_units_2 = 128
+    num_hidden_units_3 = 64
+    main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1,num_hidden_units_2,num_hidden_units_3)

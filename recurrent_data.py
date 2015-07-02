@@ -4,6 +4,8 @@ import sys
 import matplotlib.pyplot as plt
 import re
 import json
+from pos_data import getXY
+import math
 
 BASENAME = "../R2192/20140110_R2192_track1"
 
@@ -42,37 +44,24 @@ def getCutTimes(tetfilename,cutfilename):
 	return timesData
 
 def getData(basename=BASENAME):
-	inputDimension,dims = getTotalInputDimension(basename)
+	inputDimension, dims = getTotalInputDimension(basename)
 	currentBase = 0
 	data = {}
 	for i in range(16):
 		dimension = dims[i]
 		times = getCutTimes(basename+".{}".format(i),basename+".clu.1")
-		for j in times:
+		for n,j in enumerate(times):
 			if str(j['time']) in data:
-				data[str(j['time'])][currentBase + j['label']] = data[str(j['time'])][currentBase + j['label']] + 1
+				data[j['time']][currentBase + j['label']] = data[str(j['time'])][currentBase + j['label']] + 1
 			else:
-				data[str(j['time'])] = np.zeros(inputDimension)
-				data[str(j['time'])][currentBase + j['label']] = 1
+				data[j['time']] = np.zeros(inputDimension)
+				data[j['time']][currentBase + j['label']] = 1
+
+			# if n==10:
+			# 	break
 		currentBase += dimension
 
 	return data
-
-# def getTimeSteps(basename=BASENAME):
-# 	dimension = getTotalInputDimension(basename)
-# 	data = {}
-# 	for i in range(16):
-# 		# get the tetrode number
-# 		cutfilename = basename + ".clu." + str(i+1)
-
-# 		# get the number of output dimensions for this tetrode
-# 		for n,j in enumnerate(open(cutfilename,'r')):
-# 			if n == 0:
-# 				continue
-# 			if j in data:
-# 				data[j] = data[j] + 1
-
-# 	return total
 
 if __name__=="__main__":
 	# inputDimension = getTotalInputDimension()
@@ -85,16 +74,29 @@ if __name__=="__main__":
 	# cutfilename = BASENAME+".clu.1"
 	# print(getCutTimes(filename,cutfilename)[:3])
 	data = getData()
-	print(len(data))
-	j = open('data.json','w')
-	f = open('data.json','a+')
-	for i, thing in enumerate(data):
-		f.write(thing+ ' ')
-		f.write(str(list(data[thing])) + '\n')
-		# print(thing,list(data[thing]))
-		# if i == 4:
-		# 	break
-		print(i)
+	# print(len(data))
+
+	formattedData = np.zeros((69700,254))
+	sigma = 0.01*1000
+	for i,timestep in enumerate(xrange(0,69700)):
+		milisec = (timestep+1)*1000/50.0
+		for j in data:
+			guassian = math.exp(-(j-milisec)**2/(2*sigma**2))/(sigma*math.sqrt(2*math.pi))
+			formattedData[i]+=(data[j]*guassian)
+
+
+
+	j = open('recurrent_data.json','w')
+	f = open('recurrent_data.json','a+')
+	for i in formattedData:
+		f.write(i)
+	# for i, thing in enumerate(data):
+	# 	f.write(thing+ ' ')
+	# 	f.write(str(list(data[thing])) + '\n')
+	# 	# print(thing,list(data[thing]))
+	# 	# if i == 4:
+	# 	# 	break
+	# 	print(i)
 	# print("stringed the data")
 	# with open('data.json','w') as f:
 	# 	f.write(thing)
