@@ -92,7 +92,7 @@ def load_data(tetrode_number):
         output_dim=y_train.shape[-1],
     )
 
-def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_size_2, num_hidden_units_1, num_hidden_units_2, num_hidden_units_3, num_hidden_units_4, batch_size=BATCH_SIZE):
+def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_size_2, num_hidden_units_1, num_hidden_units_2, num_hidden_units_3, num_hidden_units_4,num_hidden_units_5, batch_size=BATCH_SIZE):
         """
             Create a symbolic representation of a neural network with `intput_dim`
             input nodes, `output_dim` output nodes and `num_hidden_units` per hidden
@@ -103,7 +103,7 @@ def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_s
         """
         shape = tuple([None]+list(input_shape[1:]))
         print(shape)
-        print(filter_size, pool_size, filter_size_2, pool_size_2, num_hidden_units_1, num_hidden_units_2, num_hidden_units_3)
+        print(filter_size, pool_size, filter_size_2, pool_size_2, num_hidden_units_1, num_hidden_units_2, num_hidden_units_3,num_hidden_units_4,num_hidden_units_5)
         l_in = lasagne.layers.InputLayer(shape=shape)
 
         l_conv2D_1 = lasagne.layers.Conv2DLayer(
@@ -176,8 +176,14 @@ def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_s
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_out = lasagne.layers.DenseLayer(
+        l_hidden_5 = lasagne.layers.DenseLayer(
             l_hidden_4,
+            num_units=num_hidden_units_5,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
+
+        l_out = lasagne.layers.DenseLayer(
+            l_hidden_5,
             num_units=output_dim,
             nonlinearity=lasagne.nonlinearities.softmax,
             )
@@ -224,7 +230,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
         predict=predict
     )
 
-def main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num_hidden_units_2, num_hidden_units_3,num_hidden_units_4, tetrode_number=TETRODE_NUMBER):
+def main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num_hidden_units_2, num_hidden_units_3,num_hidden_units_4, num_hidden_units_5, tetrode_number=TETRODE_NUMBER):
     """
         This is the main method that sets up the experiment
     """
@@ -237,7 +243,7 @@ def main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num
     print(dataset['input_shape'])
     
     print("Making the model...")
-    network = model(dataset['input_shape'],dataset['output_dim'],filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num_hidden_units_2, num_hidden_units_3)
+    network = model(dataset['input_shape'],dataset['output_dim'],filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num_hidden_units_2, num_hidden_units_3,num_hidden_units_4, num_hidden_units_5)
     print("Done!")
 
     print("Setting up the training functions...")
@@ -397,8 +403,9 @@ if __name__ == '__main__':
     pool_size = (1,2)
     filter_size_2 = (1,7)
     pool_size_2 = (1,2)
-    num_hidden_units_1 = 500
-    num_hidden_units_2 = 300
-    num_hidden_units_3 = 200
-    num_hidden_units_4 = 100
-    main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1,num_hidden_units_2,num_hidden_units_3,num_hidden_units_4)
+    num_hidden_units_1 = 800
+    num_hidden_units_2 = 500
+    num_hidden_units_3 = 300
+    num_hidden_units_4 = 200
+    num_hidden_units_5 = 100
+    main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1,num_hidden_units_2,num_hidden_units_3,num_hidden_units_4,num_hidden_units_5)
