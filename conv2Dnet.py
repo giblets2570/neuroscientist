@@ -4,6 +4,10 @@
 
 from __future__ import print_function
 
+import matplotlib
+matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab!
+
+from random import randint
 import gzip
 import itertools
 import pickle
@@ -19,9 +23,6 @@ from data import formatData
 import json
 import re
 import math
-import matplotlib
-from random import randint
-matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab!
 import matplotlib.pyplot as plt
 
 PY2 = sys.version_info[0] == 2
@@ -49,7 +50,7 @@ MOMENTUM = 0.9
 EARLY_STOPPING = False
 STOPPING_RANGE = 10
 
-LOG_EXPERIMENT = True
+LOG_EXPERIMENT = False
 
 TETRODE_NUMBER = 11
 
@@ -105,15 +106,15 @@ def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_s
         print(filter_size, pool_size, filter_size_2, pool_size_2, num_hidden_units_1, num_hidden_units_2, num_hidden_units_3)
         l_in = lasagne.layers.InputLayer(shape=shape)
 
-        l_conv2D_1 = lasagne.layers.Conv2DLayer(
-            l_in, 
-            num_filters=32,
-            filter_size=filter_size, 
-            stride=(1, 1), 
-            border_mode="valid", 
-            untie_biases=False, 
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_conv2D_1 = lasagne.layers.Conv2DLayer(
+        #     l_in, 
+        #     num_filters=32,
+        #     filter_size=filter_size, 
+        #     stride=(1, 1), 
+        #     border_mode="valid", 
+        #     untie_biases=False, 
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
         # l_pool2D_1 = lasagne.layers.MaxPool2DLayer(
         #     l_conv2D_1, 
@@ -128,37 +129,37 @@ def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_s
         #     pool_size=pool_size, 
         # )
 
-        l_conv2D_2 = lasagne.layers.Conv2DLayer(
-            l_conv2D_1, 
-            num_filters=32,
-            filter_size=filter_size_2, 
-            stride=(1, 1), 
-            border_mode="valid", 
-            untie_biases=False, 
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_conv2D_2 = lasagne.layers.Conv2DLayer(
+        #     l_conv2D_1, 
+        #     num_filters=32,
+        #     filter_size=filter_size_2, 
+        #     stride=(1, 1), 
+        #     border_mode="valid", 
+        #     untie_biases=False, 
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
-        l_pool2D_2 = lasagne.layers.MaxPool2DLayer(
-            l_conv2D_2, 
-            pool_size=pool_size_2, 
-            stride=None, 
-            pad=0, 
-            ignore_border=False,
-        )
+        # l_pool2D_2 = lasagne.layers.MaxPool2DLayer(
+        #     l_conv2D_2, 
+        #     pool_size=pool_size_2, 
+        #     stride=None, 
+        #     pad=0, 
+        #     ignore_border=False,
+        # )
 
         # # l_pool2D_2 = lasagne.layers.FeaturePoolLayer(
         # #     l_conv2D_2, 
         # #     pool_size=2, 
         # # )
 
-        l_hidden_1 = lasagne.layers.DenseLayer(
-            l_pool2D_2,
-            num_units=num_hidden_units_1,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_1 = lasagne.layers.DenseLayer(
+        #     l_pool2D_2,
+        #     num_units=num_hidden_units_1,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
         l_hidden_2 = lasagne.layers.DenseLayer(
-            l_hidden_1,
+            l_in,
             num_units=num_hidden_units_2,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
@@ -277,29 +278,54 @@ def main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num
                     prediction = training['predict'](testing)[0]
                     print(prediction)
                     # print(testing[0][0])
-                    plt.figure(1)
-                    plt.xlabel('Clusters')
-                    plt.ylabel('Output')
-                    plt.subplot(311)
-                    plt.plot(output, 'ro')
-                    plt.grid(True)
+                    
+                    # plotting the figure
 
-                    plt.xlabel('Clusters')
-                    plt.ylabel('Probability')
-                    plt.subplot(312)
-                    plt.plot(prediction, 'ro')
-                    plt.grid(True)
+                    fig = plt.figure(1)
+                    sub1 = fig.add_subplot(311)
+                    sub2 = fig.add_subplot(312)
+                    sub3 = fig.add_subplot(313)
+
+                    # add titles
+
+                    sub1.set_title('Desired output')
+                    sub2.set_title('Net output')
+                    sub3.set_title('Four channals of tetrode concatenated')
+
+                    # adding x labels
+
+                    sub1.set_xlabel('Clusters')
+                    sub2.set_xlabel('Clusters')
+                    sub3.set_xlabel('Time')
+
+                    # adding y labels
+
+                    sub1.set_ylabel('Output')
+                    sub2.set_ylabel('Probability')
+                    sub3.set_ylabel('Amplitude')
+
+                    # Plotting data
 
                     print(testing[0][0])
                     inp = []
                     for z in range(4):
                         inp += list(testing[0][0][z])
 
-                    plt.xlabel('Time')
-                    plt.ylabel('Aplitude')
-                    plt.subplot(313)
-                    plt.plot(inp)
+
+                    x_axis = list(np.arange(dataset['output_dim']))
+
+                    # sub1.plot(output, 'ro')
+                    sub1.bar(x_axis, output, width=1)
+                    sub1.grid(True)
+
+                    # sub2.plot(prediction, 'ro')
+                    sub2.bar(x_axis, prediction, width=1)
+                    sub2.grid(True)
+
+                    sub3.plot(inp)
                     # plt.show()
+
+                    fig.tight_layout()
 
                     # plt.plot(var2)
                     # fig.tight_layout()
@@ -307,7 +333,7 @@ def main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num
                     plt.close()
                     
                     ran += 1
-                break
+                # break
 
 
             trainvalidation.append([meanTrainCost,meanValidCost])
@@ -342,7 +368,7 @@ def main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num
             TRAIN_VALIDATION = trainvalidation,
             LEARNING_RATE = LEARNING_RATE,
             MOMENTUM = MOMENTUM,
-            ACCURACY = accuracies[-1],
+            ACCURACY = accuracies,
             NETWORK_LAYERS = [str(type(layer)) for layer in lasagne.layers.get_all_layers(network)],
             OUTPUT_DIM = dataset['output_dim'],
             # NETWORK_PARAMS = lasagne.layers.get_all_params_values(network)
