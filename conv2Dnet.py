@@ -224,7 +224,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
         predict=predict
     )
 
-def main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num_hidden_units_2, num_hidden_units_3,tetrode_number=TETRODE_NUMBER):
+def main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num_hidden_units_2, num_hidden_units_3,num_hidden_units_4, tetrode_number=TETRODE_NUMBER):
     """
         This is the main method that sets up the experiment
     """
