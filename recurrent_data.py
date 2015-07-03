@@ -138,25 +138,21 @@ def firstRecurrentData(tetrodeNumber=11,basename=BASENAME):
 		recData.append(obj)
 	return recData
 
-def convolvedData(tetrodeNumber=11,basename=BASENAME):
+def convolvedData(tetrodeNumber=11,freq=1000,basename=BASENAME):
 	data = getData(tetrodeNumber)
 
-	downData = downsampleData(data,freq=1000)
+	downData = downsampleData(data,freq)
 
 	x, y = getXY(basename+".pos")
-	
-	recData = []
 
-	for i in xrange(len(downData)):
-		time = i/50.0
-		obj = dict(
-			time=time,
-			activity=downData[i],
-			x=x[i],
-			y=y[i]
-			)
-		recData.append(obj)
-	return recData
+	inDim = len(downData)
+
+	outDim = len(x)
+
+	g = gaussianMatrix(outDim,inDim)
+	out = np.dot(g,downData)
+
+	return out
 
 def formatData(tetrodeNumber=11,basename=BASENAME):
 	recData = firstRecurrentData(tetrodeNumber,basename)
@@ -179,5 +175,6 @@ def formatData(tetrodeNumber=11,basename=BASENAME):
 
 if __name__=="__main__":
 	
-	trX, tvX, teX, trY, tvY, teY = formatData()
-	print(trY[:20])
+	out = convolvedData()	
+
+	np.save('convolved_data.npy', out)
