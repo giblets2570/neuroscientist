@@ -401,4 +401,4 @@ if __name__ == '__main__':
     num_hidden_units_2 = 300
     num_hidden_units_3 = 200
     num_hidden_units_4 = 100
-    main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1,num_hidden_units_2,num_hidden_units_3)
+    main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1,num_hidden_units_2,num_hidden_units_3,num_hidden_units_4)
