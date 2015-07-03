@@ -92,7 +92,7 @@ def load_data(tetrode_number):
         output_dim=y_train.shape[-1],
     )
 
-def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_size_2, num_hidden_units_1, num_hidden_units_2, num_hidden_units_3, batch_size=BATCH_SIZE):
+def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_size_2, num_hidden_units_1, num_hidden_units_2, num_hidden_units_3, num_hidden_units_4, batch_size=BATCH_SIZE):
         """
             Create a symbolic representation of a neural network with `intput_dim`
             input nodes, `output_dim` output nodes and `num_hidden_units` per hidden
@@ -106,15 +106,15 @@ def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_s
         print(filter_size, pool_size, filter_size_2, pool_size_2, num_hidden_units_1, num_hidden_units_2, num_hidden_units_3)
         l_in = lasagne.layers.InputLayer(shape=shape)
 
-        # l_conv2D_1 = lasagne.layers.Conv2DLayer(
-        #     l_in, 
-        #     num_filters=32,
-        #     filter_size=filter_size, 
-        #     stride=(1, 1), 
-        #     border_mode="valid", 
-        #     untie_biases=False, 
-        #     nonlinearity=lasagne.nonlinearities.rectify,
-        #     )
+        l_conv2D_1 = lasagne.layers.Conv2DLayer(
+            l_in, 
+            num_filters=32,
+            filter_size=filter_size, 
+            stride=(1, 1), 
+            border_mode="valid", 
+            untie_biases=False, 
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
 
         # l_pool2D_1 = lasagne.layers.MaxPool2DLayer(
         #     l_conv2D_1, 
@@ -152,11 +152,11 @@ def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_s
         # #     pool_size=2, 
         # # )
 
-        # l_hidden_1 = lasagne.layers.DenseLayer(
-        #     l_pool2D_2,
-        #     num_units=num_hidden_units_1,
-        #     nonlinearity=lasagne.nonlinearities.rectify,
-        #     )
+        l_hidden_1 = lasagne.layers.DenseLayer(
+            l_conv2D_1,
+            num_units=num_hidden_units_1,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
 
         l_hidden_2 = lasagne.layers.DenseLayer(
             l_in,
@@ -170,8 +170,14 @@ def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_s
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_out = lasagne.layers.DenseLayer(
+        l_hidden_4 = lasagne.layers.DenseLayer(
             l_hidden_3,
+            num_units=num_hidden_units_4,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
+
+        l_out = lasagne.layers.DenseLayer(
+            l_hidden_4,
             num_units=output_dim,
             nonlinearity=lasagne.nonlinearities.softmax,
             )
@@ -387,11 +393,12 @@ if __name__ == '__main__':
     # filter_sizes = [(4,1),(4,3),(4,5),(4,7)]
 
     # pool_sizes = [(1,2),(1,4),(1,8)]
-    filter_size = (4,3)
+    filter_size = (4,1)
     pool_size = (1,2)
     filter_size_2 = (1,7)
     pool_size_2 = (1,2)
-    num_hidden_units_1 = 256
-    num_hidden_units_2 = 128
-    num_hidden_units_3 = 64
+    num_hidden_units_1 = 500
+    num_hidden_units_2 = 300
+    num_hidden_units_3 = 200
+    num_hidden_units_4 = 100
     main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1,num_hidden_units_2,num_hidden_units_3)
