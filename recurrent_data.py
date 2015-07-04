@@ -149,10 +149,32 @@ def convolvedData(tetrodeNumber=11,freq=1000,basename=BASENAME):
 
 	outDim = len(x)
 
-	g = gaussianMatrix(outDim,inDim)
-	out = np.dot(g,downData)
+	# g = gaussianMatrix(outDim,inDim)
+	# out = np.dot(g,downData)
 
-	return out
+	l = linearConv(outDim,downData)
+
+	return l
+
+
+def linearConv(outDim,data):
+	inDim = len(data)
+	seqLen = len(data[0])
+	stepsize = int(inDim/outDim)
+	result = []
+	for i in range(inDim)[::stepsize]:
+		start = i - stepsize
+		r = np.zeros(seqLen)
+		for j in range(start,start+2*stepsize+1):
+			if j < 0 or j >= inDim:
+				continue
+			if j <= i:
+				r += abs(j-i)/stepsize*data[i]
+			else:
+				r += abs(i-j)/stepsize*data[i]
+		result.append(r)
+	return np.asarray(result)
+
 
 def formatData(tetrodeNumber=11,basename=BASENAME):
 	recData = firstRecurrentData(tetrodeNumber,basename)
@@ -177,4 +199,10 @@ if __name__=="__main__":
 	
 	out = convolvedData()	
 
-	np.save('convolved_data.npy', out)
+	# np.save('convolved_data.npy', out)
+
+	# data = np.random.rand(30,2)
+
+	# l = linearConv(10,data)
+
+	# print(l.shape)

@@ -117,32 +117,32 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_hidden_2 = lasagne.layers.DenseLayer(
-            l_hidden_1,
-            num_units=num_hidden_units_2,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_2 = lasagne.layers.DenseLayer(
+        #     l_hidden_1,
+        #     num_units=num_hidden_units_2,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
         l_code_layer = lasagne.layers.DenseLayer(
-            l_hidden_2,
+            l_hidden_1,
             num_units=num_code_units,
-            nonlinearity=lasagne.nonlinearities.softmax,
-            )
-
-        l_hidden_3 = lasagne.layers.DenseLayer(
-            l_code_layer,
-            num_units=num_hidden_units_2,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
+        # l_hidden_3 = lasagne.layers.DenseLayer(
+        #     l_code_layer,
+        #     num_units=num_hidden_units_2,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
+
         l_hidden_4 = lasagne.layers.DenseLayer(
-            l_hidden_3,
+            l_code_layer,
             num_units=num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
         l_out = lasagne.layers.DenseLayer(
-            l_hidden_2,
+            l_hidden_4,
             num_units=output_dim,
             nonlinearity=None,
             )
@@ -207,7 +207,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
         L_penalty=L_penalty
     )
 
-def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=200,num_code_units=100):
+def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=200,num_code_units=50):
     """
         This is the main method that sets up the experiment
     """
