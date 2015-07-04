@@ -97,6 +97,9 @@ def downsampleData(data, freq=50, timeS=1394):
 	return np.asarray(output)
 
 def gaussian(x, mu, sig):
+
+	if(abs(x-mu)>sig):
+		return 0.0
 	output = np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
 	if output >= 0:
 		return output
@@ -176,6 +179,25 @@ def linearConv(outDim,data):
 	return np.asarray(result)
 
 
+def gaussConv(outDim,data):
+	inDim = len(data)
+	seqLen = len(data[0])
+	stepsize = int(inDim/outDim)
+	result = []
+	for i in range(inDim)[::stepsize]:
+		start = i - stepsize
+		r = np.zeros(seqLen)
+		for j in range(start,start+2*stepsize+1):
+			if j < 0 or j >= inDim:
+				continue
+			if j <= i:
+				r += abs(j-i)/stepsize*data[i]
+			else:
+				r += abs(i-j)/stepsize*data[i]
+		result.append(r)
+	return np.asarray(result)
+
+
 def formatData(tetrodeNumber=11,basename=BASENAME):
 	recData = firstRecurrentData(tetrodeNumber,basename)
 	k = len(recData)
@@ -199,6 +221,7 @@ if __name__=="__main__":
 	
 	out = convolvedData()	
 
+	print(out.shape)
 	# np.save('convolved_data.npy', out)
 
 	# data = np.random.rand(30,2)

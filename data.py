@@ -21,12 +21,14 @@ def formatData(tetrodeNumber,basename,twoD=False):
 				break
 			entry = {}
 			entry['time'] = data[i][0]
-			m = 0
+			m = 0# np.max()
 			for j in range(4):
 				for k in range(50):
-					val = abs(data[j][1][k])
+					val = abs(data[i+j][1][k])
 					if(val > m):
 						m = val
+
+
 			con = None
 
 			if twoD:
