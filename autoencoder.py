@@ -50,7 +50,7 @@ MOMENTUM = 0.9
 EARLY_STOPPING = False
 STOPPING_RANGE = 10
 
-LOG_EXPERIMENT = True
+LOG_EXPERIMENT = False
 
 TETRODE_NUMBER = 11
 
@@ -98,7 +98,7 @@ def load_data(tetrode_number):
     )
 
 
-def model(input_shape, output_dim, num_hidden_units,num_code_units, batch_size=BATCH_SIZE):
+def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code_units, batch_size=BATCH_SIZE):
         """
             Create a symbolic representation of a neural network with `intput_dim`
             input nodes, `output_dim` output nodes and `num_hidden_units` per hidden
@@ -117,18 +117,29 @@ def model(input_shape, output_dim, num_hidden_units,num_code_units, batch_size=B
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_code_layer = lasagne.layers.DenseLayer(
+        l_hidden_2 = lasagne.layers.DenseLayer(
             l_hidden_1,
+            num_units=num_hidden_units_2,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
+
+        l_code_layer = lasagne.layers.DenseLayer(
+            l_hidden_2,
             num_units=num_code_units,
             nonlinearity=lasagne.nonlinearities.softmax,
             )
 
-        l_hidden_2 = lasagne.layers.DenseLayer(
+        l_hidden_3 = lasagne.layers.DenseLayer(
             l_code_layer,
-            num_units=num_hidden_units,
+            num_units=num_hidden_units_2,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
+        l_hidden_4 = lasagne.layers.DenseLayer(
+            l_hidden_3,
+            num_units=num_hidden_units,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
 
         l_out = lasagne.layers.DenseLayer(
             l_hidden_2,
@@ -138,7 +149,7 @@ def model(input_shape, output_dim, num_hidden_units,num_code_units, batch_size=B
 
         return l_out
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.05, beta=0.001, momentum=MOMENTUM):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.02, beta=0.01, momentum=MOMENTUM):
 
     """
         Method the returns the theano functions that are used in 
@@ -185,16 +196,18 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     predict = theano.function(inputs=[X_batch], outputs=pred, allow_input_downcast=True)
     accuracy = theano.function(inputs=[X_batch,y_batch], outputs=accuracy, allow_input_downcast=True)
     code = theano.function(inputs=[X_batch], outputs=code_output, allow_input_downcast=True)
+    L_penalty = theano.function(inputs=[X_batch], outputs=rho_hat, allow_input_downcast=True)
 
     return dict(
         train=train,
         valid=valid,
         predict=predict,
         accuracy=accuracy,
-        code=code
+        code=code,
+        L_penalty=L_penalty
     )
 
-def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_code_units=50):
+def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=200,num_code_units=100):
     """
         This is the main method that sets up the experiment
     """
@@ -207,7 +220,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_code_units=50):
     print(dataset['input_shape'])
     
     print("Making the model...")
-    network = model(dataset['input_shape'],dataset['output_dim'],num_hidden_units,num_code_units)
+    network = model(dataset['input_shape'],dataset['output_dim'],num_hidden_units,num_hidden_units_2,num_code_units)
     print("Done!")
 
     print("Setting up the training functions...")
@@ -257,8 +270,9 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_code_units=50):
                     
                     code = training['code'](testing)
 
-                    print(code)
-
+                    # print(code)
+                    L_penalty = training['L_penalty'](testing)
+                    print(L_penalty)
                     # plotting the figure
 
                     fig = plt.figure(1)
@@ -270,19 +284,19 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_code_units=50):
 
                     sub1.set_title('Desired output')
                     sub2.set_title('Net output')
-                    sub3.set_title('Four channals of tetrode concatenated')
+                    sub3.set_title('Code layer output')
 
                     # adding x labels
 
-                    sub1.set_xlabel('Clusters')
-                    sub2.set_xlabel('Clusters')
-                    sub3.set_xlabel('Time')
+                    sub1.set_xlabel('Time')
+                    sub2.set_xlabel('Time')
+                    sub3.set_xlabel('Code label')
 
                     # adding y labels
 
-                    sub1.set_ylabel('Output')
-                    sub2.set_ylabel('Probability')
-                    sub3.set_ylabel('Amplitude')
+                    sub1.set_ylabel('Amplitude')
+                    sub2.set_ylabel('Amplitude')
+                    sub3.set_ylabel('Probability')
 
                     # Plotting data
 
@@ -340,7 +354,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_code_units=50):
     if(LOG_EXPERIMENT):
         print("Logging the experiment details...")
         log = dict(
-            NET_TYPE = "Auto encoder 1 hidden 1 code",
+            NET_TYPE = "Auto encoder 2 hidden 1 code 300 200 100",
             TETRODE_NUMBER = tetrode_number,
             BASENAME = BASENAME,
             NUM_EPOCHS = epochsDone,
