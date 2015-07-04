@@ -4,7 +4,7 @@ import sys
 import matplotlib.pyplot as plt
 import re
 
-BASENAME = "../../R2192/20140110_R2192_track1"
+BASENAME = "../R2192/20140110_R2192_track1"
 
 def formatData(tetrodeNumber,basename,twoD=False):
 
@@ -21,12 +21,14 @@ def formatData(tetrodeNumber,basename,twoD=False):
 				break
 			entry = {}
 			entry['time'] = data[i][0]
-			m = 0
+			m = 0# np.max()
 			for j in range(4):
 				for k in range(50):
-					val = abs(data[j][1][k])
+					val = abs(data[i+j][1][k])
 					if(val > m):
 						m = val
+
+
 			con = None
 
 			if twoD:
@@ -75,10 +77,15 @@ def formatData(tetrodeNumber,basename,twoD=False):
 	return getTrainingTest()
 
 if __name__=="__main__":
-	trX, teX, trY, teY = formatData(sys.argv[1],BASENAME,twoD=True)
+	# trX, tvX, teX, trY, tvY, teY = formatData(9,BASENAME,twoD=True)
 
-	print(trX.shape)
-	plt.plot(trX[1])
-	plt.show()
+	# print(trX.shape)
+	# print(trX[1])
+	# print(trX[2])
+	# plt.plot(trX[4][1])
+	# plt.show()
 
+	for i in range(11,12):
+		header, data = readfile(BASENAME+"."+str(i),[('ts','>i'),('waveform','50b')])
+		print(header,len(data))
 	# print(trX.shape, teX.shape, trY.shape, teY.shape)
