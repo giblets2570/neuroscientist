@@ -77,6 +77,9 @@ def getData(tetrodeNumber=11,basename=BASENAME):
 
 
 def downsampleData(data, freq=50, timeS=1394):
+	"""
+		Method that downsamples the data to the given frequency
+	"""
 	timesteps = timeS*freq
 	rate = 1.0 / freq
 	output = None
@@ -91,29 +94,34 @@ def downsampleData(data, freq=50, timeS=1394):
 			index += 1
 			base += rate
 		output[index] += data[key]
-	return output
+	return np.asarray(output)
 
-# def gaussian(x, mu, sig):
-# 	output = np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
-# 	if output >= 0:
-# 		return output
-# 	return 0.0
-#     # return np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
+def gaussian(x, mu, sig):
+	output = np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
+	if output >= 0:
+		return output
+	return 0.0
+    # return np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
 
 
-# def gaussianMatrix(outDim,inDim):
-# 	out = []
-# 	for i in range(inDim):
-# 		out.append([gaussian((k+0.5)*inDim/outDim,i,5) for k in range(outDim)])
+def gaussianMatrix(outDim,inDim):
+	out = []
+	for i in range(inDim):
+		out.append([gaussian((k+0.5)*inDim/outDim,i,5) for k in range(outDim)])
 		
-# 		print('{} done!'.format(i))
-# 	return np.asarray(out).T
+		print('{} done!'.format(i))
+	return np.asarray(out).T
 
 
 def firstRecurrentData(tetrodeNumber=11,basename=BASENAME):
+	"""
+		Basically convolves all the data
+	"""
 	data = getData(tetrodeNumber)
 
 	downData = downsampleData(data)
+
+	print()
 
 	x, y = getXY(basename+".pos")
 	
@@ -130,6 +138,21 @@ def firstRecurrentData(tetrodeNumber=11,basename=BASENAME):
 		recData.append(obj)
 	return recData
 
+def convolvedData(tetrodeNumber=11,freq=1000,basename=BASENAME):
+	data = getData(tetrodeNumber)
+
+	downData = downsampleData(data,freq)
+
+	x, y = getXY(basename+".pos")
+
+	inDim = len(downData)
+
+	outDim = len(x)
+
+	g = gaussianMatrix(outDim,inDim)
+	out = np.dot(g,downData)
+
+	return out
 
 def formatData(tetrodeNumber=11,basename=BASENAME):
 	recData = firstRecurrentData(tetrodeNumber,basename)
@@ -148,10 +171,10 @@ def formatData(tetrodeNumber=11,basename=BASENAME):
 	tvY = np.array(y[n:m],dtype=np.float16)
 	teY = np.array(y[m:],dtype=np.float16)
 
-
 	return trX, tvX, teX, trY, tvY, teY
 
 if __name__=="__main__":
 	
-	trX, tvX, teX, trY, tvY, teY = formatData()
-	print(trY[:20])
+	out = convolvedData()	
+
+	np.save('convolved_data.npy', out)

@@ -275,7 +275,7 @@ def main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num
 
             print("Epoch: {}, Accuracy: {}, Training cost / validation cost: {}".format(i+1,accuracy,meanTrainCost/meanValidCost))
 
-            if(accuracy==0.0):
+            if(np.isnan(meanTrainCost/meanValidCost)):
                 print("Nan value")
                 break
 
