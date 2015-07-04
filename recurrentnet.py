@@ -42,8 +42,8 @@ else:
 BASENAME = "../R2192/20140110_R2192_track1"
 
 NUM_EPOCHS = 10
-BATCH_SIZE = 400
-NUM_HIDDEN_UNITS = 20
+BATCH_SIZE = 30
+NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
 MOMENTUM = 0.9
 GRAD_CLIP = 100
@@ -86,38 +86,67 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, batch_size
             `batch_size`.
             A theano expression which represents such a network is returned.
         """
-        input_sequence_length = input_shape[1]
-        print("Sequence length ", input_sequence_length)
+        length = input_shape[1]
+
         shape = tuple([batch_size]+list(input_shape[1:]))
         print("Shape ",shape)
         
+
+        # Construct vanilla RNN
         l_in = lasagne.layers.InputLayer(shape=shape)
 
-        l_forward_1 = lasagne.layers.RecurrentLayer(
-            l_in, num_hidden_units, grad_clipping=GRAD_CLIP,
+        l_recurrent = lasagne.layers.RecurrentLayer(
+            l_in,
+            num_hidden_units,
+            grad_clipping=GRAD_CLIP,
             W_in_to_hid=lasagne.init.HeUniform(),
             W_hid_to_hid=lasagne.init.HeUniform(),
             nonlinearity=lasagne.nonlinearities.rectify
             )
 
-        l_forward_2 = lasagne.layers.RecurrentLayer(
-            l_forward_1, num_hidden_units, grad_clipping=GRAD_CLIP,
-            W_in_to_hid=lasagne.init.HeUniform(),
-            W_hid_to_hid=lasagne.init.HeUniform(),
-            nonlinearity=lasagne.nonlinearities.rectify
-            )
+        # l_recurrent2 = lasagne.layers.RecurrentLayer(l_recurrent, num_hidden_units, nonlinearity=lasagne.nonlinearities.rectify)
 
-        l_reshape = lasagne.layers.ReshapeLayer(
-            l_forward_2, (batch_size*input_sequence_length, num_hidden_units)
-        )
+        # We need a reshape layer which combines the first (batch size) and second
+        # (number of timesteps) dimensions, otherwise the DenseLayer will treat the
+        # number of time steps as a feature dimension
+        l_reshape = lasagne.layers.ReshapeLayer(l_recurrent, (batch_size*length, num_hidden_units))
 
-        l_out = lasagne.layers.DenseLayer(
-            l_forward_2,
-            num_units=output_dim,
-            nonlinearity=None
-            )
+        l_recurrent_out = lasagne.layers.DenseLayer(l_reshape,
+                                                    num_units=output_dim,
+                                                    nonlinearity=None)
 
-        return l_out
+        # l_out = lasagne.layers.ReshapeLayer(l_recurrent_out,
+        #                                     (batch_size, length, output_dim))
+
+
+
+        # l_in = lasagne.layers.InputLayer(shape=shape)
+
+        # l_forward_1 = lasagne.layers.RecurrentLayer(
+        #     l_in, num_hidden_units, grad_clipping=GRAD_CLIP,
+        #     W_in_to_hid=lasagne.init.HeUniform(),
+        #     W_hid_to_hid=lasagne.init.HeUniform(),
+        #     nonlinearity=lasagne.nonlinearities.rectify
+        #     )
+
+        # l_forward_2 = lasagne.layers.RecurrentLayer(
+        #     l_forward_1, num_hidden_units, grad_clipping=GRAD_CLIP,
+        #     W_in_to_hid=lasagne.init.HeUniform(),
+        #     W_hid_to_hid=lasagne.init.HeUniform(),
+        #     nonlinearity=lasagne.nonlinearities.rectify
+        #     )
+
+        # l_reshape = lasagne.layers.ReshapeLayer(
+        #     l_forward_2, (batch_size*length, num_hidden_units)
+        # )
+
+        # l_out = lasagne.layers.DenseLayer(
+        #     l_forward_2,
+        #     num_units=output_dim,
+        #     nonlinearity=None
+        #     )
+
+        return l_recurrent_out
 
 
 def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM):
@@ -134,12 +163,12 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     # this is the cost of the network when fed throught the noisey network
     train_output = lasagne.layers.get_output(network, X_batch)
-    cost = lasagne.objectives.categorical_crossentropy(train_output, y_batch)
+    cost = lasagne.objectives.mse(train_output, y_batch)
     cost = cost.mean()
 
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch, deterministic=True)
-    valid_cost = lasagne.objectives.categorical_crossentropy(valid_output, y_batch)
+    valid_cost = lasagne.objectives.mse(valid_output, y_batch)
     valid_cost = valid_cost.mean()
 
     # test the performance of the netowork without noise
@@ -170,7 +199,8 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     print("Tetrode number: {}, Num outputs: {}".format(tetrode_number,dataset['output_dim']))
 
-    print(dataset['input_shape'])
+    print("Input shape: {}".format(dataset['X_train'].shape))
+    print("Output shape: {}".format(dataset['y_train'].shape))
     
     print("Making the model...")
     network = model(dataset['input_shape'],dataset['output_dim'])
