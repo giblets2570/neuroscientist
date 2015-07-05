@@ -45,7 +45,7 @@ else:
 
 BASENAME = "../R2192/20140110_R2192_track1"
 
-NUM_EPOCHS = 10000
+NUM_EPOCHS = 100000
 
 BATCH_SIZE = 12
 
@@ -109,22 +109,22 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, batch_size
             nonlinearity=lasagne.nonlinearities.rectify
             )
 
-        l_recurrent_back = lasagne.layers.RecurrentLayer(
-            l_in, num_hidden_units, 
-            grad_clipping=GRAD_CLIP,
-            W_in_to_hid=lasagne.init.HeUniform(),
-            W_hid_to_hid=lasagne.init.HeUniform(),
-            nonlinearity=lasagne.nonlinearities.rectify, 
-            backwards=True
-            )
-
-        # l_recurrent_2 = lasagne.layers.RecurrentLayer(
-        #     l_recurrent, num_hidden_units, 
+        # l_recurrent_back = lasagne.layers.RecurrentLayer(
+        #     l_in, num_hidden_units, 
         #     grad_clipping=GRAD_CLIP,
         #     W_in_to_hid=lasagne.init.HeUniform(),
         #     W_hid_to_hid=lasagne.init.HeUniform(),
-        #     nonlinearity=lasagne.nonlinearities.rectify
+        #     nonlinearity=lasagne.nonlinearities.rectify, 
+        #     backwards=True
         #     )
+
+        l_recurrent_2 = lasagne.layers.RecurrentLayer(
+            l_recurrent, num_hidden_units, 
+            grad_clipping=GRAD_CLIP,
+            W_in_to_hid=lasagne.init.HeUniform(),
+            W_hid_to_hid=lasagne.init.HeUniform(),
+            nonlinearity=lasagne.nonlinearities.rectify
+            )
 
         # l_recurrent_back_2 = lasagne.layers.RecurrentLayer(
         #     l_recurrent_back, num_hidden_units, 
@@ -135,21 +135,30 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, batch_size
         #     backwards=True
         #     )
 
-        l_sum = lasagne.layers.ElemwiseSumLayer([l_recurrent, l_recurrent_back])
+        l_recurrent_3 = lasagne.layers.RecurrentLayer(
+            l_recurrent_2, num_hidden_units, 
+            grad_clipping=GRAD_CLIP,
+            W_in_to_hid=lasagne.init.HeUniform(),
+            W_hid_to_hid=lasagne.init.HeUniform(),
+            nonlinearity=lasagne.nonlinearities.rectify
+            )
+        
+
+        # l_sum = lasagne.layers.ElemwiseSumLayer([l_recurrent, l_recurrent_back])
 
         # We need a reshape layer which combines the first (batch size) and second
         # (number of timesteps) dimensions, otherwise the DenseLayer will treat the
         # number of time steps as a feature dimension
-        l_reshape = lasagne.layers.ReshapeLayer(l_sum, (batch_size*length, num_hidden_units))
+        l_reshape = lasagne.layers.ReshapeLayer(l_recurrent_3, (batch_size*length, num_hidden_units))
 
-        l_hidden = lasagne.layers.DenseLayer(
-            l_reshape,
-            num_units=num_hidden_units,
-            nonlinearity=lasagne.nonlinearities.rectify
-            )
+        # l_hidden = lasagne.layers.DenseLayer(
+        #     l_reshape,
+        #     num_units=num_hidden_units,
+        #     nonlinearity=lasagne.nonlinearities.rectify
+        #     )
 
         l_recurrent_out = lasagne.layers.DenseLayer(
-            l_hidden,
+            l_reshape,
             num_units=output_dim,
             nonlinearity=None
             )
