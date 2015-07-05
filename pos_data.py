@@ -9,18 +9,52 @@ def getXY(filename=FILENAME):
 	header, data = readfile(filename,[('ts','>i'),('pos','>8h')])
 	x = [x for x,_,_,_,_,_,_,_ in data['pos']]
 	y = [y for _,y,_,_,_,_,_,_ in data['pos']]
-	return np.asarray(x), np.asarray(y)
+	for n,i in enumerate(x):
+		if i>800:
+			x[n] = 640
+	for n,i in enumerate(y):
+		if i>800:
+			y[n] = 500
+
+	x = np.asarray(x,dtype=np.float16)
+	y = np.asarray(y,dtype=np.float16)
+
+	xmin = np.amin(x)
+	xmax = np.amax(x)
+	ymin = np.amin(y)
+	ymax = np.amax(y)
+
+	# print("X min",xmin)
+	# print("X max",xmax)
+	# print("Y min",ymin)
+	# print("Y max",ymax)
+
+	diffx = xmax - xmin
+	diffy = ymax - ymin
+
+	scale = np.amax([diffx,diffy])
+
+	# print("Scale ", scale)
+
+	for n,i in enumerate(range(len(x))):
+		x[i] = x[i] - xmin
+		x[i] = x[i]* (1.0/scale)
+
+
+	for n,i in enumerate(range(len(y))):
+		y[i] = y[i] - ymin
+		y[i] = y[i]*1.0/scale
+
+	return x, y
 
 if __name__=="__main__":
-	header, data = readfile(filename,[('ts','>i'),('pos','>8h')])
-	print(header)
-	x = [x for x,_,_,_,_,_,_,_ in data['pos']]
-	y = [y for _,y,_,_,_,_,_,_ in data['pos']]
+	x, y = getXY()
 
-	print(data['pos'][1000:1030])
+
+	# print(data['pos'][1000:1030])
 	# plt.plot(data['pos'])
 	# plt.show()
-	# plt.scatter(x, y)
-	# plt.show()
-	with open('pos.txt','w') as f:
-		f.write(str(x) + " " + str(y))
+	plt.scatter(x, y)
+	plt.show()
+	# with open('pos.txt','w') as f:
+	# 	f.write(str(x) + " " + str(y))

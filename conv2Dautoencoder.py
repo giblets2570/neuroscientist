@@ -54,7 +54,7 @@ LOG_EXPERIMENT = False
 
 TETRODE_NUMBER = 11
 
-CONV = False
+CONV = True
 
 class DimshuffleLayer(lasagne.layers.Layer):
     def __init__(self, input_layer, pattern):
@@ -75,9 +75,9 @@ def load_data(tetrode_number=TETRODE_NUMBER):
     X_train, X_valid, X_test, y_train_labels, y_valid_labels, y_test_labels = formatData(tetrode_number,BASENAME,CONV)
     print("Done!")
 
-    # X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1])
-    # X_valid = X_valid.reshape(X_valid.shape[0],1,X_valid.shape[1])
-    # X_test = X_test.reshape(X_test.shape[0],1,X_test.shape[1])
+    X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1],X_train.shape[2])
+    X_valid = X_valid.reshape(X_valid.shape[0],1,X_valid.shape[1],X_valid.shape[2])
+    X_test = X_test.reshape(X_test.shape[0],1,X_test.shape[1],X_test.shape[2])
 
 
     y_train = X_train
@@ -115,7 +115,7 @@ def load_data(tetrode_number=TETRODE_NUMBER):
     )
 
 
-def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code_units, batch_size=BATCH_SIZE):
+def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code_units, filter_size, batch_size=BATCH_SIZE):
         """
             Create a symbolic representation of a neural network with `intput_dim`
             input nodes, `output_dim` output nodes and `num_hidden_units` per hidden
@@ -127,6 +127,10 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
         shape = tuple([None]+list(input_shape[1:]))
         print(shape)
         l_in = lasagne.layers.InputLayer(shape=shape)
+
+        shaped_units = 32 * (4+filter_size[0]-1) * (50+filter_size[1]-1) / 4,
+        print(shaped_units)
+        shaped_units = shaped_units[0]
 
         l_conv2D_1 = lasagne.layers.Conv2DLayer(
             l_in, 
@@ -145,7 +149,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
 
         l_hidden_1 = lasagne.layers.DenseLayer(
             l_reshape_1,
-            num_units=num_hidden_units,
+            num_units= num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
@@ -161,9 +165,16 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_reshape_2 = lasagne.layers.ReshapeLayer(
+        l_hidden_3 = lasagne.layers.DenseLayer(
             l_hidden_2,
-            shape=(([0], -1))
+            num_units=shaped_units,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
+
+        l_reshape_2 = lasagne.layers.ReshapeLayer(
+
+            l_hidden_3,
+            shape=(([0],32,(4+filter_size[0]-1)/2,(50+filter_size[1]-1)/2))
             )
 
         l_deconv2D_1 = lasagne.layers.Conv2DLayer(
@@ -178,7 +189,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
 
         l_out = lasagne.layers.ReshapeLayer(
             l_deconv2D_1,
-            num_units=output_dim,
+            shape=(([0], -1)),
             nonlinearity=None,
             )
 
@@ -255,7 +266,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     print(dataset['output_dim'])
     
     print("Making the model...")
-    network = model(dataset['input_shape'],dataset['output_dim'],num_hidden_units,num_hidden_units_2,num_code_units)
+    network = model(dataset['input_shape'],dataset['output_dim'],num_hidden_units,num_hidden_units_2,num_code_units,(4,1))
     print("Done!")
 
     print("Setting up the training functions...")

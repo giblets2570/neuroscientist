@@ -127,7 +127,9 @@ def firstRecurrentData(tetrodeNumber=11,basename=BASENAME):
 	print()
 
 	x, y = getXY(basename+".pos")
-	
+	print(x.shape)
+	# downData = linearConv(x.shape[0],downData)
+
 	recData = []
 
 	for i in xrange(len(downData)):
@@ -198,14 +200,25 @@ def gaussConv(outDim,data):
 	return np.asarray(result)
 
 
-def formatData(tetrodeNumber=11,basename=BASENAME):
+def formatData(tetrodeNumber=11,basename=BASENAME,sequenceLength=500):
 	recData = firstRecurrentData(tetrodeNumber,basename)
-	k = len(recData)
-	n = int(k*0.8)
-	m = int(k*0.9)
+	data = getData(tetrodeNumber)
 
-	X = [recData[i]['activity'] for i in range(k)]
-	y = [[recData[i]['x'],recData[i]['y']] for i in range(k)]
+	downData = downsampleData(data)
+
+
+
+	k = len(recData)
+	xdim = recData[0]['activity'].shape[0]
+	ydim = 2
+	
+	max_num_sequences = int(k/sequenceLength)
+	
+	X = np.asarray([recData[i]['activity'] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,xdim))
+	y = np.asarray([[recData[i]['x'],recData[i]['y']] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,ydim))
+
+	n = int(len(X)*0.8)
+	m = int(len(X)*0.9)
 
 	trX = np.array(X[:n],dtype=np.float16)
 	tvX = np.array(X[n:m],dtype=np.float16)
@@ -222,6 +235,8 @@ if __name__=="__main__":
 	out = convolvedData()	
 
 	print(out.shape)
+	# out = formatData()
+
 	# np.save('convolved_data.npy', out)
 
 	# data = np.random.rand(30,2)
