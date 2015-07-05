@@ -128,38 +128,56 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
         print(shape)
         l_in = lasagne.layers.InputLayer(shape=shape)
 
-        l_hidden_1 = lasagne.layers.DenseLayer(
-            l_in,
-            num_units=num_hidden_units,
-            nonlinearity=lasagne.nonlinearities.rectify,
+        l_conv2D_1 = lasagne.layers.Conv2DLayer(
+            l_in, 
+            num_filters=32,
+            filter_size=filter_size, 
+            stride=(1, 1), 
+            border_mode="valid", 
+            untie_biases=False, 
+            nonlinearity=None,
             )
 
-        l_hidden_2 = lasagne.layers.DenseLayer(
-            l_hidden_1,
-            num_units=num_hidden_units_2,
+        l_reshape_1 = lasagne.layers.ReshapeLayer(
+            l_in,
+            shape=(([0], -1))
+            )
+
+        l_hidden_1 = lasagne.layers.DenseLayer(
+            l_reshape_1,
+            num_units=num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
         l_code_layer = lasagne.layers.DenseLayer(
-            l_hidden_2,
+            l_hidden_1,
             num_units=num_code_units,
-            nonlinearity=lasagne.nonlinearities.sigmoid,
-            )
-
-        l_hidden_3 = lasagne.layers.DenseLayer(
-            l_code_layer,
-            num_units=num_hidden_units_2,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_hidden_4 = lasagne.layers.DenseLayer(
-            l_hidden_3,
+        l_hidden_2 = lasagne.layers.DenseLayer(
+            l_code_layer,
             num_units=num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_out = lasagne.layers.DenseLayer(
-            l_hidden_4,
+        l_reshape_2 = lasagne.layers.ReshapeLayer(
+            l_hidden_2,
+            shape=(([0], -1))
+            )
+
+        l_deconv2D_1 = lasagne.layers.Conv2DLayer(
+            l_reshape_2, 
+            num_filters=1,
+            filter_size=filter_size, 
+            stride=(1, 1), 
+            border_mode="valid", 
+            untie_biases=False, 
+            nonlinearity=None,
+            )
+
+        l_out = lasagne.layers.ReshapeLayer(
+            l_deconv2D_1,
             num_units=output_dim,
             nonlinearity=None,
             )
@@ -198,13 +216,13 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     cost = cost.mean() + beta * L
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch)
-    valid_cost = lasagne.objectives.mse(valid_output, y_batch) 
+    valid_cost = lasagne.objectives.binary_crossentropy(valid_output, y_batch) 
     valid_cost = valid_cost.mean() 
 
     # test the performance of the netowork without noise
     pred = lasagne.layers.get_output(network, X_batch, deterministic=True)
     # pred = T.argmax(test, axis=1)
-    accuracy = 1 - T.mean(lasagne.objectives.mse(pred, y_batch), dtype=theano.config.floatX)
+    accuracy = 1 - T.mean(lasagne.objectives.binary_crossentropy(pred, y_batch), dtype=theano.config.floatX)
 
     all_params = lasagne.layers.get_all_params(network)
     updates = lasagne.updates.nesterov_momentum(cost, all_params, learning_rate, momentum)
