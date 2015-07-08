@@ -106,7 +106,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, batch_size
             grad_clipping=GRAD_CLIP,
             W_in_to_hid=lasagne.init.HeUniform(),
             W_hid_to_hid=lasagne.init.HeUniform(),
-            nonlinearity=lasagne.nonlinearities.rectify
+            nonlinearity=lasagne.nonlinearities.tanh
             )
 
         # l_recurrent_back = lasagne.layers.RecurrentLayer(
@@ -114,7 +114,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, batch_size
         #     grad_clipping=GRAD_CLIP,
         #     W_in_to_hid=lasagne.init.HeUniform(),
         #     W_hid_to_hid=lasagne.init.HeUniform(),
-        #     nonlinearity=lasagne.nonlinearities.rectify, 
+        #     nonlinearity=lasagne.nonlinearities.tanh, 
         #     backwards=True
         #     )
 
@@ -123,7 +123,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, batch_size
             grad_clipping=GRAD_CLIP,
             W_in_to_hid=lasagne.init.HeUniform(),
             W_hid_to_hid=lasagne.init.HeUniform(),
-            nonlinearity=lasagne.nonlinearities.rectify
+            nonlinearity=lasagne.nonlinearities.tanh
             )
 
         # l_recurrent_back_2 = lasagne.layers.RecurrentLayer(
@@ -131,7 +131,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, batch_size
         #     grad_clipping=GRAD_CLIP,
         #     W_in_to_hid=lasagne.init.HeUniform(),
         #     W_hid_to_hid=lasagne.init.HeUniform(),
-        #     nonlinearity=lasagne.nonlinearities.rectify, 
+        #     nonlinearity=lasagne.nonlinearities.tanh, 
         #     backwards=True
         #     )
 
@@ -140,7 +140,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, batch_size
             grad_clipping=GRAD_CLIP,
             W_in_to_hid=lasagne.init.HeUniform(),
             W_hid_to_hid=lasagne.init.HeUniform(),
-            nonlinearity=lasagne.nonlinearities.rectify
+            nonlinearity=lasagne.nonlinearities.tanh
             )
         
 
@@ -274,7 +274,7 @@ def main(tetrode_number=TETRODE_NUMBER):
     if(LOG_EXPERIMENT):
         print("Logging the experiment details...")
         log = dict(
-            NET_TYPE = "Recuurent network 2 layers, {} units 1 hidden".format(NUM_HIDDEN_UNITS),
+            NET_TYPE = "Recuurent network 3 layers, {} units ".format(NUM_HIDDEN_UNITS),
             TETRODE_NUMBER = tetrode_number,
             BASENAME = BASENAME,
             NUM_EPOCHS = epochsDone,

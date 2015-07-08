@@ -128,14 +128,14 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
         print(shape)
         l_in = lasagne.layers.InputLayer(shape=shape)
 
-        l_hidden_1 = lasagne.layers.DenseLayer(
-            l_in,
-            num_units=num_hidden_units,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_1 = lasagne.layers.DenseLayer(
+        #     l_in,
+        #     num_units=num_hidden_units,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
         l_hidden_2 = lasagne.layers.DenseLayer(
-            l_hidden_1,
+            l_in,
             num_units=num_hidden_units_2,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
@@ -143,7 +143,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
         l_code_layer = lasagne.layers.DenseLayer(
             l_hidden_2,
             num_units=num_code_units,
-            nonlinearity=lasagne.nonlinearities.sigmoid,
+            nonlinearity=lasagne.nonlinearities.softmax,
             )
 
         l_hidden_3 = lasagne.layers.DenseLayer(
@@ -152,14 +152,14 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_hidden_4 = lasagne.layers.DenseLayer(
-            l_hidden_3,
-            num_units=num_hidden_units,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_4 = lasagne.layers.DenseLayer(
+        #     l_hidden_3,
+        #     num_units=num_hidden_units,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
         l_out = lasagne.layers.DenseLayer(
-            l_hidden_4,
+            l_hidden_3,
             num_units=output_dim,
             nonlinearity=None,
             )
@@ -186,10 +186,14 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     # code output 
     code_output = lasagne.layers.get_output(code_layer, X_batch, deterministic=True)
-    rho_hat = T.mean(code_output,axis=1)
-    L = T.sum(sparsity * T.log(sparsity/rho_hat) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat)))
-    
 
+    l = T.sub(1,code_output)
+    ll = T.mul(code_output,l)
+    L = T.mul(4,ll)
+    L = L.mean()
+
+    rho_hat = T.mean(code_output,axis=1)
+    # L = T.sum(sparsity * T.log(sparsity/rho_hat) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat)))
 
     # reg = 0.0001*lasagne.regularization.l2(network)
     # this is the cost of the network when fed throught the noisey network
@@ -214,13 +218,15 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     predict = theano.function(inputs=[X_batch], outputs=pred, allow_input_downcast=True)
     accuracy = theano.function(inputs=[X_batch,y_batch], outputs=accuracy, allow_input_downcast=True)
     code = theano.function(inputs=[X_batch], outputs=code_output, allow_input_downcast=True)
+    L_penalty = theano.function(inputs=[X_batch], outputs=L, allow_input_downcast=True)
 
     return dict(
         train=train,
         valid=valid,
         predict=predict,
         accuracy=accuracy,
-        code=code
+        code=code,
+        L_penalty=L_penalty
     )
 
 def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=200,num_code_units=50):
@@ -267,7 +273,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
             meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
             accuracy = training['accuracy'](dataset['X_test'],dataset['y_test'])
 
-            print("Epoch: {}, Accuracy: {}, Training cost / validation cost: {}".format(i+1,accuracy,meanTrainCost/meanValidCost))
+            print("Epoch: {}, Accuracy: {}, Training cost: {}, validation cost: {}".format(i+1,accuracy,meanTrainCost,meanValidCost))
 
             if(np.isnan(meanTrainCost/meanValidCost)):
                 print("Nan value")
@@ -283,7 +289,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                     np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
                     format_codes = []
                     for code in codes:
-                        # if(j==0):
+                        
                         format_codes.append(np.argmax(code))
 
                     prev = sorted(format_codes)[0]
@@ -321,7 +327,9 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                     
                     code = training['code'](testing)
 
-                    # print(code)
+                    if(j == 0):
+                        L_penalty = training['L_penalty'](testing)
+                        print ("L_penalty = {}".format(L_penalty))
                     
                     # plotting the figure
 
@@ -373,7 +381,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
                     # plt.plot(var2)
                     # fig.tight_layout()
-                    plt.savefig('./logs/fig{}_{}.png'.format(i,j), bbox_inches='tight')
+                    plt.savefig('../logs/fig{}_{}.png'.format(i,j), bbox_inches='tight')
                     plt.close()
                     
                     ran += 1

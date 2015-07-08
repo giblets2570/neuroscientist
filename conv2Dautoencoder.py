@@ -128,9 +128,13 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
         print(shape)
         l_in = lasagne.layers.InputLayer(shape=shape)
 
+
         shaped_units = 32 * (4+filter_size[0]-1) * (50+filter_size[1]-1) / 4,
         print(shaped_units)
-        shaped_units = shaped_units[0]
+        # shaped_units = shaped_units[0]
+        shaped_units = 2400
+
+        print(shape)
 
         l_conv2D_1 = lasagne.layers.Conv2DLayer(
             l_in, 

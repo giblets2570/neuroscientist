@@ -38,12 +38,21 @@ def getXY(filename=FILENAME):
 
 	for n,i in enumerate(range(len(x))):
 		x[i] = x[i] - xmin
-		x[i] = x[i]* (1.0/scale)
+		x[i] = x[i]*(1.0/scale)
 
 
 	for n,i in enumerate(range(len(y))):
 		y[i] = y[i] - ymin
 		y[i] = y[i]*1.0/scale
+
+	for i in range(len(x)):
+		x[i] = x[i]*2.0
+		x[i] = x[i] - 1
+
+
+	for i in range(len(y)):
+		y[i] = y[i]*2.0
+		y[i] = y[i] - 1
 
 	return x, y
 

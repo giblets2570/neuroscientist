@@ -21,7 +21,6 @@ def getTotalInputDimension(tetrodeNumber=11,basename=BASENAME):
 	for i in range(tetrodeNumber-1,tetrodeNumber):
 		# get the tetrode number
 		cutfilename = basename + ".clu." + str(i+1)
-
 		# get the number of output dimensions for this tetrode
 		for j in open(cutfilename,'r'):
 			total += int(re.sub("[^0-9]", "", j))
@@ -37,21 +36,17 @@ def getCutTimes(tetfilename,cutfilename):
 	header, data = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
 	print(header)
 	labels = []
-
 	for i,j in enumerate(open(cutfilename,'r')):
 		if(i == 0):
 			continue
 		labels.append((int(re.sub("[^0-9]", "", j))-1))
-
 	for i,j in zip(range(0,len(data),4),labels):
 		if i+3 > len(data):
 			break
 		entry = {}
 		entry['time'] = data[i][0] / 96000.0
 		entry['label'] = j
-
 		timesData.append(entry)
-
 	return timesData
 
 def getData(tetrodeNumber=11,basename=BASENAME):
@@ -68,13 +63,8 @@ def getData(tetrodeNumber=11,basename=BASENAME):
 			else:
 				data[j['time']] = np.zeros(inputDimension)
 				data[j['time']][currentBase + j['label']] = 1
-
-			# if n==10:
-			# 	break
 		currentBase += dimension
-
 	return data
-
 
 def downsampleData(data, freq=50, timeS=1394):
 	"""
@@ -96,17 +86,6 @@ def downsampleData(data, freq=50, timeS=1394):
 		output[index] += data[key]
 	return np.asarray(output)
 
-def gaussian(x, mu, sig):
-
-	if(abs(x-mu)>sig):
-		return 0.0
-	output = np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
-	if output >= 0:
-		return output
-	return 0.0
-    # return np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
-
-
 def gaussianMatrix(outDim,inDim):
 	out = []
 	for i in range(inDim):
@@ -115,25 +94,23 @@ def gaussianMatrix(outDim,inDim):
 		print('{} done!'.format(i))
 	return np.asarray(out).T
 
-
 def firstRecurrentData(tetrodeNumber=11,basename=BASENAME):
 	"""
 		Basically convolves all the data
 	"""
 	data = getData(tetrodeNumber)
-
-	downData = downsampleData(data)
-
-	print()
+	freq = 1000.0
+	downData = downsampleData(data,freq=freq)
 
 	x, y = getXY(basename+".pos")
 	print(x.shape)
-	# downData = linearConv(x.shape[0],downData)
+
+	downData = gaussConv(x.shape[0],downData)
 
 	recData = []
 
 	for i in xrange(len(downData)):
-		time = i/50.0
+		time = i/freq
 		obj = dict(
 			time=time,
 			activity=downData[i],
@@ -143,25 +120,6 @@ def firstRecurrentData(tetrodeNumber=11,basename=BASENAME):
 		recData.append(obj)
 	return recData
 
-def convolvedData(tetrodeNumber=11,freq=1000,basename=BASENAME):
-	data = getData(tetrodeNumber)
-
-	downData = downsampleData(data,freq)
-
-	x, y = getXY(basename+".pos")
-
-	inDim = len(downData)
-
-	outDim = len(x)
-
-	# g = gaussianMatrix(outDim,inDim)
-	# out = np.dot(g,downData)
-
-	l = linearConv(outDim,downData)
-
-	return l
-
-
 def linearConv(outDim,data):
 	inDim = len(data)
 	seqLen = len(data[0])
@@ -170,7 +128,7 @@ def linearConv(outDim,data):
 	for i in range(inDim)[::stepsize]:
 		start = i - stepsize
 		r = np.zeros(seqLen)
-		for j in range(start,start+2*stepsize+1):
+		for j in range(start,start+2*stepsize+2):
 			if j < 0 or j >= inDim:
 				continue
 			if j <= i:
@@ -179,34 +137,27 @@ def linearConv(outDim,data):
 				r += abs(i-j)/stepsize*data[i]
 		result.append(r)
 	return np.asarray(result)
-
 
 def gaussConv(outDim,data):
 	inDim = len(data)
 	seqLen = len(data[0])
 	stepsize = int(inDim/outDim)
 	result = []
+	conv = [gaussian(i,stepsize,stepsize/2) for i in range(2*stepsize+1)]
+	# print(conv)
 	for i in range(inDim)[::stepsize]:
 		start = i - stepsize
 		r = np.zeros(seqLen)
-		for j in range(start,start+2*stepsize+1):
+		for n,j in enumerate(range(start,start+2*stepsize+1)):
 			if j < 0 or j >= inDim:
 				continue
-			if j <= i:
-				r += abs(j-i)/stepsize*data[i]
-			else:
-				r += abs(i-j)/stepsize*data[i]
+			r += conv[n]*data[j]
 		result.append(r)
 	return np.asarray(result)
 
 
 def formatData(tetrodeNumber=11,basename=BASENAME,sequenceLength=500):
 	recData = firstRecurrentData(tetrodeNumber,basename)
-	data = getData(tetrodeNumber)
-
-	downData = downsampleData(data)
-
-
 
 	k = len(recData)
 	xdim = recData[0]['activity'].shape[0]
@@ -230,12 +181,29 @@ def formatData(tetrodeNumber=11,basename=BASENAME,sequenceLength=500):
 
 	return trX, tvX, teX, trY, tvY, teY
 
+def gaussian(x, mu, sig):
+	output = np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
+	if output >= 0:
+		return output
+	return 0.0
+
 if __name__=="__main__":
 	
-	out = convolvedData()	
+	# out = convolvedData()	
 
-	print(out.shape)
-	# out = formatData()
+	# print(out.shape)
+
+	# # r = [gaussian(i,35,17) for i in range(71)]
+
+	# # print r
+
+	# # plt.plot(r)
+
+	# # plt.show()
+
+	trX, tvX, teX, trY, tvY, teY = formatData()
+
+	print(trX[0][0])
 
 	# np.save('convolved_data.npy', out)
 
