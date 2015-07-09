@@ -50,11 +50,11 @@ MOMENTUM = 0.9
 EARLY_STOPPING = False
 STOPPING_RANGE = 10
 
-LOG_EXPERIMENT = False
+LOG_EXPERIMENT = True
 
 TETRODE_NUMBER = 11
 
-CONV = False
+CONV = True
 
 class DimshuffleLayer(lasagne.layers.Layer):
     def __init__(self, input_layer, pattern):
@@ -75,9 +75,9 @@ def load_data(tetrode_number=TETRODE_NUMBER):
     X_train, X_valid, X_test, y_train_labels, y_valid_labels, y_test_labels = formatData(tetrode_number,BASENAME,CONV)
     print("Done!")
 
-    # X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1])
-    # X_valid = X_valid.reshape(X_valid.shape[0],1,X_valid.shape[1])
-    # X_test = X_test.reshape(X_test.shape[0],1,X_test.shape[1])
+    X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1],X_train.shape[2])
+    X_valid = X_valid.reshape(X_valid.shape[0],1,X_valid.shape[1],X_valid.shape[2])
+    X_test = X_test.reshape(X_test.shape[0],1,X_test.shape[1],X_test.shape[2])
 
 
     y_train = X_train
@@ -115,7 +115,7 @@ def load_data(tetrode_number=TETRODE_NUMBER):
     )
 
 
-def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code_units, batch_size=BATCH_SIZE):
+def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code_units, filter_size, batch_size=BATCH_SIZE):
         """
             Create a symbolic representation of a neural network with `intput_dim`
             input nodes, `output_dim` output nodes and `num_hidden_units` per hidden
@@ -128,9 +128,17 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
         print(shape)
         l_in = lasagne.layers.InputLayer(shape=shape)
 
+        print("Input shape: ",lasagne.layers.get_output_shape(l_in))
+
+        # print(shaped_units)
+        # shaped_units = shaped_units[0]
+        shaped_units = 2800
+
+        # print(shape)
+
         l_conv2D_1 = lasagne.layers.Conv2DLayer(
             l_in, 
-            num_filters=32,
+            num_filters=8,
             filter_size=filter_size, 
             stride=(1, 1), 
             border_mode="valid", 
@@ -138,16 +146,22 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
             nonlinearity=None,
             )
 
+        print("Conv 2D shape: ",lasagne.layers.get_output_shape(l_conv2D_1))
+
         l_reshape_1 = lasagne.layers.ReshapeLayer(
-            l_in,
+            l_conv2D_1,
             shape=(([0], -1))
             )
 
+        print("Reshape 1 shape: ", lasagne.layers.get_output_shape(l_reshape_1))
+
         l_hidden_1 = lasagne.layers.DenseLayer(
             l_reshape_1,
-            num_units=num_hidden_units,
+            num_units= num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
+
+        print("Hidden 1 shape: ", lasagne.layers.get_output_shape(l_hidden_1))
 
         l_code_layer = lasagne.layers.DenseLayer(
             l_hidden_1,
@@ -155,18 +169,32 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
+        print("Code layer shape: ",lasagne.layers.get_output_shape(l_code_layer))
+
         l_hidden_2 = lasagne.layers.DenseLayer(
             l_code_layer,
             num_units=num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_reshape_2 = lasagne.layers.ReshapeLayer(
+        print("Hidden 2 shape: ",lasagne.layers.get_output_shape(l_hidden_2))
+
+        l_hidden_3 = lasagne.layers.DenseLayer(
             l_hidden_2,
-            shape=(([0], -1))
+            num_units=shaped_units,
+            nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_deconv2D_1 = lasagne.layers.Conv2DLayer(
+        print("Hidden 3 shape: ",lasagne.layers.get_output_shape(l_hidden_3))
+
+        l_reshape_2 = lasagne.layers.ReshapeLayer(
+            l_hidden_3,
+            shape=(([0],8,7,50))
+            )
+
+        print("Reshape 2 shape: ",lasagne.layers.get_output_shape(l_reshape_2))
+
+        l_out = lasagne.layers.Conv2DLayer(
             l_reshape_2, 
             num_filters=1,
             filter_size=filter_size, 
@@ -176,11 +204,9 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
             nonlinearity=None,
             )
 
-        l_out = lasagne.layers.ReshapeLayer(
-            l_deconv2D_1,
-            num_units=output_dim,
-            nonlinearity=None,
-            )
+        # print("Deconv shape: ",lasagne.layers.get_output_shape(l_deconv2D_1))
+
+        print("Output shape: ",lasagne.layers.get_output_shape(l_out))
 
         return l_out
 
@@ -193,8 +219,8 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     """
 
     # symbolic variables 
-    X_batch = T.matrix()
-    y_batch = T.matrix()
+    X_batch = T.tensor4()
+    y_batch = T.tensor4()
 
     layers = lasagne.layers.get_all_layers(network)
     num_layers = len(layers)
@@ -216,13 +242,13 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     cost = cost.mean() + beta * L
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch)
-    valid_cost = lasagne.objectives.binary_crossentropy(valid_output, y_batch) 
+    valid_cost = lasagne.objectives.mse(valid_output, y_batch) 
     valid_cost = valid_cost.mean() 
 
     # test the performance of the netowork without noise
     pred = lasagne.layers.get_output(network, X_batch, deterministic=True)
     # pred = T.argmax(test, axis=1)
-    accuracy = 1 - T.mean(lasagne.objectives.binary_crossentropy(pred, y_batch), dtype=theano.config.floatX)
+    accuracy = 1 - T.mean(lasagne.objectives.mse(pred, y_batch), dtype=theano.config.floatX)
 
     all_params = lasagne.layers.get_all_params(network)
     updates = lasagne.updates.nesterov_momentum(cost, all_params, learning_rate, momentum)
@@ -255,7 +281,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     print(dataset['output_dim'])
     
     print("Making the model...")
-    network = model(dataset['input_shape'],dataset['output_dim'],num_hidden_units,num_hidden_units_2,num_code_units)
+    network = model(dataset['input_shape'],dataset['output_dim'],num_hidden_units,num_hidden_units_2,num_code_units,(4,1))
     print("Done!")
 
     print("Setting up the training functions...")
@@ -267,6 +293,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
     print("Begining to train the network...")
     epochsDone = 0
+    autoencoderSameLabels = []
     try:
         for i in range(NUM_EPOCHS):
             costs = []
@@ -322,79 +349,80 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                     acs.append(label_acc)
                     print("Label: {}, Num examples: {}, Same label with autoencoder: {} ".format(j,dataset['labeled_test'][j].shape[0],label_acc))
                 acs = np.asarray(acs)
+                autoencoderSameLabels.append(np.mean(acs))
                 print("Average agreement: {}".format(np.mean(acs)))
 
 
-            if i%50 == 0:
-                ran = randint(0,dataset['num_examples_test']-20)
-                for j in range(10):
-                    testing = [dataset['X_test'][ran]]
-                    # print(testing[0].shape)
-                    output = dataset['y_test'][ran]
-                    # print(np.arange(dataset['output_dim']))
-                    # print(output)
-                    prediction = training['predict'](testing)[0]
-                    # print(prediction)
-                    # print(testing[0][0])
+            # if i%50 == 0:
+            #     ran = randint(0,dataset['num_examples_test']-20)
+            #     for j in range(10):
+            #         testing = [dataset['X_test'][ran]]
+            #         # print(testing[0].shape)
+            #         output = dataset['y_test'][ran]
+            #         # print(np.arange(dataset['output_dim']))
+            #         # print(output)
+            #         prediction = training['predict'](testing)[0]
+            #         # print(prediction)
+            #         # print(testing[0][0])
                     
-                    code = training['code'](testing)
+            #         code = training['code'](testing)
 
-                    # print(code)
+            #         # print(code)
                     
-                    # plotting the figure
+            #         # plotting the figure
 
-                    fig = plt.figure(1)
-                    sub1 = fig.add_subplot(311)
-                    sub2 = fig.add_subplot(312)
-                    sub3 = fig.add_subplot(313)
+            #         fig = plt.figure(1)
+            #         sub1 = fig.add_subplot(311)
+            #         sub2 = fig.add_subplot(312)
+            #         sub3 = fig.add_subplot(313)
 
-                    # add titles
+            #         # add titles
 
-                    sub1.set_title('Desired output')
-                    sub2.set_title('Net output')
-                    sub3.set_title('Code layer output')
+            #         sub1.set_title('Desired output')
+            #         sub2.set_title('Net output')
+            #         sub3.set_title('Code layer output')
 
-                    # adding x labels
+            #         # adding x labels
 
-                    sub1.set_xlabel('Time')
-                    sub2.set_xlabel('Time')
-                    sub3.set_xlabel('Code label')
+            #         sub1.set_xlabel('Time')
+            #         sub2.set_xlabel('Time')
+            #         sub3.set_xlabel('Code label')
 
-                    # adding y labels
+            #         # adding y labels
 
-                    sub1.set_ylabel('Amplitude')
-                    sub2.set_ylabel('Amplitude')
-                    sub3.set_ylabel('Probability')
+            #         sub1.set_ylabel('Amplitude')
+            #         sub2.set_ylabel('Amplitude')
+            #         sub3.set_ylabel('Probability')
 
-                    # Plotting data
+            #         # Plotting data
 
-                    # print(testing[0][0])
-                    # inp = []
-                    # for z in range(4):
-                    #     inp += list(testing[0][0][z])
+            #         # print(testing[0][0])
+            #         # inp = []
+            #         # for z in range(4):
+            #         #     inp += list(testing[0][0][z])
 
 
-                    sub1.plot(output)
-                    # sub1.bar(x_axis, output, width=1)
-                    sub1.grid(True)
+            #         sub1.plot(output)
+            #         # sub1.bar(x_axis, output, width=1)
+            #         sub1.grid(True)
 
-                    sub2.plot(prediction)
-                    sub2.grid(True)
+            #         sub2.plot(prediction)
+            #         sub2.grid(True)
 
-                    x_axis = list(np.arange(len(code[0])))
+            #         x_axis = list(np.arange(len(code[0])))
 
-                    # sub3.plot(code[0])
-                    sub3.bar(x_axis, code[0], width=1)
-                    # plt.show()
+            #         # sub3.plot(code[0])
+            #         sub3.bar(x_axis, code[0], width=1)
+            #         # plt.show()
 
-                    fig.tight_layout()
+            #         fig.tight_layout()
 
-                    # plt.plot(var2)
-                    # fig.tight_layout()
-                    plt.savefig('./logs/fig{}_{}.png'.format(i,j), bbox_inches='tight')
-                    plt.close()
+            #         # plt.plot(var2)
+            #         # fig.tight_layout()
+            #         plt.savefig('./logs/fig{}_{}.png'.format(i,j), bbox_inches='tight')
+            #         plt.close()
                     
-                    ran += 1
+            #         ran += 1
                 # break
 
 
@@ -430,13 +458,14 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
             TRAIN_VALIDATION = trainvalidation,
             LEARNING_RATE = LEARNING_RATE,
             MOMENTUM = MOMENTUM,
+            SAME_LABEL_AVERAGES = autoencoderSameLabels,
             ACCURACY = accuracies,
             NETWORK_LAYERS = [str(type(layer)) for layer in lasagne.layers.get_all_layers(network)],
             OUTPUT_DIM = dataset['output_dim'],
             # NETWORK_PARAMS = lasagne.layers.get_all_params_values(network)
         )
         now = datetime.datetime.now()
-        filename = "experiments/auto/{}_{}_{}_NUMLAYERS_{}_OUTPUTDIM_{}".format(now,NUM_EPOCHS,NUM_HIDDEN_UNITS,len(log['NETWORK_LAYERS']),log['OUTPUT_DIM'])
+        filename = "experiments/convAuto/{}_{}_{}_NUMLAYERS_{}_OUTPUTDIM_{}".format(now,NUM_EPOCHS,NUM_HIDDEN_UNITS,len(log['NETWORK_LAYERS']),log['OUTPUT_DIM'])
         filename = re.sub("[^A-Za-z0-9_/ ,-:]", "", filename)
         with open(filename,"w") as outfile:
             outfile.write(str(log))

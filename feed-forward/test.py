@@ -45,7 +45,7 @@ def gen_data(length=LENGTH, n_batch=N_BATCH, delay=DELAY):
 # Generate a "validation" sequence whose cost we will periodically compute
 X_val, y_val = gen_data()
 
-print(X_val.shape, y_val.shape)
+print(X_val, y_val.shape)
 
 class DimshuffleLayer(lasagne.layers.Layer):
     def __init__(self, input_layer, pattern):
