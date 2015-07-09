@@ -13,7 +13,7 @@ def formatData(tetrodeNumber,basename,twoD=False):
 
 	def concatanateChannels():
 		header, data = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
-		# print(header)
+		print(header)
 		timesData = []
 		inputData = []
 		for i in range(0,len(data),4):
