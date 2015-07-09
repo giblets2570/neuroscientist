@@ -56,7 +56,7 @@ GRAD_CLIP = 100
 
 LOG_EXPERIMENT = True
 
-TETRODE_NUMBER = 11
+TETRODE_NUMBER = 9
 
 def load_data(tetrode_number):
     """
@@ -118,13 +118,13 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, batch_size
         #     backwards=True
         #     )
 
-        l_recurrent_2 = lasagne.layers.RecurrentLayer(
-            l_recurrent, num_hidden_units, 
-            grad_clipping=GRAD_CLIP,
-            W_in_to_hid=lasagne.init.HeUniform(),
-            W_hid_to_hid=lasagne.init.HeUniform(),
-            nonlinearity=lasagne.nonlinearities.tanh
-            )
+        # l_recurrent_2 = lasagne.layers.RecurrentLayer(
+        #     l_recurrent, num_hidden_units, 
+        #     grad_clipping=GRAD_CLIP,
+        #     W_in_to_hid=lasagne.init.HeUniform(),
+        #     W_hid_to_hid=lasagne.init.HeUniform(),
+        #     nonlinearity=lasagne.nonlinearities.tanh
+        #     )
 
         # l_recurrent_back_2 = lasagne.layers.RecurrentLayer(
         #     l_recurrent_back, num_hidden_units, 
@@ -135,13 +135,13 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, batch_size
         #     backwards=True
         #     )
 
-        l_recurrent_3 = lasagne.layers.RecurrentLayer(
-            l_recurrent_2, num_hidden_units, 
-            grad_clipping=GRAD_CLIP,
-            W_in_to_hid=lasagne.init.HeUniform(),
-            W_hid_to_hid=lasagne.init.HeUniform(),
-            nonlinearity=lasagne.nonlinearities.tanh
-            )
+        # l_recurrent_3 = lasagne.layers.RecurrentLayer(
+        #     l_recurrent_2, num_hidden_units, 
+        #     grad_clipping=GRAD_CLIP,
+        #     W_in_to_hid=lasagne.init.HeUniform(),
+        #     W_hid_to_hid=lasagne.init.HeUniform(),
+        #     nonlinearity=lasagne.nonlinearities.tanh
+        #     )
         
 
         # l_sum = lasagne.layers.ElemwiseSumLayer([l_recurrent, l_recurrent_back])
@@ -149,7 +149,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, batch_size
         # We need a reshape layer which combines the first (batch size) and second
         # (number of timesteps) dimensions, otherwise the DenseLayer will treat the
         # number of time steps as a feature dimension
-        l_reshape = lasagne.layers.ReshapeLayer(l_recurrent_3, (batch_size*length, num_hidden_units))
+        l_reshape = lasagne.layers.ReshapeLayer(l_recurrent, (batch_size*length, num_hidden_units))
 
         # l_hidden = lasagne.layers.DenseLayer(
         #     l_reshape,
