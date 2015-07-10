@@ -49,7 +49,8 @@ NUM_EPOCHS = 100000
 
 BATCH_SIZE = 12
 
-NUM_HIDDEN_UNITS = 100
+NUM_HIDDEN_UNITS = 50
+NUM_RECURRENT_UNITS = 30
 LEARNING_RATE = 0.01
 MOMENTUM = 0.9
 GRAD_CLIP = 100
@@ -84,7 +85,7 @@ def load_data(tetrode_number):
         output_dim=y_train.shape[-1],
     )
 
-def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, batch_size=BATCH_SIZE):
+def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurrent_units=NUM_RECURRENT_UNITS, batch_size=BATCH_SIZE):
         """
             Create a symbolic representation of a neural network with `intput_dim`
             input nodes, `output_dim` output nodes and `num_hidden_units` per hidden
@@ -94,6 +95,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, batch_size
             A theano expression which represents such a network is returned.
         """
         length = input_shape[1]
+        reduced_length = num_hidden_units
 
         shape = tuple([batch_size]+list(input_shape[1:]))
         print("Shape ",shape)
@@ -101,13 +103,32 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, batch_size
         # Construct vanilla RNN
         l_in = lasagne.layers.InputLayer(shape=shape)
 
+
+        print("Input shape: ",lasagne.layers.get_output_shape(l_in))
+
+        l_reshape_1 = lasagne.layers.ReshapeLayer(l_in, (batch_size*length, input_shape[-1]))
+
+        print("Reshape 1 shape: ",lasagne.layers.get_output_shape(l_reshape_1))
+
+        l_hidden_1 = lasagne.layers.DenseLayer(
+            l_reshape_1,
+            num_units=reduced_length,
+            nonlinearity=lasagne.nonlinearities.rectify
+            )
+
+        print("Hidden 1 shape: ",lasagne.layers.get_output_shape(l_hidden_1))
+
+        l_reshape_2 = lasagne.layers.ReshapeLayer(l_hidden_1, (batch_size, length, num_hidden_units))
+
         l_recurrent = lasagne.layers.RecurrentLayer(
-            l_in, num_hidden_units, 
+            l_reshape_2, num_recurrent_units, 
             grad_clipping=GRAD_CLIP,
             W_in_to_hid=lasagne.init.HeUniform(),
             W_hid_to_hid=lasagne.init.HeUniform(),
-            nonlinearity=lasagne.nonlinearities.tanh
+            nonlinearity=lasagne.nonlinearities.sigmoid
             )
+
+        print("Recurrent shape: ",lasagne.layers.get_output_shape(l_recurrent))
 
         # l_recurrent_back = lasagne.layers.RecurrentLayer(
         #     l_in, num_hidden_units, 
@@ -149,22 +170,24 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, batch_size
         # We need a reshape layer which combines the first (batch size) and second
         # (number of timesteps) dimensions, otherwise the DenseLayer will treat the
         # number of time steps as a feature dimension
-        l_reshape = lasagne.layers.ReshapeLayer(l_recurrent, (batch_size*length, num_hidden_units))
 
-        # l_hidden = lasagne.layers.DenseLayer(
-        #     l_reshape,
-        #     num_units=num_hidden_units,
-        #     nonlinearity=lasagne.nonlinearities.rectify
-        #     )
+
+        l_reshape_3 = lasagne.layers.ReshapeLayer(l_recurrent, (batch_size*length, num_recurrent_units))
+
+        print("Reshape shape: ",lasagne.layers.get_output_shape(l_reshape_3))
 
         l_recurrent_out = lasagne.layers.DenseLayer(
-            l_reshape,
+            l_reshape_3,
             num_units=output_dim,
             nonlinearity=None
             )
 
+        print("Recurrent out shape: ",lasagne.layers.get_output_shape(l_recurrent_out))
+
         l_out = lasagne.layers.ReshapeLayer(l_recurrent_out,
                                             (batch_size, length, output_dim))
+
+        print("Output shape: ",lasagne.layers.get_output_shape(l_out))
 
         return l_out
 
@@ -180,6 +203,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     # symbolic variables 
     X_batch = T.tensor3()
     y_batch = T.tensor3()
+    l_rate = T.scalar()
 
     # this is the cost of the network when fed throught the noisey network
     train_output = lasagne.layers.get_output(network, X_batch)
@@ -197,9 +221,9 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     accuracy = T.mean(lasagne.objectives.mse(pred, y_batch), dtype=theano.config.floatX)
 
     all_params = lasagne.layers.get_all_params(network)
-    updates = lasagne.updates.adagrad(cost, all_params, learning_rate)
+    updates = lasagne.updates.adagrad(cost, all_params, l_rate)
     
-    train = theano.function(inputs=[X_batch, y_batch], outputs=cost, updates=updates, allow_input_downcast=True)
+    train = theano.function(inputs=[X_batch, y_batch, l_rate], outputs=cost, updates=updates, allow_input_downcast=True)
     valid = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
     predict = theano.function(inputs=[X_batch], outputs=test, allow_input_downcast=True)
 
@@ -232,29 +256,35 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     accuracies = []
     trainvalidation = []
+    learning_rate = LEARNING_RATE
 
     print("Begining to train the network...")
     epochsDone = 0
     try:
+        meanTrainCost = 1000
         for i in range(NUM_EPOCHS):
             costs = []
             valid_costs = []
 
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
-                cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
+                cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end],learning_rate)
                 costs.append(cost)
+                # if(costs[-1] > 1.02*costs[-2]):
+                #     LEARNING_RATE = 0.8*LEARNING_RATE
                 # print(cost)
             
             for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
-                cost = training['train'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
+                cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
                 valid_costs.append(cost)
 
-
+            if(np.mean(np.asarray(costs,dtype=np.float32)) > 1.02*meanTrainCost):
+                print("Lowering learning rate")
+                learning_rate = 0.8*learning_rate
             meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
             meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
             # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
 
-            print("Epoch: {}, Training cost: {}, Validation Cost: {}".format(i+1,meanTrainCost,meanValidCost))
+            print("Epoch: {}, Training cost: {}, Validation Cost: {}, learning rate: {}".format(i+1,meanTrainCost,meanValidCost,LEARNING_RATE))
 
             if(np.isnan(meanValidCost)):
                 print("Nan value")
