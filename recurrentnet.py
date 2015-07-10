@@ -47,7 +47,7 @@ BASENAME = "../R2192/20140110_R2192_track1"
 
 NUM_EPOCHS = 100000
 
-BATCH_SIZE = 12
+BATCH_SIZE = 90
 
 NUM_HIDDEN_UNITS = 50
 NUM_RECURRENT_UNITS = 30
@@ -277,14 +277,14 @@ def main(tetrode_number=TETRODE_NUMBER):
                 cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
                 valid_costs.append(cost)
 
-            if(np.mean(np.asarray(costs,dtype=np.float32)) > 1.02*meanTrainCost):
+            if(np.mean(np.asarray(costs,dtype=np.float32)) > 1.01*meanTrainCost):
                 print("Lowering learning rate")
                 learning_rate = 0.8*learning_rate
             meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
             meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
             # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
 
-            print("Epoch: {}, Training cost: {}, Validation Cost: {}, learning rate: {}".format(i+1,meanTrainCost,meanValidCost,LEARNING_RATE))
+            print("Epoch: {}, Training cost: {}, Validation Cost: {}, learning rate: {}".format(i+1,meanTrainCost,meanValidCost,learning_rate))
 
             if(np.isnan(meanValidCost)):
                 print("Nan value")

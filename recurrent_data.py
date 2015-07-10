@@ -180,9 +180,29 @@ def formatData(tetrodeNumber=9,basename=BASENAME,sequenceLength=500):
 	
 	# X = np.asarray([recData[i]['activity'] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,xdim))
 	# y = np.asarray([[recData[i]['x'],recData[i]['y']] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,ydim))
-	
 
-	
+	_X = np.asarray([recData[i]['activity'] for i in xrange(k)][:max_num_sequences*sequenceLength])
+	_y = np.asarray([[recData[i]['x'],recData[i]['y']] for i in xrange(k)][:max_num_sequences*sequenceLength])
+
+	X = []
+	i = 0
+	print(_X.shape)
+	while(i + sequenceLength < _X.shape[0]):
+		X.append(_X[i:i+sequenceLength])
+		i+=25
+	X = np.asarray(X)
+	print(X.shape)
+
+	y = []
+	i = 0
+	print(_y.shape)
+	while(i + sequenceLength < _y.shape[0]):
+		y.append(_y[i:i+sequenceLength])
+		i+=25
+	y = np.asarray(y)
+	print(y.shape)
+
+
 	n = int(len(X)*0.8)
 	m = int(len(X)*0.9)
 
@@ -229,6 +249,6 @@ def test():
 
 if __name__=="__main__":
 	
-	test()
+	formatData()
 	
 
