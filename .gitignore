@@ -1,4 +1,4 @@
 *.pyc
 experiments/
 *.png
-logs/
+./logs/*

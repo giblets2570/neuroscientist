@@ -106,15 +106,20 @@ def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_s
         print(filter_size, pool_size, filter_size_2, pool_size_2, num_hidden_units_1, num_hidden_units_2, num_hidden_units_3,num_hidden_units_4,num_hidden_units_5)
         l_in = lasagne.layers.InputLayer(shape=shape)
 
-        l_conv2D_1 = lasagne.layers.Conv2DLayer(
-            l_in, 
-            num_filters=32,
-            filter_size=filter_size, 
-            stride=(1, 1), 
-            border_mode="valid", 
-            untie_biases=False, 
-            nonlinearity=lasagne.nonlinearities.rectify,
+        l_reshape_1 = lasagne.layers.ReshapeLayer(
+            l_in,
+            shape=([0],1,200)
             )
+
+        # l_conv2D_1 = lasagne.layers.Conv2DLayer(
+        #     l_in, 
+        #     num_filters=16,
+        #     filter_size=filter_size, 
+        #     stride=(1, 1), 
+        #     border_mode="valid", 
+        #     untie_biases=False, 
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
         # l_pool2D_1 = lasagne.layers.MaxPool2DLayer(
         #     l_conv2D_1, 
@@ -152,32 +157,32 @@ def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_s
         # #     pool_size=2, 
         # # )
 
-        l_hidden_1 = lasagne.layers.DenseLayer(
-            l_conv2D_1,
-            num_units=num_hidden_units_1,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_1 = lasagne.layers.DenseLayer(
+        #     l_reshape_1,
+        #     num_units=num_hidden_units_1,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
-        l_hidden_2 = lasagne.layers.DenseLayer(
-            l_in,
-            num_units=num_hidden_units_2,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_2 = lasagne.layers.DenseLayer(
+        #     l_hidden_1,
+        #     num_units=num_hidden_units_2,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
-        l_hidden_3 = lasagne.layers.DenseLayer(
-            l_hidden_2,
-            num_units=num_hidden_units_3,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_3 = lasagne.layers.DenseLayer(
+        #     l_hidden_2,
+        #     num_units=num_hidden_units_3,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
-        l_hidden_4 = lasagne.layers.DenseLayer(
-            l_hidden_3,
-            num_units=num_hidden_units_4,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_4 = lasagne.layers.DenseLayer(
+        #     l_hidden_3,
+        #     num_units=num_hidden_units_4,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
         l_hidden_5 = lasagne.layers.DenseLayer(
-            l_hidden_4,
+            l_in,
             num_units=num_hidden_units_5,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
@@ -283,12 +288,12 @@ def main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num
                 ran = randint(0,dataset['num_examples_test']-20)
                 for j in range(10):
                     testing = [dataset['X_test'][ran]]
-                    print(testing[0].shape)
+                    # print(testing[0].shape)
                     output = dataset['y_test'][ran]
-                    print(np.arange(dataset['output_dim']))
-                    print(output)
+                    # print(np.arange(dataset['output_dim']))
+                    # print(output)
                     prediction = training['predict'](testing)[0]
-                    print(prediction)
+                    # print(prediction)
                     # print(testing[0][0])
                     
                     # plotting the figure
@@ -318,7 +323,7 @@ def main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num
 
                     # Plotting data
 
-                    print(testing[0][0])
+                    # print(testing[0][0])
                     inp = []
                     for z in range(4):
                         inp += list(testing[0][0][z])
@@ -341,7 +346,7 @@ def main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num
 
                     # plt.plot(var2)
                     # fig.tight_layout()
-                    plt.savefig('./logs/fig{}_{}.png'.format(i,j), bbox_inches='tight')
+                    plt.savefig('../logs/conv2D/fig{}_{}.png'.format(i,j), bbox_inches='tight')
                     plt.close()
                     
                     ran += 1
@@ -372,7 +377,7 @@ def main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num
     if(LOG_EXPERIMENT):
         print("Logging the experiment details...")
         log = dict(
-            NET_TYPE = "2D conv, filter_size {}, pool_size {},filter_size_2 {}, pool_size_2 {}, 3 hidden".format(filter_size,pool_size,filter_size_2,pool_size_2),
+            NET_TYPE = "2D conv, 5 hidden",
             TETRODE_NUMBER = tetrode_number,
             BASENAME = BASENAME,
             NUM_EPOCHS = epochsDone,
