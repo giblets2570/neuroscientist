@@ -265,7 +265,7 @@ def main(filter_size,pool_size,filter_size_2,pool_size_2,num_hidden_units_1, num
                 costs.append(cost)
             
             for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
-                cost = training['train'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
+                cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
                 valid_costs.append(cost)
 
 

@@ -210,7 +210,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
 
         return l_out
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.02, beta=0.0001, momentum=MOMENTUM):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.02, beta=0.5, momentum=MOMENTUM):
 
     """
         Method the returns the theano functions that are used in 
@@ -231,8 +231,11 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     # code output 
     code_output = lasagne.layers.get_output(code_layer, X_batch, deterministic=True)
     rho_hat = T.mean(code_output,axis=1)
-    L = T.sum(sparsity * T.log(sparsity/rho_hat) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat)))
-    
+    # L = T.sum(sparsity * T.log(sparsity/rho_hat) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat)))
+    l = T.sub(1,code_output)
+    ll = T.mul(code_output,l)
+    L = T.mul(4,ll)
+    L = L.mean()
 
 
     # reg = 0.0001*lasagne.regularization.l2(network)
@@ -304,7 +307,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                 costs.append(cost)
             
             for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
-                cost = training['train'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
+                cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
                 valid_costs.append(cost)
 
 
@@ -353,76 +356,80 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                 print("Average agreement: {}".format(np.mean(acs)))
 
 
-            # if i%50 == 0:
-            #     ran = randint(0,dataset['num_examples_test']-20)
-            #     for j in range(10):
-            #         testing = [dataset['X_test'][ran]]
-            #         # print(testing[0].shape)
-            #         output = dataset['y_test'][ran]
-            #         # print(np.arange(dataset['output_dim']))
-            #         # print(output)
-            #         prediction = training['predict'](testing)[0]
-            #         # print(prediction)
-            #         # print(testing[0][0])
+            if i%50 == 0:
+                ran = randint(0,dataset['num_examples_test']-20)
+                now = datetime.datetime.now()
+                for j in range(10):
+                    testing = [dataset['X_test'][ran]]
+                    # print(testing[0].shape)
+                    output = dataset['y_test'][ran].reshape((1, 200))[0]
+                    print(output)
+
+                    # print(np.arange(dataset['output_dim']))
+                    # print(output)
+                    prediction = training['predict'](testing)[0].reshape((1, 200))[0]
+                    print(prediction)
+                    # print(prediction)
+                    # print(testing[0][0])
                     
-            #         code = training['code'](testing)
+                    code = training['code'](testing).reshape((1, 50))
 
-            #         # print(code)
+                    # print(code)
                     
-            #         # plotting the figure
+                    # plotting the figure
 
-            #         fig = plt.figure(1)
-            #         sub1 = fig.add_subplot(311)
-            #         sub2 = fig.add_subplot(312)
-            #         sub3 = fig.add_subplot(313)
+                    fig = plt.figure(1)
+                    sub1 = fig.add_subplot(311)
+                    sub2 = fig.add_subplot(312)
+                    sub3 = fig.add_subplot(313)
 
-            #         # add titles
+                    # add titles
 
-            #         sub1.set_title('Desired output')
-            #         sub2.set_title('Net output')
-            #         sub3.set_title('Code layer output')
+                    sub1.set_title('Desired output')
+                    sub2.set_title('Net output')
+                    sub3.set_title('Code layer output')
 
-            #         # adding x labels
+                    # adding x labels
 
-            #         sub1.set_xlabel('Time')
-            #         sub2.set_xlabel('Time')
-            #         sub3.set_xlabel('Code label')
+                    sub1.set_xlabel('Time')
+                    sub2.set_xlabel('Time')
+                    sub3.set_xlabel('Code label')
 
-            #         # adding y labels
+                    # adding y labels
 
-            #         sub1.set_ylabel('Amplitude')
-            #         sub2.set_ylabel('Amplitude')
-            #         sub3.set_ylabel('Probability')
+                    sub1.set_ylabel('Amplitude')
+                    sub2.set_ylabel('Amplitude')
+                    sub3.set_ylabel('Probability')
 
-            #         # Plotting data
+                    # Plotting data
 
-            #         # print(testing[0][0])
-            #         # inp = []
-            #         # for z in range(4):
-            #         #     inp += list(testing[0][0][z])
+                    # print(testing[0][0])
+                    # inp = []
+                    # for z in range(4):
+                    #     inp += list(testing[0][0][z])
 
 
-            #         sub1.plot(output)
-            #         # sub1.bar(x_axis, output, width=1)
-            #         sub1.grid(True)
+                    sub1.plot(output)
+                    # sub1.bar(x_axis, output, width=1)
+                    sub1.grid(True)
 
-            #         sub2.plot(prediction)
-            #         sub2.grid(True)
+                    sub2.plot(prediction)
+                    sub2.grid(True)
 
-            #         x_axis = list(np.arange(len(code[0])))
+                    x_axis = list(np.arange(len(code[0])))
 
-            #         # sub3.plot(code[0])
-            #         sub3.bar(x_axis, code[0], width=1)
-            #         # plt.show()
+                    # sub3.plot(code[0])
+                    sub3.bar(x_axis, code[0], width=1)
+                    # plt.show()
 
-            #         fig.tight_layout()
+                    fig.tight_layout()
 
-            #         # plt.plot(var2)
-            #         # fig.tight_layout()
-            #         plt.savefig('./logs/fig{}_{}.png'.format(i,j), bbox_inches='tight')
-            #         plt.close()
+                    # plt.plot(var2)
+                    # fig.tight_layout()
+                    plt.savefig('../logs/convAuto/fig{}_{}_{}.png'.format(i,j,now), bbox_inches='tight')
+                    plt.close()
                     
-            #         ran += 1
+                    ran += 1
                 # break
 
 
@@ -450,7 +457,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     if(LOG_EXPERIMENT):
         print("Logging the experiment details...")
         log = dict(
-            NET_TYPE = "Auto encoder 2 hidden 1 code 300 200 100",
+            NET_TYPE = "Conv auto encoder 2 hidden 1 code",
             TETRODE_NUMBER = tetrode_number,
             BASENAME = BASENAME,
             NUM_EPOCHS = epochsDone,
@@ -466,7 +473,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         )
         now = datetime.datetime.now()
         filename = "experiments/convAuto/{}_{}_{}_NUMLAYERS_{}_OUTPUTDIM_{}".format(now,NUM_EPOCHS,NUM_HIDDEN_UNITS,len(log['NETWORK_LAYERS']),log['OUTPUT_DIM'])
-        filename = re.sub("[^A-Za-z0-9_/ ,-:]", "", filename)
+        filename = re.sub("[^A-Za-z0-9_/,-:]", "", filename)
         with open(filename,"w") as outfile:
             outfile.write(str(log))
 

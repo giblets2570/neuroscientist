@@ -16,14 +16,14 @@ def getXY(filename=FILENAME):
 		if i>800:
 			y[n] = 500
 
-	x = np.asarray(x,dtype=np.float16)
-	y = np.asarray(y,dtype=np.float16)
+	x = np.asarray(x,dtype=np.float32)
+	y = np.asarray(y,dtype=np.float32)
 
 	xmin = np.amin(x)
 	xmax = np.amax(x)
 	ymin = np.amin(y)
 	ymax = np.amax(y)
-
+	print xmin,xmax,ymin,ymax
 	# print("X min",xmin)
 	# print("X max",xmax)
 	# print("Y min",ymin)
@@ -34,7 +34,7 @@ def getXY(filename=FILENAME):
 
 	scale = np.amax([diffx,diffy])
 
-	# print("Scale ", scale)
+	print("Scale ", scale)
 
 	for n,i in enumerate(range(len(x))):
 		x[i] = x[i] - xmin
@@ -45,14 +45,14 @@ def getXY(filename=FILENAME):
 		y[i] = y[i] - ymin
 		y[i] = y[i]*1.0/scale
 
-	for i in range(len(x)):
-		x[i] = x[i]*2.0
-		x[i] = x[i] - 1
+	# for i in range(len(x)):
+	# 	x[i] = x[i]*2.0
+	# 	x[i] = x[i] - 1
 
 
-	for i in range(len(y)):
-		y[i] = y[i]*2.0
-		y[i] = y[i] - 1
+	# for i in range(len(y)):
+	# 	y[i] = y[i]*2.0
+	# 	y[i] = y[i] - 1
 
 	return x, y
 

@@ -69,8 +69,8 @@ def getData(tetrodeNumber=9,basename=BASENAME):
 				data[j['time']][currentBase + j['label']] = 1
 			else:
 				data[j['time']] = np.zeros(inputDimension)
-				for i in range(len(data[j['time']])):
-					data[j['time']][i] = -1
+				# for i in range(len(data[j['time']])):
+				# 	data[j['time']][i] = -1
 				data[j['time']][currentBase + j['label']] = 1
 		currentBase += dimension
 	return data
@@ -91,7 +91,7 @@ def downsampleData(data, freq=50, timeS=1394):
 	base = rate
 	print("Making sure in order")
 	for key in sorted(data):
-		print(key)
+		# print(key)
 		if first:
 			output = np.zeros((timesteps,len(data[key])))
 			first = False
@@ -170,8 +170,7 @@ def formatData(tetrodeNumber=9,basename=BASENAME,sequenceLength=500):
 
 	"""
 
-
-	recData = firstRecurrentData(tetrodeNumber,basename)
+	recData = recurrentData(tetrodeNumber,basename)
 
 	k = len(recData)
 	xdim = recData[0]['activity'].shape[0]
@@ -179,19 +178,21 @@ def formatData(tetrodeNumber=9,basename=BASENAME,sequenceLength=500):
 	
 	max_num_sequences = int(k/sequenceLength)
 	
-	X = np.asarray([recData[i]['activity'] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,xdim))
-	y = np.asarray([[recData[i]['x'],recData[i]['y']] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,ydim))
+	# X = np.asarray([recData[i]['activity'] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,xdim))
+	# y = np.asarray([[recData[i]['x'],recData[i]['y']] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,ydim))
+	
 
+	
 	n = int(len(X)*0.8)
 	m = int(len(X)*0.9)
 
-	trX = np.array(X[:n],dtype=np.float16)
-	tvX = np.array(X[n:m],dtype=np.float16)
-	teX = np.array(X[m:],dtype=np.float16)
+	trX = np.array(X[:n],dtype=np.float32)
+	tvX = np.array(X[n:m],dtype=np.float32)
+	teX = np.array(X[m:],dtype=np.float32)
 
-	trY = np.array(y[:n],dtype=np.float16)
-	tvY = np.array(y[n:m],dtype=np.float16)
-	teY = np.array(y[m:],dtype=np.float16)
+	trY = np.array(y[:n],dtype=np.float32)
+	tvY = np.array(y[n:m],dtype=np.float32)
+	teY = np.array(y[m:],dtype=np.float32)
 
 	return trX, tvX, teX, trY, tvY, teY
 
@@ -215,6 +216,7 @@ def setZeroesNegative(m):
 			if(m[i][j] == 0.0):
 				m[i][j] = 1.0
 	return m
+
 def test():
 	m = np.zeros((20,10))
 	for i in range(int(m.shape[0]/2)):
