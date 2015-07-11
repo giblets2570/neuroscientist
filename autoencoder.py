@@ -24,6 +24,7 @@ import json
 import re
 import math
 import matplotlib.pyplot as plt
+from tsne import bh_sne
 
 PY2 = sys.version_info[0] == 2
 
@@ -101,10 +102,13 @@ def load_data(tetrode_number=TETRODE_NUMBER):
     return dict(
         X_train=X_train,
         y_train=y_train,
+        y_train_labels=[np.argmax(y) for  y in y_train_labels],
         X_valid=X_valid,
         y_valid=y_valid,
+        y_valid_labels=[np.argmax(y) for  y in y_valid_labels],
         X_test=X_test,
         y_test=y_test,
+        y_test_labels=[np.argmax(y) for  y in y_test_labels],
         labeled_test=r,
         caswells_dim = y_train_labels.shape[-1],
         num_examples_train=X_train.shape[0],
@@ -166,7 +170,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
 
         return l_out
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.02, beta=0.0001, momentum=MOMENTUM):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.02, beta=0.1, momentum=MOMENTUM):
 
     """
         Method the returns the theano functions that are used in 
@@ -281,7 +285,8 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
 
             # this is the test to see if the autoencoder is learning how to 
-            if i%10==0:
+            # get the same labels as caswells
+            if i%20==0:
                 acs = []
                 for j in range(dataset['caswells_dim']):
                     # print(dataset['labeled_test'][j].shape)
@@ -312,7 +317,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                 acs = np.asarray(acs)
                 print("Average agreement: {}".format(np.mean(acs)))
 
-
+            # this is where we plot the data
             if i%50 == 0:
                 ran = randint(0,dataset['num_examples_test']-20)
                 for j in range(10):
@@ -381,11 +386,20 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
                     # plt.plot(var2)
                     # fig.tight_layout()
-                    plt.savefig('../logs/fig{}_{}.png'.format(i,j), bbox_inches='tight')
+                    plt.savefig('../logs/auto/fig{}_{}.png'.format(i,j), bbox_inches='tight')
                     plt.close()
                     
                     ran += 1
                 # break
+
+            if i%100==0:
+                codes = training['code'](dataset['X_train'][0:2000])
+                print(codes.shape)
+                codes_2d = bh_sne(codes)
+                print(dataset['y_train'].shape)
+                plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:2000])
+                plt.savefig('../logs/auto/tsne{}.png'.format(i), bbox_inches='tight')
+                plt.close()
 
 
             trainvalidation.append([meanTrainCost,meanValidCost])
