@@ -189,7 +189,7 @@ def formatData(tetrodeNumber=9,basename=BASENAME,sequenceLength=500):
 	print(_X.shape)
 	while(i + sequenceLength < _X.shape[0]):
 		X.append(_X[i:i+sequenceLength])
-		i+=25
+		i+=100
 	X = np.asarray(X)
 	print(X.shape)
 
@@ -198,7 +198,8 @@ def formatData(tetrodeNumber=9,basename=BASENAME,sequenceLength=500):
 	print(_y.shape)
 	while(i + sequenceLength < _y.shape[0]):
 		y.append(_y[i:i+sequenceLength])
-		i+=25
+		# i+=25
+		i+=100
 	y = np.asarray(y)
 	print(y.shape)
 
