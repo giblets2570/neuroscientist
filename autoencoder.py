@@ -403,7 +403,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                 codes_2d = bh_sne(codes)
 
                 # print(dataset['y_train'].shape)
-                # plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:5000])
+                plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:5000])
                 plt.savefig('../logs/auto/tsne{}.png'.format(i), bbox_inches='tight')
                 plt.close()
                 
