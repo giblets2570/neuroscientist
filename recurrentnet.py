@@ -47,7 +47,7 @@ BASENAME = "../R2192/20140110_R2192_track1"
 
 NUM_EPOCHS = 100000
 
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 
 NUM_HIDDEN_UNITS = 100
 NUM_RECURRENT_UNITS = 100
@@ -123,6 +123,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         l_recurrent = lasagne.layers.GRULayer(
             l_in, num_hidden_units, 
             grad_clipping=GRAD_CLIP,
+            gradient_steps=500,
             # W_in_to_hid=lasagne.init.HeUniform(),
             # W_hid_to_hid=lasagne.init.HeUniform(),
             # nonlinearity=lasagne.nonlinearities.sigmoid
@@ -133,6 +134,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         l_recurrent_2 = lasagne.layers.GRULayer(
             l_recurrent, num_hidden_units, 
             grad_clipping=GRAD_CLIP,
+            gradient_steps=500,
             # W_in_to_hid=lasagne.init.HeUniform(),
             # W_hid_to_hid=lasagne.init.HeUniform(),
             # nonlinearity=lasagne.nonlinearities.sigmoid
@@ -140,15 +142,15 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         print("Recurrent 2 shape: ",lasagne.layers.get_output_shape(l_recurrent_2))
 
-        l_recurrent_3 = lasagne.layers.GRULayer(
-            l_recurrent_2, num_hidden_units, 
-            grad_clipping=GRAD_CLIP,
-            # W_in_to_hid=lasagne.init.HeUniform(),
-            # W_hid_to_hid=lasagne.init.HeUniform(),
-            # nonlinearity=lasagne.nonlinearities.sigmoid
-            )
+        # l_recurrent_3 = lasagne.layers.GRULayer(
+        #     l_recurrent_2, num_hidden_units, 
+        #     grad_clipping=GRAD_CLIP,
+        #     # W_in_to_hid=lasagne.init.HeUniform(),
+        #     # W_hid_to_hid=lasagne.init.HeUniform(),
+        #     # nonlinearity=lasagne.nonlinearities.sigmoid
+        #     )
 
-        print("Recurrent 3 shape: ",lasagne.layers.get_output_shape(l_recurrent_3))
+        # print("Recurrent 3 shape: ",lasagne.layers.get_output_shape(l_recurrent_3))
 
         # l_recurrent_back = lasagne.layers.RecurrentLayer(
         #     l_in, num_hidden_units, 
@@ -192,7 +194,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         # number of time steps as a feature dimension
 
 
-        l_reshape_3 = lasagne.layers.ReshapeLayer(l_recurrent_3, (batch_size*length, num_hidden_units))
+        l_reshape_3 = lasagne.layers.ReshapeLayer(l_recurrent_2, (batch_size*length, num_hidden_units))
 
         print("Reshape shape: ",lasagne.layers.get_output_shape(l_reshape_3))
 
@@ -324,7 +326,7 @@ def main(tetrode_number=TETRODE_NUMBER):
     if(LOG_EXPERIMENT):
         print("Logging the experiment details...")
         log = dict(
-            NET_TYPE = "Recuurent network 3 layers, {} units ".format(NUM_HIDDEN_UNITS),
+            NET_TYPE = "Recurent network 3 layers, {} units ".format(NUM_HIDDEN_UNITS),
             TETRODE_NUMBER = tetrode_number,
             BASENAME = BASENAME,
             NUM_EPOCHS = epochsDone,

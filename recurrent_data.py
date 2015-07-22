@@ -7,6 +7,10 @@ import json
 from pos_data import getXY
 import math
 
+# We'll generate an animation with matplotlib and moviepy.
+from moviepy.video.io.bindings import mplfig_to_npimage
+import moviepy.editor as mpy
+
 BASENAME = "../R2192/20140110_R2192_track1"
 
 def getTotalInputDimension(tetrodeNumber=9,basename=BASENAME):
@@ -109,7 +113,7 @@ def recurrentData(tetrodeNumber=9,basename=BASENAME):
 	data = getData(tetrodeNumber)
 	freq = 1000.0
 	downData = downsampleData(data,freq=freq)
-	print(len(downData))
+	# print(len(downData))
 	x, y = getXY(basename+".pos")
 	print(x.shape)
 
@@ -145,7 +149,7 @@ def gaussConv(outDim,data):
 
 	inDim = len(data)
 	seqLen = len(data[0])
-	stepsize = int(inDim/outDim)
+	stepsize = 2*int(inDim/outDim)
 	result = []
 	conv = [gaussian(i,stepsize,stepsize/2) for i in range(2*stepsize+1)]
 	# print(conv)
@@ -162,7 +166,7 @@ def gaussConv(outDim,data):
 	return np.asarray(result)
 
 
-def formatData(tetrodeNumber=9,basename=BASENAME,sequenceLength=500):
+def formatData(tetrodeNumber=9,basename=BASENAME,sequenceLength=2000):
 	"""
 		This method formats the data so it 
 		can be used by the recurrent net. 
@@ -238,6 +242,40 @@ def setZeroesNegative(m):
 				m[i][j] = 1.0
 	return m
 
+def rate_maps(tetrodeNumber=9,basename=BASENAME):
+	recData = recurrentData(tetrodeNumber,basename)
+	k = len(recData)
+	X = np.asarray([recData[i]['activity'] for i in xrange(k)])
+	y = np.asarray([[recData[i]['x'],recData[i]['y']] for i in xrange(k)])
+
+	# print("k",k)
+	
+	num_neurons = X.shape[1]
+	print(num_neurons)
+	for i in range(num_neurons):
+		# activations = []
+		print("Neuron {}".format(i+1))
+
+		print(X[i,:].shape)
+		print(X[:,i].shape)
+
+		alphas=X[:,i]
+		size = alphas.shape[0]
+		rgba_colors = np.zeros((size,4))
+
+		# for red the first column needs to be one
+		rgba_colors[:, 2] = 1.0
+		# the fourth column needs to be your alphas
+		rgba_colors[:, 3] = alphas
+
+		plt.scatter(y[:,0],y[:,1],c=rgba_colors,lw=0)
+		
+
+
+		plt.savefig('rate_maps/neuron_{}.png'.format(i), bbox_inches='tight')
+		plt.close()
+		# plt.show()
+
 def test():
 	m = np.zeros((20,10))
 	for i in range(int(m.shape[0]/2)):
@@ -250,6 +288,6 @@ def test():
 
 if __name__=="__main__":
 	
-	formatData()
+	rate_maps()
 	
 

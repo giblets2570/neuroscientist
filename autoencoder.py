@@ -26,6 +26,11 @@ import math
 import matplotlib.pyplot as plt
 from tsne import bh_sne
 
+from sklearn.cluster import DBSCAN
+from sklearn import metrics
+from sklearn.datasets.samples_generator import make_blobs
+from sklearn.preprocessing import StandardScaler
+
 PY2 = sys.version_info[0] == 2
 
 if PY2:
@@ -396,11 +401,60 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                 codes = training['code'](dataset['X_train'][0:5000])
                 print(codes.shape)
                 codes_2d = bh_sne(codes)
-                print(dataset['y_train'].shape)
-                plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:5000])
+
+                # print(dataset['y_train'].shape)
+                # plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:5000])
                 plt.savefig('../logs/auto/tsne{}.png'.format(i), bbox_inches='tight')
                 plt.close()
+                
+                ##############################################################################
+                # Compute DBSCAN
 
+                X = codes_2d
+
+                db = DBSCAN(eps=0.3, min_samples=10).fit(X)
+                core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
+                core_samples_mask[db.core_sample_indices_] = True
+                labels = db.labels_
+                n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+
+                # Number of clusters in labels, ignoring noise if present.
+                print('Estimated number of clusters: %d' % n_clusters_)
+                print("Homogeneity: %0.3f" % metrics.homogeneity_score(dataset['y_train_labels'][0:5000], labels))
+                print("Completeness: %0.3f" % metrics.completeness_score(dataset['y_train_labels'][0:5000], labels))
+                print("V-measure: %0.3f" % metrics.v_measure_score(dataset['y_train_labels'][0:5000], labels))
+                print("Adjusted Rand Index: %0.3f"
+                      % metrics.adjusted_rand_score(dataset['y_train_labels'][0:5000], labels))
+                print("Adjusted Mutual Information: %0.3f"
+                      % metrics.adjusted_mutual_info_score(dataset['y_train_labels'][0:5000], labels))
+                print("Silhouette Coefficient: %0.3f"
+                      % metrics.silhouette_score(X, labels))
+
+                ##############################################################################
+                # Plot result
+
+                # Black removed and is used for noise instead.
+                unique_labels = set(labels)
+                colors = plt.cm.Spectral(np.linspace(0, 1, len(unique_labels)))
+                for k, col in zip(unique_labels, colors):
+                    if k == -1:
+                        # Black used for noise.
+                        col = 'k'
+
+                    class_member_mask = (labels == k)
+
+                    xy = X[class_member_mask & core_samples_mask]
+                    plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=col,
+                             markeredgecolor='k', markersize=14)
+
+                    xy = X[class_member_mask & ~core_samples_mask]
+                    plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=col,
+                             markeredgecolor='k', markersize=6)
+
+                plt.title('Estimated number of clusters: %d' % n_clusters_)
+                print("We are now gonna plot the learned clusters")
+                plt.savefig('../logs/auto/dbscan{}.png'.format(i), bbox_inches='tight')
+                plt.close()
 
             trainvalidation.append([meanTrainCost,meanValidCost])
             accuracies.append(accuracy)
