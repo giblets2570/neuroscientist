@@ -13,7 +13,7 @@ import moviepy.editor as mpy
 
 BASENAME = "../R2192/20140110_R2192_track1"
 
-def getTotalInputDimension(tetrodeNumber=9,basename=BASENAME):
+def getTotalInputDimension(tetrodeNumber=9,endTetrode=16,basename=BASENAME):
 	"""
 		Method to return the total number 
 		of dimension of the input
@@ -22,7 +22,7 @@ def getTotalInputDimension(tetrodeNumber=9,basename=BASENAME):
 	dims = []
 	print type(tetrodeNumber)
 	print tetrodeNumber
-	for i in range(tetrodeNumber-1,16):
+	for i in range(tetrodeNumber-1,endTetrode):
 		# get the tetrode number
 		print("Tetrode number: {}".format(i+1))
 		cutfilename = basename + ".clu." + str(i+1)
@@ -35,11 +35,11 @@ def getTotalInputDimension(tetrodeNumber=9,basename=BASENAME):
 
 def getCutTimes(tetfilename,cutfilename):
 	"""
-		Method that returns the times and 
+		Method that returns the times and the labels of each activation.
 	"""
 	timesData = []
 	header, data = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
-	# print(header)
+	
 	labels = []
 	for i,j in enumerate(open(cutfilename,'r')):
 		if(i == 0):
@@ -54,17 +54,17 @@ def getCutTimes(tetfilename,cutfilename):
 		timesData.append(entry)
 	return timesData
 
-def getData(tetrodeNumber=9,basename=BASENAME):
+def getData(tetrodeNumber=9,endTetrode=16,basename=BASENAME):
 	"""
 		Gets the data into the format of 
 		a dictionary with the times as the 
 		key and the activation over all
 		tetrodes as the value (large vector)
 	"""
-	inputDimension, dims = getTotalInputDimension(tetrodeNumber,basename)
+	inputDimension, dims = getTotalInputDimension(tetrodeNumber,endTetrode,basename)
 	currentBase = 0
 	data = {}
-	for k,i in enumerate(range(tetrodeNumber-1,16)):
+	for k,i in enumerate(range(tetrodeNumber-1,endTetrode)):
 		dimension = dims[k]
 		times = getCutTimes(basename+".{}".format(i),basename+".clu.1")
 		for n,j in enumerate(times):
@@ -105,12 +105,12 @@ def downsampleData(data, freq=50, timeS=1394):
 		output[index] += data[key]
 	return np.asarray(output)
 
-def recurrentData(tetrodeNumber=9,basename=BASENAME):
+def recurrentData(tetrodeNumber=9,endTetrode=16,basename=BASENAME):
 	"""
 		Basically convolves all the data an puts the data
 		in a dictionary
 	"""
-	data = getData(tetrodeNumber)
+	data = getData(tetrodeNumber,endTetrode)
 	freq = 50.0
 	downData = downsampleData(data,freq=freq)
 	# print(len(downData))
@@ -166,7 +166,7 @@ def gaussConv(outDim,data):
 	return np.asarray(result)
 
 
-def formatData(tetrodeNumber=9,basename=BASENAME,sequenceLength=2000):
+def formatData(tetrodeNumber=9,basename=BASENAME,sequenceLength=2000,endTetrode=16):
 	"""
 		This method formats the data so it 
 		can be used by the recurrent net. 
@@ -174,7 +174,7 @@ def formatData(tetrodeNumber=9,basename=BASENAME,sequenceLength=2000):
 
 	"""
 
-	recData = recurrentData(tetrodeNumber,basename)
+	recData = recurrentData(tetrodeNumber,endTetrode,basename)
 
 	k = len(recData)
 	xdim = recData[0]['activity'].shape[0]
@@ -242,8 +242,8 @@ def setZeroesNegative(m):
 				m[i][j] = 1.0
 	return m
 
-def rate_maps(tetrodeNumber=9,basename=BASENAME):
-	recData = recurrentData(tetrodeNumber,basename)
+def rate_maps(tetrodeNumber=9,endTetrode=16,basename=BASENAME):
+	recData = recurrentData(tetrodeNumber,endTetrode,basename)
 	k = len(recData)
 	X = np.asarray([recData[i]['activity'] for i in xrange(k)])
 	y = np.asarray([[recData[i]['x'],recData[i]['y']] for i in xrange(k)])
@@ -256,10 +256,10 @@ def rate_maps(tetrodeNumber=9,basename=BASENAME):
 		# activations = []
 		print("Neuron {}".format(i+1))
 
-		print(X[i,:].shape)
-		print(X[:,i].shape)
-
 		alphas=X[:,i]
+		print(alphas)
+		plt.plot(alphas)
+		plt.show()
 		size = alphas.shape[0]
 		rgba_colors = np.zeros((size,4))
 
@@ -268,12 +268,14 @@ def rate_maps(tetrodeNumber=9,basename=BASENAME):
 		# the fourth column needs to be your alphas
 		rgba_colors[:, 3] = alphas
 
-		plt.scatter(y[:,0],y[:,1],c=rgba_colors,lw=0)
-		
+		# print(rgba_colors)
 
+		plt.scatter(y[:,0],y[:,1],c=rgba_colors,lw=0)
 
 		plt.savefig('rate_maps/neuron_{}.png'.format(i), bbox_inches='tight')
 		plt.close()
+		# if i == 10:
+		# 	break
 		# plt.show()
 
 def test():
@@ -286,8 +288,122 @@ def test():
 	print(m)
 
 
-if __name__=="__main__":
-	
-	rate_maps()
-	
 
+def organiseTetrodeData(tetrode):
+
+	tetfilename = BASENAME+"."+str(tetrode)
+	tetheader,tetdata = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
+
+	cutfilename = BASENAME+".clu."+str(tetrode)
+
+	sample_rate = float(re.sub("[^0-9.]", "", tetheader['sample_rate']))
+	timebase = float(re.sub("[^0-9.]", "", tetheader['timebase']))
+	duration = int(re.sub("[^0-9.]", "", tetheader['duration']))
+
+	data = []
+	result = []
+	dim = 0
+	for n,j in enumerate(open(cutfilename,'r')):
+		if n>0:
+			label = np.zeros(dim)
+			label[int(re.sub("[^0-9]", "", j))-1] = 1.0
+			result.append(dict(label=label))
+		else:
+			dim = int(re.sub("[^0-9]", "", j))
+	# print(result)
+	# print(len(tetdata))
+	time = 0
+	activation = 0
+	for n,j in enumerate(tetdata):
+		if n%4==3:
+			activation += list(j[1])
+			activation = np.asarray(activation)
+			# print(time/timebase)
+			result[n/4]['time'] = time/timebase
+			result[n/4]['activation'] = activation
+		elif n%4==0:
+			time = j[0]
+			activation = list(j[1])
+		else:
+			activation+=list(j[1])
+
+	print(result[0:5])
+	return duration,result
+
+def downsampleData(duration,data,freq=50.0):
+	i = 0
+	step = 1/freq
+	outputDim = int(duration*freq)
+	activationDim = data[0]['activation'].shape[0]
+	labelDim = data[0]['label'].shape[0]
+	activationResult = np.zeros((outputDim,activationDim))
+	labelResult = np.zeros((outputDim,labelDim))
+	for entry in data:
+		while((i+1)*step < entry['time']):
+			i+=1
+		activationResult[i] += entry['activation']
+		labelResult[i] += entry['label']
+
+	print(activationResult.shape)
+	print(activationResult)
+	print(labelResult.shape)
+	print(labelResult)
+
+	return activationResult, labelResult
+
+# def convolveData(duration,data,freq=50.0):
+# 	i = 0
+# 	step = 1/freq
+# 	outputDim = int(duration*freq)
+# 	activationDim = data[0]['activation'].shape[0]
+# 	result = np.zeros((outputDim,activationDim))
+# 	for entry in data:
+# 		print((i+1)*step)
+# 		while((i+1)*step < entry['time']):
+# 			i+=1
+# 		result[i] += entry['activation']
+
+# 	print(result.shape)
+# 	print(result)
+
+
+def mapPosToActivations(activationResult,labelResult):
+	x,y = getXY()
+	result = []
+	for n in xrange(x.shape[0]):
+		result.append(dict(pos=[x[n],y[n]],activation=activationResult[n],label=labelResult[n]))
+	return result
+
+def ratemap(activationResult,labelResult):
+	x,y = getXY()
+	# rgba_colors = np.zeros((x.shape[0],4))
+	# rgba_colors[:, 3] = 1.0
+	for i in range(labelResult[0].shape[0]):
+		rgba_colors = np.zeros((x.shape[0],4))
+		rgba_colors[:, 3] = 0.2
+		for j in range(x.shape[0]):
+			if labelResult[j][i] < 0.5:
+				rgba_colors[j][3] = 0.0
+			elif labelResult[j][i] < 1.5:
+				rgba_colors[j][1] = 1.0
+			else:
+				rgba_colors[j][0] = 1.0
+				rgba_colors[j][3] = 1.0
+
+		plt.scatter(x,y,c=rgba_colors,lw=0)
+		plt.show()
+
+if __name__=="__main__":
+	duration,result = organiseTetrodeData(9)
+	activationResult, labelResult = downsampleData(duration,result)
+	ratemap(activationResult, labelResult)
+	# rate_maps(9,9)
+	# tetfilename = BASENAME+".1"
+	# header, data = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
+	# print(header)
+	# cutfilename = BASENAME+".clu.1"
+	# header, data = readfile(cutfilename,[('ts','>i'),('waveform','50b')])
+	# print(header)
+	# posfilename = BASENAME+".pos"
+	# header, data = readfile(posfilename,[('ts','>i'),('pos','>8h')])
+	# print(re.sub("[^0-9.]", "", header['sample_rate']))

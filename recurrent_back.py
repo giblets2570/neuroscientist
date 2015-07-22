@@ -51,7 +51,7 @@ BATCH_SIZE = 16
 
 NUM_HIDDEN_UNITS = 100
 NUM_RECURRENT_UNITS = 100
-LEARNING_RATE = 0.02
+LEARNING_RATE = 0.01
 MOMENTUM = 0.9
 GRAD_CLIP = 100
 
@@ -195,7 +195,9 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         # We need a reshape layer which combines the first (batch size) and second
         # (number of timesteps) dimensions, otherwise the DenseLayer will treat the
-        # number of time steps as a feature dimension.
+        # number of time steps as a feature dimension
+
+
         l_reshape_3 = lasagne.layers.ReshapeLayer(l_sum, (batch_size*length, num_hidden_units))
 
         print("Reshape shape: ",lasagne.layers.get_output_shape(l_reshape_3))
