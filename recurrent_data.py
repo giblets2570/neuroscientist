@@ -367,16 +367,36 @@ def downsampleData(duration,data,freq=50.0):
 # 	print(result)
 
 
-def mapPosToActivations():
+def mapPosToActivations(activationResult,labelResult):
 	x,y = getXY()
-	print(x.shape)
-	print(y.shape)
+	result = []
+	for n in xrange(x.shape[0]):
+		result.append(dict(pos=[x[n],y[n]],activation=activationResult[n],label=labelResult[n]))
+	return result
 
+def ratemap(activationResult,labelResult):
+	x,y = getXY()
+	# rgba_colors = np.zeros((x.shape[0],4))
+	# rgba_colors[:, 3] = 1.0
+	for i in range(labelResult[0].shape[0]):
+		rgba_colors = np.zeros((x.shape[0],4))
+		rgba_colors[:, 3] = 0.2
+		for j in range(x.shape[0]):
+			if labelResult[j][i] < 0.5:
+				rgba_colors[j][3] = 0.0
+			elif labelResult[j][i] < 1.5:
+				rgba_colors[j][1] = 1.0
+			else:
+				rgba_colors[j][0] = 1.0
+				rgba_colors[j][3] = 1.0
+
+		plt.scatter(x,y,c=rgba_colors,lw=0)
+		plt.show()
 
 if __name__=="__main__":
-	duration,result = organiseTetrodeData(1)
-	downsampleData(duration,result)
-	mapPosToActivations()
+	duration,result = organiseTetrodeData(9)
+	activationResult, labelResult = downsampleData(duration,result)
+	ratemap(activationResult, labelResult)
 	# rate_maps(9,9)
 	# tetfilename = BASENAME+".1"
 	# header, data = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
