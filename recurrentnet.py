@@ -51,7 +51,7 @@ BATCH_SIZE = 16
 
 NUM_HIDDEN_UNITS = 100
 NUM_RECURRENT_UNITS = 100
-LEARNING_RATE = 0.01
+LEARNING_RATE = 0.02
 MOMENTUM = 0.9
 GRAD_CLIP = 100
 
@@ -197,7 +197,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         # number of time steps as a feature dimension
 
 
-        l_reshape_3 = lasagne.layers.ReshapeLayer(l_recurrent_2, (batch_size*length, num_hidden_units))
+        l_reshape_3 = lasagne.layers.ReshapeLayer(l_recurrent, (batch_size*length, num_hidden_units))
 
         print("Reshape shape: ",lasagne.layers.get_output_shape(l_reshape_3))
 
