@@ -330,26 +330,26 @@ def organiseTetrodeData(tetrode):
 	print(result[0:5])
 	return duration,result
 
-def downsampleData(duration,data,freq=50.0):
-	i = 0
-	step = 1/freq
-	outputDim = int(duration*freq)
-	activationDim = data[0]['activation'].shape[0]
-	labelDim = data[0]['label'].shape[0]
-	activationResult = np.zeros((outputDim,activationDim))
-	labelResult = np.zeros((outputDim,labelDim))
-	for entry in data:
-		while((i+1)*step < entry['time']):
-			i+=1
-		activationResult[i] += entry['activation']
-		labelResult[i] += entry['label']
+# def downsampleData(duration,data,freq=50.0):
+# 	i = 0
+# 	step = 1/freq
+# 	outputDim = int(duration*freq)
+# 	activationDim = data[0]['activation'].shape[0]
+# 	labelDim = data[0]['label'].shape[0]
+# 	activationResult = np.zeros((outputDim,activationDim))
+# 	labelResult = np.zeros((outputDim,labelDim))
+# 	for entry in data:
+# 		while((i+1)*step < entry['time']):
+# 			i+=1
+# 		activationResult[i] += entry['activation']
+# 		labelResult[i] += entry['label']
 
-	print(activationResult.shape)
-	print(activationResult)
-	print(labelResult.shape)
-	print(labelResult)
+# 	print(activationResult.shape)
+# 	print(activationResult)
+# 	print(labelResult.shape)
+# 	print(labelResult)
 
-	return activationResult, labelResult
+# 	return activationResult, labelResult
 
 # def convolveData(duration,data,freq=50.0):
 # 	i = 0
