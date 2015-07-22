@@ -150,6 +150,9 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         #     # nonlinearity=lasagne.nonlinearities.sigmoid
         #     )
 
+
+        # this is great
+
         # print("Recurrent 3 shape: ",lasagne.layers.get_output_shape(l_recurrent_3))
 
         # l_recurrent_back = lasagne.layers.RecurrentLayer(

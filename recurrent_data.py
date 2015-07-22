@@ -111,13 +111,13 @@ def recurrentData(tetrodeNumber=9,basename=BASENAME):
 		in a dictionary
 	"""
 	data = getData(tetrodeNumber)
-	freq = 1000.0
+	freq = 50.0
 	downData = downsampleData(data,freq=freq)
 	# print(len(downData))
 	x, y = getXY(basename+".pos")
 	print(x.shape)
 
-	downData = gaussConv(x.shape[0],downData)
+	# downData = gaussConv(x.shape[0],downData)
 
 	downData = normalizeMatrix(downData)
 	print downData
