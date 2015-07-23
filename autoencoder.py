@@ -397,7 +397,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                     ran += 1
                 # break
 
-            if i%100==0 and i>0:
+            if i%100==0: # and i>0:
                 codes = training['code'](dataset['X_train'][0:5000])
                 print(codes.shape)
                 codes_2d = bh_sne(codes)
@@ -410,9 +410,9 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                 ##############################################################################
                 # Compute DBSCAN
 
-                X = codes_2d
+                X = StandardScaler().fit_transform(codes_2d)
 
-                db = DBSCAN(eps=0.3, min_samples=10).fit(X)
+                db = DBSCAN().fit(X)
                 core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
                 core_samples_mask[db.core_sample_indices_] = True
                 labels = db.labels_
