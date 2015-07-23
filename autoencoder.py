@@ -397,14 +397,14 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                     ran += 1
                 # break
 
-            if i%100==0:
+            if i%100==0 and i>0:
                 codes = training['code'](dataset['X_train'][0:5000])
                 print(codes.shape)
                 codes_2d = bh_sne(codes)
 
                 # print(dataset['y_train'].shape)
                 plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:5000])
-                plt.savefig('../logs/auto/tsne{}.png'.format(i), bbox_inches='tight')
+                plt.savefig('../logs/auto/tsne_{}.png'.format(i), bbox_inches='tight')
                 plt.close()
                 
                 ##############################################################################
@@ -453,7 +453,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
                 plt.title('Estimated number of clusters: %d' % n_clusters_)
                 print("We are now gonna plot the learned clusters")
-                plt.savefig('../logs/auto/dbscan{}.png'.format(i), bbox_inches='tight')
+                plt.savefig('../logs/auto/dbscan_{}.png'.format(i), bbox_inches='tight')
                 plt.close()
 
             trainvalidation.append([meanTrainCost,meanValidCost])
