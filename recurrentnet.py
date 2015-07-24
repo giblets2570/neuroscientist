@@ -284,6 +284,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     print("Begining to train the network...")
     epochsDone = 0
+    increasing = 0
     try:
         meanTrainCost = 1000
         for i in range(NUM_EPOCHS):
@@ -302,8 +303,14 @@ def main(tetrode_number=TETRODE_NUMBER):
                 valid_costs.append(cost)
 
             if(np.mean(np.asarray(costs,dtype=np.float32)) > 1.00000001*meanTrainCost):
+                increasing += 1
+            else: 
+                increasing = 0
+
+            if increasing == 5:
                 print("Lowering learning rate")
                 learning_rate = 0.9*learning_rate
+                increasing = 0
             meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
             meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
             # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
