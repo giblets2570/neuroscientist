@@ -346,7 +346,7 @@ def main(tetrode_number=TETRODE_NUMBER):
     if(LOG_EXPERIMENT):
         print("Logging the experiment details...")
         log = dict(
-            NET_TYPE = "Recurent network 3 layers, {} units ".format(NUM_HIDDEN_UNITS),
+            NET_TYPE = "Recurent network backwards, {} units ".format(NUM_HIDDEN_UNITS),
             TETRODE_NUMBER = tetrode_number,
             BASENAME = BASENAME,
             NUM_EPOCHS = epochsDone,
