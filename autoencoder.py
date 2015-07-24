@@ -405,7 +405,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                 codes_2d = bh_sne(codes)
 
                 # print(dataset['y_train'].shape)
-                plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:5000],alpha=0.5,lw=0)
+                plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:5000],alpha=0.8,lw=0)
                 plt.savefig('../logs/auto/tsne_{}.png'.format(i), bbox_inches='tight')
                 plt.close()
 
@@ -446,13 +446,13 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
                 # DBSCAN
 
-                X = StandardScaler().fit_transform(codes_2d)
+                # X = StandardScaler().fit_transform(codes_2d)
 
-                print(X)
+                # print(X)
 
                 ##############################################################################
                 # Compute DBSCAN
-                db = DBSCAN(eps=20, min_samples=10).fit(X)
+                db = DBSCAN(eps=1.5, min_samples=5).fit(codes_2d)
                 core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
                 core_samples_mask[db.core_sample_indices_] = True
                 labels = db.labels_
@@ -486,16 +486,15 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                     class_member_mask = (labels == k)
 
                     xy = X[class_member_mask & core_samples_mask]
-                    plt.plot(xy[:, 0], xy[:, 1], markerfacecolor=col,
+                    plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=col,
                              markeredgecolor='k', markersize=7)
 
                     xy = X[class_member_mask & ~core_samples_mask]
-                    plt.plot(xy[:, 0], xy[:, 1], markerfacecolor=col,
+                    plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=col,
                              markeredgecolor='k', markersize=4)
 
                 plt.title('Estimated number of clusters: %d' % n_clusters_)
-                plt.show()
-
+                plt.savefig('../logs/auto/dbscan_{}.png'.format(i), bbox_inches='tight')
 
             trainvalidation.append([meanTrainCost,meanValidCost])
             accuracies.append(accuracy)
