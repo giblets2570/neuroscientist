@@ -397,7 +397,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                     ran += 1
                 # break
 
-            if i%100==0: # and i>0:
+            if i%100==0 and i>0:
                 codes = training['code'](dataset['X_train'][0:5000])
                 print(codes.shape)
                 codes_2d = bh_sne(codes)
