@@ -172,60 +172,60 @@ def gaussConv(outDim,data):
 	return np.asarray(result)/maximum
 
 
-def formatData(tetrodeNumber=9,basename=BASENAME,sequenceLength=2000,endTetrode=16):
-	"""
-		This method formats the data so it 
-		can be used by the recurrent net. 
-		The format is (batch_size, sequence_length,sequence_shape)
+# def formatData(tetrodeNumber=9,basename=BASENAME,sequenceLength=2000,endTetrode=16):
+# 	"""
+# 		This method formats the data so it 
+# 		can be used by the recurrent net. 
+# 		The format is (batch_size, sequence_length,sequence_shape)
 
-	"""
+# 	"""
 
-	recData = recurrentData(tetrodeNumber,endTetrode,basename)
+# 	recData = recurrentData(tetrodeNumber,endTetrode,basename)
 
-	k = len(recData)
-	xdim = recData[0]['activity'].shape[0]
-	ydim = 2
+# 	k = len(recData)
+# 	xdim = recData[0]['activity'].shape[0]
+# 	ydim = 2
 	
-	max_num_sequences = int(k/sequenceLength)
+# 	max_num_sequences = int(k/sequenceLength)
 	
-	# X = np.asarray([recData[i]['activity'] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,xdim))
-	# y = np.asarray([[recData[i]['x'],recData[i]['y']] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,ydim))
+# 	# X = np.asarray([recData[i]['activity'] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,xdim))
+# 	# y = np.asarray([[recData[i]['x'],recData[i]['y']] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,ydim))
 
-	_X = np.asarray([recData[i]['activity'] for i in xrange(k)][:max_num_sequences*sequenceLength])
-	_y = np.asarray([[recData[i]['x'],recData[i]['y']] for i in xrange(k)][:max_num_sequences*sequenceLength])
+# 	_X = np.asarray([recData[i]['activity'] for i in xrange(k)][:max_num_sequences*sequenceLength])
+# 	_y = np.asarray([[recData[i]['x'],recData[i]['y']] for i in xrange(k)][:max_num_sequences*sequenceLength])
 
-	X = []
-	i = 0
-	print(_X.shape)
-	while(i + sequenceLength < _X.shape[0]):
-		X.append(_X[i:i+sequenceLength])
-		i+=100
-	X = np.asarray(X)
-	print(X.shape)
+# 	X = []
+# 	i = 0
+# 	print(_X.shape)
+# 	while(i + sequenceLength < _X.shape[0]):
+# 		X.append(_X[i:i+sequenceLength])
+# 		i+=100
+# 	X = np.asarray(X)
+# 	print(X.shape)
 
-	y = []
-	i = 0
-	print(_y.shape)
-	while(i + sequenceLength < _y.shape[0]):
-		y.append(_y[i:i+sequenceLength])
-		# i+=25
-		i+=100
-	y = np.asarray(y)
-	print(y.shape)
+# 	y = []
+# 	i = 0
+# 	print(_y.shape)
+# 	while(i + sequenceLength < _y.shape[0]):
+# 		y.append(_y[i:i+sequenceLength])
+# 		# i+=25
+# 		i+=100
+# 	y = np.asarray(y)
+# 	print(y.shape)
 
 
-	n = int(len(X)*0.8)
-	m = int(len(X)*0.9)
+# 	n = int(len(X)*0.8)
+# 	m = int(len(X)*0.9)
 
-	trX = np.array(X[:n],dtype=np.float32)
-	tvX = np.array(X[n:m],dtype=np.float32)
-	teX = np.array(X[m:],dtype=np.float32)
+# 	trX = np.array(X[:n],dtype=np.float32)
+# 	tvX = np.array(X[n:m],dtype=np.float32)
+# 	teX = np.array(X[m:],dtype=np.float32)
 
-	trY = np.array(y[:n],dtype=np.float32)
-	tvY = np.array(y[n:m],dtype=np.float32)
-	teY = np.array(y[m:],dtype=np.float32)
+# 	trY = np.array(y[:n],dtype=np.float32)
+# 	tvY = np.array(y[n:m],dtype=np.float32)
+# 	teY = np.array(y[m:],dtype=np.float32)
 
-	return trX, tvX, teX, trY, tvY, teY
+# 	return trX, tvX, teX, trY, tvY, teY
 
 def gaussian(x, mu, sig):
 	output = np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
@@ -351,27 +351,7 @@ def newDownsampleData(duration,data,freq=50.0):
 		activationResult[i] += entry['activation']
 		labelResult[i] += entry['label']
 
-	# print(activationResult.shape)
-	# print(activationResult)
-	# print(labelResult.shape)
-	# print(labelResult)
-
 	return activationResult, labelResult
-
-# def newConvolveData(duration,data,freq=50.0):
-# 	i = 0
-# 	step = 1/freq
-# 	outputDim = int(duration*freq)
-# 	activationDim = data[0]['activation'].shape[0]
-# 	result = np.zeros((outputDim,activationDim))
-# 	for entry in data:
-# 		print((i+1)*step)
-# 		while((i+1)*step < entry['time']):
-# 			i+=1
-# 		result[i] += entry['activation']
-
-# 	print(result.shape)
-# 	print(result)
 
 
 def mapPosToActivations(activationResult,labelResult):
