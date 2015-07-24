@@ -141,7 +141,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         #     backwards=True
         #     )
 
-        print("Recurrent back shape: ",lasagne.layers.get_output_shape(l_recurrent_back))
+        # print("Recurrent back shape: ",lasagne.layers.get_output_shape(l_recurrent_back))
 
         # l_recurrent_3 = lasagne.layers.GRULayer(
         #     l_recurrent_2, num_hidden_units, 
