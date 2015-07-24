@@ -150,21 +150,26 @@ def gaussConv(outDim,data):
 
 	inDim = len(data)
 	seqLen = len(data[0])
-	stepsize = 2*int(inDim/outDim)
+	stepsize = int(inDim/outDim)
 	result = []
-	conv = [gaussian(i,stepsize,stepsize/2) for i in range(2*stepsize+1)]
+	conv = [gaussian(i,stepsize,stepsize/2) for i in range(stepsize+1)]
 	# print(conv)
+	maximum = 0.0
 	for i in range(inDim)[::stepsize]:
 		start = i - stepsize
 		r = np.zeros(seqLen)
-		for n,j in enumerate(range(start,start+2*stepsize+1)):
+		for n,j in enumerate(range(start,start+stepsize+1)):
 			if j < 0:
 				continue
 			if j >= inDim:
 				break
 			r += conv[n]*data[j]
+		m = np.amax(r)
+		if m>maximum:
+			maximum = m
 		result.append(r)
-	return np.asarray(result)
+
+	return np.asarray(result)/maximum
 
 
 def formatData(tetrodeNumber=9,basename=BASENAME,sequenceLength=2000,endTetrode=16):
@@ -328,12 +333,13 @@ def organiseTetrodeData(tetrode):
 		else:
 			activation+=list(j[1])
 
-	print(result[0:5])
+	# print(result[0:5])
 	return duration,result
 
 def newDownsampleData(duration,data,freq=50.0):
+	print("Duration: {}".format(duration))
 	i = 0
-	step = 1/freq
+	step = 1.0/freq
 	outputDim = int(duration*freq)
 	activationDim = data[0]['activation'].shape[0]
 	labelDim = data[0]['label'].shape[0]
@@ -345,10 +351,10 @@ def newDownsampleData(duration,data,freq=50.0):
 		activationResult[i] += entry['activation']
 		labelResult[i] += entry['label']
 
-	print(activationResult.shape)
-	print(activationResult)
-	print(labelResult.shape)
-	print(labelResult)
+	# print(activationResult.shape)
+	# print(activationResult)
+	# print(labelResult.shape)
+	# print(labelResult)
 
 	return activationResult, labelResult
 
@@ -377,31 +383,105 @@ def mapPosToActivations(activationResult,labelResult):
 
 def ratemap(activationResult,labelResult):
 	x,y = getXY()
+	print(activationResult.shape)
+	print(labelResult.shape)
 
 	for i in range(labelResult[0].shape[0]):
 		rgba_colors = np.zeros((x.shape[0],4))
+		r = np.zeros(x.shape[0])
 		rgba_colors[:, 3] = 0.2
+		print("Label {}".format(i+1))
 		for j in range(x.shape[0]):
-			if labelResult[j][i] < 0.5:
+			r[j] = labelResult[j][i]
+			if labelResult[j][i] < 0.24:
 				rgba_colors[j][3] = 0.0
-			elif labelResult[j][i] < 1.5:
+			elif labelResult[j][i] < 0.55:
 				rgba_colors[j][1] = 1.0
-			else:
+			elif labelResult[j][i] < 1:
 				rgba_colors[j][0] = 1.0
-				rgba_colors[j][3] = 1.0
-
+				rgba_colors[j][3] = 0.8
+			else:
+				rgba_colors[:, 3] = 1.0
+		print(np.mean(r))
 		plt.scatter(x,y,c=rgba_colors,lw=0)
 		plt.show()
 
-if __name__=="__main__":
-	duration, result = organiseTetrodeData(9)
-	activationResult, labelResult = newDownsampleData(duration,result,1000)
-	#going to test the convolution
-	print(labelResult.shape)
-	activationResult = gaussConv(69700,activationResult)
-	labelResult = gaussConv(69700,labelResult)
+def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000):
 
-	ratemap(activationResult, labelResult)
+	k = 69700
+	totalLabel = None
+	for n,tetrode in enumerate(tetrodes):
+		duration, result = organiseTetrodeData(tetrode)
+		activationResult, labelResult = newDownsampleData(duration,result,1000.0)
+		# activationResult = gaussConv(k,activationResult)
+		labelResult = gaussConv(k,labelResult)	
+		# totalLabel += list(labelResult)
+		print("Neuron {}".format(n))
+		print(labelResult.shape)
+		if n == 0:
+			totalLabel = labelResult
+		else:
+			totalLabel = np.concatenate((totalLabel, labelResult), axis=1)
+
+	# totalLabel = np.asarray(totalLabel)
+	print(totalLabel.shape)
+	_x, _y = getXY()
+
+	xdim = totalLabel.shape[0]
+	ydim = 2
+	
+	max_num_sequences = int(k/sequenceLength)
+	
+	# X = np.asarray([recData[i]['activity'] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,xdim))
+	# y = np.asarray([[recData[i]['x'],recData[i]['y']] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,ydim))
+
+	_X = np.asarray([totalLabel[i] for i in xrange(k)][:max_num_sequences*sequenceLength])
+	_Y = np.asarray([[_x[i],_y[i]] for i in xrange(k)][:max_num_sequences*sequenceLength])
+
+	X = []
+	i = 0
+	print(_X.shape)
+	while(i + sequenceLength < _X.shape[0]):
+		X.append(_X[i:i+sequenceLength])
+		i+=100
+	X = np.asarray(X)
+	print(X.shape)
+
+	y = []
+	i = 0
+	print(_Y.shape)
+	while(i + sequenceLength < _Y.shape[0]):
+		y.append(_Y[i:i+sequenceLength])
+		# i+=25
+		i+=100
+	y = np.asarray(y)
+	print(y.shape)
+
+	n = int(len(X)*0.8)
+	m = int(len(X)*0.9)
+
+	trX = np.array(X[:n],dtype=np.float32)
+	tvX = np.array(X[n:m],dtype=np.float32)
+	teX = np.array(X[m:],dtype=np.float32)
+
+	trY = np.array(y[:n],dtype=np.float32)
+	tvY = np.array(y[n:m],dtype=np.float32)
+	teY = np.array(y[m:],dtype=np.float32)
+
+	return trX, tvX, teX, trY, tvY, teY	
+
+if __name__=="__main__":
+	# duration, result = organiseTetrodeData(12)
+	# activationResult, labelResult = newDownsampleData(duration,result,1000.0)
+	# #going to test the convolution
+	# print(labelResult.shape)
+	# activationResult = gaussConv(69700,activationResult)
+	# labelResult = gaussConv(69700,labelResult)
+
+	# ratemap(activationResult, labelResult)
+
+	trX, tvX, teX, trY, tvY, teY = formatData()
+
 	# rate_maps(9,9)
 	# tetfilename = BASENAME+".1"
 	# header, data = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
