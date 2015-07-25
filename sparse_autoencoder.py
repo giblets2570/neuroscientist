@@ -210,7 +210,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     # this is the cost of the network when fed throught the noisey network
     train_output = lasagne.layers.get_output(network, X_batch)
     cost = lasagne.objectives.mse(train_output, y_batch) 
-    cost = cost.mean() # + beta * L
+    cost = cost.mean() + beta * L
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch)
     valid_cost = lasagne.objectives.mse(valid_output, y_batch) 
@@ -339,9 +339,9 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                     
                     code = training['code'](testing)
 
-                    # if(j == 0):
-                    #     L_penalty = training['L_penalty'](testing)
-                    #     print ("L_penalty = {}".format(L_penalty))
+                    if(j == 0):
+                        L_penalty = training['L_penalty'](testing)
+                        print ("L_penalty = {}".format(L_penalty))
                     
                     # plotting the figure
 

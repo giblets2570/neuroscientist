@@ -33,20 +33,22 @@ else:
         return pickle.load(f, encoding=encoding)
 
 
-BASENAME = "../../R2192/20140110_R2192_track1"
+BASENAME = "../R2192/20140110_R2192_track1"
 
-NUM_EPOCHS = 10
+NUM_EPOCHS = 1000
 BATCH_SIZE = 600
-NUM_HIDDEN_UNITS = 100
+NUM_HIDDEN_UNITS = 300
 LEARNING_RATE = 0.01
 MOMENTUM = 0.9
 
-EARLY_STOPPING = True
+EARLY_STOPPING = False
 STOPPING_RANGE = 10
 
 LOG_EXPERIMENT = False
 
 TETRODE_NUMBER = 16
+
+L2_CONSTANT = 0.00001
 
 CONV = False
 
@@ -58,6 +60,7 @@ def load_data(tetrode_number):
     X_train, X_valid, X_test, y_train, y_valid, y_test = formatData(tetrode_number,BASENAME,CONV)
 
     X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1])
+    X_valid = X_valid.reshape(X_valid.shape[0],1,X_valid.shape[1])
     # y_train = y_train.reshape(y_train.shape[0],1,y_train.shape[1])
     X_test = X_test.reshape(X_test.shape[0],1,X_test.shape[1])
     # y_test = y_test.reshape(y_test.shape[0],1,y_test.shape[1])
@@ -70,13 +73,14 @@ def load_data(tetrode_number):
         X_test=X_test,
         y_test=y_test,
         num_examples_train=X_train.shape[0],
+        num_examples_valid=X_valid.shape[0],
         num_examples_test=X_test.shape[0],
         input_shape=X_train.shape,
         output_dim=y_train.shape[-1],
     )
 
 def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden,batch_size=BATCH_SIZE):
-	"""Create a symbolic representation of a neural network with `intput_dim`
+    """Create a symbolic representation of a neural network with `intput_dim`
     input nodes, `output_dim` output nodes and `num_hidden_units` per hidden
     layer.
     The training function of this model must have a mini-batch size of
@@ -84,55 +88,55 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
     A theano expression which represents such a network is returned.
     """
 
-        l_in = lasagne.layers.InputLayer(shape=input_shape)
-        
-	   # l_in_dropout = lasagne.layers.DropoutLayer(l_in,p=p_drop_input)
+    l_in = lasagne.layers.InputLayer(shape=input_shape)
+    
+   # l_in_dropout = lasagne.layers.DropoutLayer(l_in,p=p_drop_input)
 
-        l_hidden = lasagne.layers.DenseLayer(
-            l_in,
-            num_units=num_hidden_units,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+    l_hidden = lasagne.layers.DenseLayer(
+        l_in,
+        num_units=num_hidden_units,
+        nonlinearity=lasagne.nonlinearities.rectify,
+        )
 
-        # l_hidden_dropout = lasagne.layers.DropoutLayer(
-        #     l_hidden,
-        #     p=p_drop_hidden
-        #     )
-        l_hidden_2 = lasagne.layers.DenseLayer(
-            l_hidden,
-            num_units=num_hidden_units,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
-        # l_hidden_2_dropout = lasagne.layers.DropoutLayer(
-        #     l_hidden_2,
-        #     p=p_drop_hidden
-        #     )
-        l_hidden_3 = lasagne.layers.DenseLayer(
-            l_hidden_2,
-            num_units=num_hidden_units,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
-        # l_hidden_3_dropout = lasagne.layers.DropoutLayer(
-        #     l_hidden_3,
-        #     p=p_drop_hidden
-        #     )
-        # l_hidden_4 = lasagne.layers.DenseLayer(
-        #     l_hidden_3,
-        #     num_units=num_hidden_units,
-        #     nonlinearity=lasagne.nonlinearities.rectify,
-        #     )
-        # l_hidden_4_dropout = lasagne.layers.DropoutLayer(
-        #     l_hidden_4,
-        #     p=p_drop_hidden
-        #     )
-	l_out = lasagne.layers.DenseLayer(
-            l_hidden_3,
-            num_units=output_dim,
-            nonlinearity=lasagne.nonlinearities.softmax,
-            )
-        return l_out
+    # l_hidden_dropout = lasagne.layers.DropoutLayer(
+    #     l_hidden,
+    #     p=p_drop_hidden
+    #     )
+    l_hidden_2 = lasagne.layers.DenseLayer(
+        l_hidden,
+        num_units=num_hidden_units,
+        nonlinearity=lasagne.nonlinearities.rectify,
+        )
+    # l_hidden_2_dropout = lasagne.layers.DropoutLayer(
+    #     l_hidden_2,
+    #     p=p_drop_hidden
+    #     )
+    l_hidden_3 = lasagne.layers.DenseLayer(
+        l_hidden_2,
+        num_units=num_hidden_units,
+        nonlinearity=lasagne.nonlinearities.rectify,
+        )
+    # l_hidden_3_dropout = lasagne.layers.DropoutLayer(
+    #     l_hidden_3,
+    #     p=p_drop_hidden
+    #     )
+    # l_hidden_4 = lasagne.layers.DenseLayer(
+    #     l_hidden_3,
+    #     num_units=num_hidden_units,
+    #     nonlinearity=lasagne.nonlinearities.rectify,
+    #     )
+    # l_hidden_4_dropout = lasagne.layers.DropoutLayer(
+    #     l_hidden_4,
+    #     p=p_drop_hidden
+    #     )
+    l_out = lasagne.layers.DenseLayer(
+        l_hidden_3,
+        num_units=output_dim,
+        nonlinearity=lasagne.nonlinearities.softmax,
+        )
+    return l_out
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, alpha=L2_CONSTANT):
 
     """
         Method the returns the theano functions that are used in 
@@ -145,9 +149,10 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     y_batch = T.matrix()
 
     # this is the cost of the network when fed throught the noisey network
+    l2 = lasagne.regularization.l2(X_batch)
     train_output = lasagne.layers.get_output(network, X_batch)
     cost = lasagne.objectives.categorical_crossentropy(train_output, y_batch)
-    cost = cost.mean()
+    cost = cost.mean() + alpha*l2
 
     # test the performance of the netowork without noise
     test = lasagne.layers.get_output(network, X_batch, deterministic=True)
@@ -158,10 +163,12 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     updates = lasagne.updates.nesterov_momentum(cost, all_params, learning_rate, momentum)
     
     train = theano.function(inputs=[X_batch, y_batch], outputs=cost, updates=updates, allow_input_downcast=True)
+    valid = theano.function(inputs=[X_batch, y_batch], outputs=cost, allow_input_downcast=True)
     predict = theano.function(inputs=[X_batch], outputs=pred, allow_input_downcast=True)
 
     return dict(
         train=train,
+        valid=valid,
         predict=predict
     )
 
@@ -188,10 +195,23 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     print("Begining to train the network...")
     for i in range(NUM_EPOCHS):
+        costs = []
+        valid_costs = []
+
         for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
             cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
+            costs.append(cost)
+        for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
+            cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
+            valid_costs.append(cost)
+
         accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test']))
-        print("Epoch: {}, Accuracy: {}".format(i+1,accuracy))
+
+        meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
+        meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
+
+        # print("Epoch: {}, Accuracy: {}".format(i+1,accuracy))
+        print("Epoch: {}, Accuracy: {}, Training cost: {}, validation cost: {}".format(i+1,accuracy,meanTrainCost,meanValidCost))
 
         if(EARLY_STOPPING):
             if(len(accuracies) < STOPPING_RANGE):

@@ -243,19 +243,20 @@ def main(tetrode_number=TETRODE_NUMBER):
             print("Epoch: {}, Accuracy: {}, Training cost / validation cost: {}".format(i+1,accuracy,meanTrainCost/meanValidCost))
 
             trainvalidation.append([meanTrainCost,meanValidCost])
+            
     	accuracies.append(accuracy)
-            if(EARLY_STOPPING):
-                if(len(accuracies) < STOPPING_RANGE):
-                    pass
-                else:
-                    test = [k for k in accuracies if k < accuracy]
-                    if not test:
-                        print('Early stopping causing training to finish at epoch {}'.format(i+1))
-                        break
-                    del accuracies[0]
-                    accuracies.append(accuracy)
+        if(EARLY_STOPPING):
+            if(len(accuracies) < STOPPING_RANGE):
+                pass
+            else:
+                test = [k for k in accuracies if k < accuracy]
+                if not test:
+                    print('Early stopping causing training to finish at epoch {}'.format(i+1))
+                    break
+                del accuracies[0]
+                accuracies.append(accuracy)
 
-            epochsDone = epochsDone + 1
+        epochsDone = epochsDone + 1
     except KeyboardInterrupt:
         pass
 
