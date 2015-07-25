@@ -307,7 +307,7 @@ def main(tetrode_number=TETRODE_NUMBER):
             else: 
                 increasing = 0
 
-            if increasing == 5:
+            if increasing == 3:
                 print("Lowering learning rate")
                 learning_rate = 0.9*learning_rate
                 increasing = 0
@@ -335,7 +335,7 @@ def main(tetrode_number=TETRODE_NUMBER):
     if(LOG_EXPERIMENT):
         print("Logging the experiment details...")
         log = dict(
-            NET_TYPE = "Recurent network 3 layers, {} units ".format(NUM_HIDDEN_UNITS),
+            NET_TYPE = "Recurent network 1 layer, {} units ".format(NUM_HIDDEN_UNITS),
             TETRODE_NUMBER = tetrode_number,
             BASENAME = BASENAME,
             NUM_EPOCHS = epochsDone,

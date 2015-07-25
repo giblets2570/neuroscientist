@@ -443,7 +443,6 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                 plt.savefig('../logs/auto/meanshift_{}.png'.format(i), bbox_inches='tight')
                 plt.close()
 
-
                 # DBSCAN
 
                 # X = StandardScaler().fit_transform(codes_2d)
