@@ -131,36 +131,36 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         print("Recurrent shape: ",lasagne.layers.get_output_shape(l_recurrent))
 
-        # l_recurrent_2 = lasagne.layers.GRULayer(
-        #     l_recurrent, num_hidden_units, 
-        #     grad_clipping=GRAD_CLIP,
-        #     gradient_steps=500,
-        #     # W_in_to_hid=lasagne.init.HeUniform(),
-        #     # W_hid_to_hid=lasagne.init.HeUniform(),
-        #     # nonlinearity=lasagne.nonlinearities.sigmoid
-        #     )
-
-        print("Recurrent shape: ",lasagne.layers.get_output_shape(l_recurrent_2))
-
-        l_recurrent_back = lasagne.layers.GRULayer(
-            l_in, num_hidden_units, 
+        l_recurrent_2 = lasagne.layers.GRULayer(
+            l_recurrent, num_hidden_units, 
             grad_clipping=GRAD_CLIP,
             gradient_steps=500,
             # W_in_to_hid=lasagne.init.HeUniform(),
             # W_hid_to_hid=lasagne.init.HeUniform(),
             # nonlinearity=lasagne.nonlinearities.sigmoid
-            backwards=True
             )
 
-        # print("Recurrent back shape: ",lasagne.layers.get_output_shape(l_recurrent_back))
+        print("Recurrent shape: ",lasagne.layers.get_output_shape(l_recurrent_2))
 
-        # l_recurrent_3 = lasagne.layers.GRULayer(
-        #     l_recurrent_2, num_hidden_units, 
+        # l_recurrent_back = lasagne.layers.GRULayer(
+        #     l_in, num_hidden_units, 
         #     grad_clipping=GRAD_CLIP,
+        #     gradient_steps=500,
         #     # W_in_to_hid=lasagne.init.HeUniform(),
         #     # W_hid_to_hid=lasagne.init.HeUniform(),
         #     # nonlinearity=lasagne.nonlinearities.sigmoid
+        #     backwards=True
         #     )
+
+        # print("Recurrent back shape: ",lasagne.layers.get_output_shape(l_recurrent_back))
+
+        l_recurrent_3 = lasagne.layers.GRULayer(
+            l_recurrent_2, num_hidden_units, 
+            grad_clipping=GRAD_CLIP,
+            # W_in_to_hid=lasagne.init.HeUniform(),
+            # W_hid_to_hid=lasagne.init.HeUniform(),
+            # nonlinearity=lasagne.nonlinearities.sigmoid
+            )
 
 
         # this is great
@@ -202,12 +202,12 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         #     )
         
 
-        l_sum = lasagne.layers.ElemwiseSumLayer([l_recurrent, l_recurrent_back])
+        # l_sum = lasagne.layers.ElemwiseSumLayer([l_recurrent, l_recurrent_back])
 
         # We need a reshape layer which combines the first (batch size) and second
         # (number of timesteps) dimensions, otherwise the DenseLayer will treat the
         # number of time steps as a feature dimension.
-        l_reshape_3 = lasagne.layers.ReshapeLayer(l_sum, (batch_size*length, num_hidden_units))
+        l_reshape_3 = lasagne.layers.ReshapeLayer(l_recurrent_3, (batch_size*length, num_hidden_units))
 
         print("Reshape shape: ",lasagne.layers.get_output_shape(l_reshape_3))
 
