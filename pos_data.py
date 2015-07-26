@@ -4,7 +4,7 @@ import sys
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as PathEffects
 import matplotlib
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 
 import numpy as np
 
@@ -93,7 +93,7 @@ def makeVideo(X, Y):
 	    #             vmin=-2.5, vmax=2.5, levels=np.linspace(-2,2,20))
 	    # ax.scatter(X[:,0], X[:,1])
 	    ax.axis((0.0,1.0,0.0,1.0))
-	    ax.scatter(X[t*500],Y[t*500])
+	    # ax.scatter(X[t*500],Y[t*500])
 
 	    return mplfig_to_npimage(fig)
 
