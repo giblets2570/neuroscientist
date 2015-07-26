@@ -68,9 +68,9 @@ def getXY(filename=FILENAME):
 
 def makeVideo(X, Y):
 
-	duration = X.shape[0]
+	duration = X.shape[0]/500
 
-	duration = 50
+	fps = 15
 
 	fig, ax = plt.subplots(1, figsize=(4, 4), facecolor='white')
 	fig.subplots_adjust(left=0, right=1, bottom=0)
@@ -93,11 +93,11 @@ def makeVideo(X, Y):
 	    #             vmin=-2.5, vmax=2.5, levels=np.linspace(-2,2,20))
 	    # ax.scatter(X[:,0], X[:,1])
 	    ax.axis((0.0,1.0,0.0,1.0))
-	    ax.scatter(X[t],Y[t])
+	    ax.scatter(X[t*500],Y[t*500])
 
 	    return mplfig_to_npimage(fig)
 
-	animation = mpy.VideoClip(make_frame, duration = duration)
+	animation = mpy.VideoClip(make_frame, duration = duration/fps)
 	animation.write_gif("mouse_moving.gif", fps=15)
 
 if __name__=="__main__":
