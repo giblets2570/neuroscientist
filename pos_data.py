@@ -19,12 +19,17 @@ def getXY(filename=FILENAME):
 	header, data = readfile(filename,[('ts','>i'),('pos','>8h')])
 	x = [x for x,_,_,_,_,_,_,_ in data['pos']]
 	y = [y for _,y,_,_,_,_,_,_ in data['pos']]
+	num_wrong = 0
 	for n,i in enumerate(x):
 		if i>800:
+			num_wrong+=1
 			x[n] = 640
 	for n,i in enumerate(y):
 		if i>800:
+			num_wrong+=1
 			y[n] = 500
+
+	print("Num wrong: {}".format(num_wrong))
 
 	x = np.asarray(x,dtype=np.float32)
 	y = np.asarray(y,dtype=np.float32)
