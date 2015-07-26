@@ -1,5 +1,5 @@
 import matplotlib
-matplotlib.use('Agg')
+# matplotlib.use('Agg')
 from reading_and_viewing_data.readDACQfile import _readFile as readfile 
 import sys
 
@@ -13,7 +13,8 @@ from moviepy.video.io.bindings import mplfig_to_npimage
 import moviepy.editor as mpy
 
 
-FILENAME = "../R2192/20140110_R2192_track1.pos"
+FILENAME = "../R2192-screening/20141001_R2192_screening.pos"
+# FILENAME = "../R2192/20140110_R2192_track1.pos"
 
 def getXY(filename=FILENAME):
 	header, data = readfile(filename,[('ts','>i'),('pos','>8h')])
@@ -21,13 +22,13 @@ def getXY(filename=FILENAME):
 	y = [y for _,y,_,_,_,_,_,_ in data['pos']]
 	num_wrong = 0
 	for n,i in enumerate(x):
-		if i>800:
+		if i>1000:
 			num_wrong+=1
-			x[n] = 640
+			x[n] = x[n-1]
 	for n,i in enumerate(y):
-		if i>800:
+		if i>1000:
 			num_wrong+=1
-			y[n] = 500
+			y[n] = y[n-1]
 
 	print("Num wrong: {}".format(num_wrong))
 
@@ -107,11 +108,11 @@ def makeVideo(X, Y):
 
 if __name__=="__main__":
 	x, y = getXY()
-	makeVideo(x,y)
+	# makeVideo(x,y)
 	# print(data['pos'][1000:1030])
 	# plt.plot(data['pos'])
 	# plt.show()
-	# plt.scatter(x, y)
-	# plt.show()
+	plt.scatter(x, y)
+	plt.show()
 	# with open('pos.txt','w') as f:
 	# 	f.write(str(x) + " " + str(y))
