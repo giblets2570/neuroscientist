@@ -35,9 +35,9 @@ else:
 
 BASENAME = "../R2192/20140110_R2192_track1"
 
-NUM_EPOCHS = 1000
+NUM_EPOCHS = 1000000
 BATCH_SIZE = 600
-NUM_HIDDEN_UNITS = 300
+NUM_HIDDEN_UNITS = 400
 LEARNING_RATE = 0.01
 MOMENTUM = 0.9
 
@@ -48,7 +48,7 @@ LOG_EXPERIMENT = False
 
 TETRODE_NUMBER = 16
 
-L2_CONSTANT = 0.00001
+L2_CONSTANT = 0.0001
 
 CONV = False
 
@@ -59,10 +59,10 @@ def load_data(tetrode_number):
 
     X_train, X_valid, X_test, y_train, y_valid, y_test = formatData(tetrode_number,BASENAME,CONV)
 
-    X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1])
-    X_valid = X_valid.reshape(X_valid.shape[0],1,X_valid.shape[1])
-    # y_train = y_train.reshape(y_train.shape[0],1,y_train.shape[1])
-    X_test = X_test.reshape(X_test.shape[0],1,X_test.shape[1])
+    # X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1])
+    # X_valid = X_valid.reshape(X_valid.shape[0],1,X_valid.shape[1])
+    # # y_train = y_train.reshape(y_train.shape[0],1,y_train.shape[1])
+    # X_test = X_test.reshape(X_test.shape[0],1,X_test.shape[1])
     # y_test = y_test.reshape(y_test.shape[0],1,y_test.shape[1])
 
     return dict(
@@ -90,7 +90,9 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
 
     l_in = lasagne.layers.InputLayer(shape=input_shape)
     
-   # l_in_dropout = lasagne.layers.DropoutLayer(l_in,p=p_drop_input)
+    # l_in_dropout = lasagne.layers.DropoutLayer(l_in,p=p_drop_input)
+
+    print("Input shape: ",lasagne.layers.get_output_shape(l_in))
 
     l_hidden = lasagne.layers.DenseLayer(
         l_in,
@@ -98,15 +100,23 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
         nonlinearity=lasagne.nonlinearities.rectify,
         )
 
+    print("Hidden 1 shape: ",lasagne.layers.get_output_shape(l_hidden))
+
     # l_hidden_dropout = lasagne.layers.DropoutLayer(
     #     l_hidden,
-    #     p=p_drop_hidden
+    #     p=0.6
     #     )
+
+    # print("Hidden drop 1 shape: ",lasagne.layers.get_output_shape(l_hidden_dropout))
+
     l_hidden_2 = lasagne.layers.DenseLayer(
         l_hidden,
         num_units=num_hidden_units,
         nonlinearity=lasagne.nonlinearities.rectify,
         )
+
+    print("Hidden 2 shape: ",lasagne.layers.get_output_shape(l_hidden_2))
+
     # l_hidden_2_dropout = lasagne.layers.DropoutLayer(
     #     l_hidden_2,
     #     p=p_drop_hidden
@@ -116,6 +126,9 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
         num_units=num_hidden_units,
         nonlinearity=lasagne.nonlinearities.rectify,
         )
+
+    print("Hidden 3 shape: ",lasagne.layers.get_output_shape(l_hidden_3))
+
     # l_hidden_3_dropout = lasagne.layers.DropoutLayer(
     #     l_hidden_3,
     #     p=p_drop_hidden
@@ -134,6 +147,9 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
         num_units=output_dim,
         nonlinearity=lasagne.nonlinearities.softmax,
         )
+
+    print("Output shape: ",lasagne.layers.get_output_shape(l_out))
+
     return l_out
 
 def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, alpha=L2_CONSTANT):
@@ -145,7 +161,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     """
 
     # symbolic variables 
-    X_batch = T.tensor3()
+    X_batch = T.matrix()
     y_batch = T.matrix()
 
     # this is the cost of the network when fed throught the noisey network
@@ -183,7 +199,7 @@ def main(tetrode_number=TETRODE_NUMBER):
     print(dataset['input_shape'])
 
     print("Making the model...")
-    network = model(dataset['input_shape'],dataset['output_dim'],NUM_HIDDEN_UNITS,0.2,0.2)
+    network = model(dataset['input_shape'],dataset['output_dim'],NUM_HIDDEN_UNITS,0.5,0.5)
     print("Done!")
 
     print("Setting up the training functions...")
