@@ -70,7 +70,7 @@ def makeVideo(X, Y):
 
 	duration = X.shape[0]
 
-	duration = duration/10
+	duration = 1000
 
 	fig, ax = plt.subplots(1, figsize=(4, 4), facecolor='white')
 	fig.subplots_adjust(left=0, right=1, bottom=0)
