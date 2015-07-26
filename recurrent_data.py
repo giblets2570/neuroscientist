@@ -296,10 +296,10 @@ def test():
 
 
 def organiseTetrodeData(tetrode):
-
+	
 	tetfilename = BASENAME+"."+str(tetrode)
 	tetheader,tetdata = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
-
+	print(tetheader)
 	cutfilename = BASENAME+".clu."+str(tetrode)
 
 	sample_rate = float(re.sub("[^0-9.]", "", tetheader['sample_rate']))
