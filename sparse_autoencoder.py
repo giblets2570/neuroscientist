@@ -33,6 +33,10 @@ from sklearn import metrics
 from sklearn.datasets.samples_generator import make_blobs
 from sklearn.preprocessing import StandardScaler
 
+# We'll generate an animation with matplotlib and moviepy.
+from moviepy.video.io.bindings import mplfig_to_npimage
+import moviepy.editor as mpy
+
 PY2 = sys.version_info[0] == 2
 
 if PY2:
@@ -47,7 +51,7 @@ else:
         return pickle.load(f, encoding=encoding)
 
 
-BASENAME = "../R2192/20140110_R2192_track1"
+BASENAME = "../R2192-screening/20141001_R2192_screening"
 
 NUM_EPOCHS = 1000000
 BATCH_SIZE = 400
@@ -62,7 +66,11 @@ LOG_EXPERIMENT = True
 
 TETRODE_NUMBER = 11
 
+SAVE_MODEL = False
+
 CONV = False
+
+NUM_POINTS = 10000
 
 class DimshuffleLayer(lasagne.layers.Layer):
     def __init__(self, input_layer, pattern):
@@ -177,7 +185,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
 
         return l_out
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.02, beta=0.1, momentum=MOMENTUM):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.02, beta=0.01, momentum=MOMENTUM):
 
     """
         Method the returns the theano functions that are used in 
@@ -239,6 +247,25 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
         code=code,
         L_penalty=L_penalty
     )
+
+def makeVideo(X_2d):
+
+    duration = X_2d.shape[0]
+
+    fps = 15
+
+    fig, ax = plt.subplots(1, figsize=(4, 4), facecolor='white')
+    fig.subplots_adjust(left=0, right=1, bottom=0)
+
+    def make_frame(t):
+        ax.clear()
+        ax.set_title("Activations", fontsize=16)
+        ax.scatter(X_2d[:t,0],X_2d[:t,1])
+
+        return mplfig_to_npimage(fig)
+
+    animation = mpy.VideoClip(make_frame, duration = duration/fps)
+    animation.write_gif("code_activations.gif", fps=15)
 
 def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=200,num_code_units=50):
     """
@@ -400,15 +427,19 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                 # break
 
             if i%100==0:
-                codes = training['code'](dataset['X_train'][0:5000])
+                codes = training['code'](dataset['X_train'][0:NUM_POINTS])
                 print(codes.shape)
                 codes_2d = bh_sne(codes)
 
                 # print(dataset['y_train'].shape)
-                plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:5000],alpha=0.8,lw=0)
+                plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:NUM_POINTS],alpha=0.8,lw=0)
                 plt.savefig('../logs/auto/tsne_{}.png'.format(i), bbox_inches='tight')
                 plt.close()
 
+
+                # This is where the code for the video will go
+
+                makeVideo(codes_2d)
 
                 # MEANSHIFT
 
@@ -460,13 +491,13 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                 n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
 
                 print('Estimated number of clusters: %d' % n_clusters_)
-                print("Homogeneity: %0.3f" % metrics.homogeneity_score(dataset['y_train_labels'][:5000], labels))
-                print("Completeness: %0.3f" % metrics.completeness_score(dataset['y_train_labels'][:5000], labels))
-                print("V-measure: %0.3f" % metrics.v_measure_score(dataset['y_train_labels'][:5000], labels))
+                print("Homogeneity: %0.3f" % metrics.homogeneity_score(dataset['y_train_labels'][:NUM_POINTS], labels))
+                print("Completeness: %0.3f" % metrics.completeness_score(dataset['y_train_labels'][:NUM_POINTS], labels))
+                print("V-measure: %0.3f" % metrics.v_measure_score(dataset['y_train_labels'][:NUM_POINTS], labels))
                 print("Adjusted Rand Index: %0.3f"
-                      % metrics.adjusted_rand_score(dataset['y_train_labels'][:5000], labels))
+                      % metrics.adjusted_rand_score(dataset['y_train_labels'][:NUM_POINTS], labels))
                 print("Adjusted Mutual Information: %0.3f"
-                      % metrics.adjusted_mutual_info_score(dataset['y_train_labels'][:5000], labels))
+                      % metrics.adjusted_mutual_info_score(dataset['y_train_labels'][:NUM_POINTS], labels))
                 print("Silhouette Coefficient: %0.3f"
                       % metrics.silhouette_score(X, labels))
 
@@ -494,6 +525,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
                 plt.title('Estimated number of clusters: %d' % n_clusters_)
                 plt.savefig('../logs/auto/dbscan_{}.png'.format(i), bbox_inches='tight')
+                plt.close()
 
             trainvalidation.append([meanTrainCost,meanValidCost])
             accuracies.append(accuracy)
@@ -537,6 +569,13 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         filename = re.sub("[^A-Za-z0-9_/ ,-:]", "", filename)
         with open(filename,"w") as outfile:
             outfile.write(str(log))
+
+    if(SAVE_MODEL):
+        print("Saving model...")
+        all_param_values = lasagne.layers.get_all_param_values(network)
+        f=open('sparse_auto_network','w')
+        pickle.dump(all_param_values, f)
+        f.close()
 
 if __name__ == '__main__':
     main()

@@ -400,12 +400,12 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                 # break
 
             if i%100==0:
-                codes = training['code'](dataset['X_train'][0:5000])
+                codes = training['code'](dataset['X_train'][0:10000])
                 print(codes.shape)
                 codes_2d = bh_sne(codes)
 
                 # print(dataset['y_train'].shape)
-                plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:5000],alpha=0.8,lw=0)
+                plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:10000],alpha=0.8,lw=0)
                 plt.savefig('../logs/auto/tsne_{}.png'.format(i), bbox_inches='tight')
                 plt.close()
 
@@ -460,13 +460,13 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                 n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
 
                 print('Estimated number of clusters: %d' % n_clusters_)
-                print("Homogeneity: %0.3f" % metrics.homogeneity_score(dataset['y_train_labels'][:5000], labels))
-                print("Completeness: %0.3f" % metrics.completeness_score(dataset['y_train_labels'][:5000], labels))
-                print("V-measure: %0.3f" % metrics.v_measure_score(dataset['y_train_labels'][:5000], labels))
+                print("Homogeneity: %0.3f" % metrics.homogeneity_score(dataset['y_train_labels'][:10000], labels))
+                print("Completeness: %0.3f" % metrics.completeness_score(dataset['y_train_labels'][:10000], labels))
+                print("V-measure: %0.3f" % metrics.v_measure_score(dataset['y_train_labels'][:10000], labels))
                 print("Adjusted Rand Index: %0.3f"
-                      % metrics.adjusted_rand_score(dataset['y_train_labels'][:5000], labels))
+                      % metrics.adjusted_rand_score(dataset['y_train_labels'][:10000], labels))
                 print("Adjusted Mutual Information: %0.3f"
-                      % metrics.adjusted_mutual_info_score(dataset['y_train_labels'][:5000], labels))
+                      % metrics.adjusted_mutual_info_score(dataset['y_train_labels'][:10000], labels))
                 print("Silhouette Coefficient: %0.3f"
                       % metrics.silhouette_score(X, labels))
 

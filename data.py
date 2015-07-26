@@ -4,9 +4,9 @@ import sys
 import matplotlib.pyplot as plt
 import re
 
-BASENAME = "../R2192/20140110_R2192_track1"
+BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-def formatData(tetrodeNumber,basename,twoD=False):
+def formatData(tetrodeNumber,basename,twoD=False,timed=False):
 
 	tetfilename = basename + "." + str(tetrodeNumber)
 	cutfilename = basename + ".clu." + str(tetrodeNumber)
@@ -36,7 +36,7 @@ def formatData(tetrodeNumber,basename,twoD=False):
 			else:
 				con = list(np.asarray(data[i][1],dtype=np.float16)/m)+list(np.asarray(data[i+1][1],dtype=np.float16)/m)+list(np.asarray(data[i+2][1],dtype=np.float16)/m)+list(np.asarray(data[i+3][1],dtype=np.float16)/m)
 			conData = np.asarray(con,dtype=np.float16)
-			entry['data'] = conData
+			entry['data'] = np.asarray(conData)
 			timesData.append(entry)
 			inputData.append(conData)
 
@@ -74,7 +74,13 @@ def formatData(tetrodeNumber,basename,twoD=False):
 
 		return trX, tvX, teX, trY, tvY, teY
 
-	return getTrainingTest()
+
+	if(timed):
+		return concatanateChannels()
+	else:
+		return getTrainingTest()
+
+
 
 if __name__=="__main__":
 	# trX, tvX, teX, trY, tvY, teY = formatData(9,BASENAME,twoD=True)
