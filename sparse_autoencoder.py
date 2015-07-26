@@ -66,7 +66,7 @@ LOG_EXPERIMENT = True
 
 TETRODE_NUMBER = 11
 
-SAVE_MODEL = False
+SAVE_MODEL = True
 
 CONV = False
 
@@ -439,7 +439,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
                 # This is where the code for the video will go
 
-                makeVideo(codes_2d)
+                # makeVideo(codes_2d)
 
                 # MEANSHIFT
 
