@@ -12,7 +12,7 @@ import math
 from moviepy.video.io.bindings import mplfig_to_npimage
 import moviepy.editor as mpy
 
-BASENAME = "../R2192/20140110_R2192_track1"
+BASENAME = "../R2192-screening/20141001_R2192_screening"
 
 def getTotalInputDimension(tetrodeNumber=9,endTetrode=16,basename=BASENAME):
 	"""
@@ -388,7 +388,9 @@ def ratemap(activationResult,labelResult):
 
 def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000):
 
-	k = 69700
+	# k = 69700
+	k = 54100
+	# this has to work
 	totalLabel = None
 	for n,tetrode in enumerate(tetrodes):
 		duration, result = organiseTetrodeData(tetrode)
