@@ -1,10 +1,10 @@
+import matplotlib
+matplotlib.use('Agg')
 from reading_and_viewing_data.readDACQfile import _readFile as readfile 
 import sys
 
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as PathEffects
-import matplotlib
-# matplotlib.use('TkAgg')
 
 import numpy as np
 
