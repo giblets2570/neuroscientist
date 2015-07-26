@@ -93,7 +93,7 @@ def makeVideo(X, Y):
 	    #             vmin=-2.5, vmax=2.5, levels=np.linspace(-2,2,20))
 	    # ax.scatter(X[:,0], X[:,1])
 	    ax.axis((0.0,1.0,0.0,1.0))
-	    ax.scatter(X,Y)
+	    ax.scatter(X[t],Y[t])
 
 	    return mplfig_to_npimage(fig)
 
