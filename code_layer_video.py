@@ -72,7 +72,7 @@ SAVE_MODEL = False
 
 CONV = False
 
-NUM_POINTS = 1000
+NUM_POINTS = 100
 
 MODEL_FILENAME = "sparse_auto_network"
 
@@ -81,13 +81,14 @@ def load_data(tetrode_number=TETRODE_NUMBER):
         Get data with labels, split into training and test set.
     """
     print("Loading data...")
-    data, timed_activations = formatData(tetrode_number,BASENAME,CONV,timed=True)
+    data, timed_activations, labels = formatData(tetrode_number,BASENAME,CONV,timed=True)
     print(len(timed_activations))
     x, y = getXY()
     print("Done!")
 
     return dict(
         data=data,
+        labels=[np.argmax(y) for  y in labels],
         timed_activations=timed_activations,
         x=x,
         y=y,
@@ -172,7 +173,11 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
         code=code
     )
 
-def makeVideo(X_2d):
+def makeVideo(X_2d,dataset):
+
+    labels = dataset['labels']
+    # print(labels.shape)
+    timed_activations = dataset['timed_activations']
 
     duration = X_2d.shape[0]
 
@@ -181,10 +186,19 @@ def makeVideo(X_2d):
     fig, ax = plt.subplots(1, figsize=(4, 4), facecolor='white')
     fig.subplots_adjust(left=0, right=1, bottom=0)
 
+    i = 0
+
     def make_frame(t):
         ax.clear()
+        # old_i = i
+        print(t)
+        # while(timed_activations[i]['time']/96000.0 < t):
+        #     i+=1
+
         ax.set_title("Activations", fontsize=16)
-        ax.scatter(X_2d[:t,0],X_2d[:t,1])
+        ax.scatter(X_2d[:,0],X_2d[:,1],alpha=0.1,lw=0.0)
+
+        ax.scatter(X_2d[t:t+1,0],X_2d[t:t+1,1],alpha=1,lw=0.0)
 
         return mplfig_to_npimage(fig)
 
@@ -219,13 +233,9 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     print(codes.shape)
     codes_2d = bh_sne(codes)
 
-    # print(dataset['y_train'].shape)
-    plt.scatter(codes_2d[:, 0], codes_2d[:, 1],alpha=0.8,lw=0)
-    plt.savefig('test_tsne.png', bbox_inches='tight')
-    plt.close()
 
     # This is where the code for the video will go
-    makeVideo(codes_2d)
+    makeVideo(codes_2d,dataset)
 
 if __name__ == '__main__':
     main()

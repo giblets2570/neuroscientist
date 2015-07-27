@@ -76,7 +76,9 @@ def formatData(tetrodeNumber,basename,twoD=False,timed=False):
 
 
 	if(timed):
-		return concatanateChannels()
+		w,e = concatanateChannels()
+		f = formatCut()
+		return w,e,f
 	else:
 		return getTrainingTest()
 
