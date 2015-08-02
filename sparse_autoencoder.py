@@ -70,7 +70,7 @@ SAVE_MODEL = True
 
 CONV = False
 
-NUM_POINTS = 10000
+NUM_POINTS = 1000
 
 class DimshuffleLayer(lasagne.layers.Layer):
     def __init__(self, input_layer, pattern):
