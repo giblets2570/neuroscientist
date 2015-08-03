@@ -60,10 +60,14 @@ def formatData(basename=BASENAME):
 
 	activations = np.asarray(activations)
 
+	print("Shuffling the data")
+
 	rng_state = np.random.get_state()
 	np.random.shuffle(activations)
 	np.random.set_state(rng_state)
 	np.random.shuffle(labels)
+
+	print("Done Shuffling")
 
 	num_entries = activations.shape[0]
 	n = int(num_entries*0.8)
