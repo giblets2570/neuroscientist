@@ -69,6 +69,8 @@ def formatData(basename=BASENAME):
 	n = int(num_entries*0.8)
 	m = int(num_entries*0.9)
 
+	print("Got the data yo")
+
 	return activations[:n],activations[n:m],activations[m:],labels[:n],labels[n:m],labels[m:]
 
 if __name__=="__main__":
@@ -80,4 +82,4 @@ if __name__=="__main__":
 	print(trY.shape) 
 	print(tvY.shape) 
 	print(teY.shape)
-	print()
+	
