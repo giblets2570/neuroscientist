@@ -59,6 +59,8 @@ LOG_EXPERIMENT = True
 
 TETRODE_NUMBER = 9
 
+SAVE_MODEL = True
+
 def load_data(tetrode_number):
     """
         Get data with labels, split into training and test set.
@@ -365,8 +367,12 @@ def main(tetrode_number=TETRODE_NUMBER):
         with open(filename,"w") as outfile:
             outfile.write(str(log))
 
-
-
+    if(SAVE_MODEL):
+        print("Saving model...")
+        all_param_values = lasagne.layers.get_all_param_values(network)
+        f=open('recurrent_1_network','w')
+        pickle.dump(all_param_values, f)
+        f.close()
 
 if __name__ == '__main__':
     # for i in range(16):
