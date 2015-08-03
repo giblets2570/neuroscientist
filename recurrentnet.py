@@ -95,6 +95,9 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             The training function of this model must have a mini-batch size of
             `batch_size`.
             A theano expression which represents such a network is returned.
+
+            Need to create a dense layer that converts the input to a 
+
         """
         length = input_shape[1]
         reduced_length = num_hidden_units
@@ -104,6 +107,8 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         # Construct vanilla RNN
         l_in = lasagne.layers.InputLayer(shape=shape)
+
+
 
 
         # print("Input shape: ",lasagne.layers.get_output_shape(l_in))

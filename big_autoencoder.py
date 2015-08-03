@@ -19,7 +19,7 @@ import theano
 import theano.tensor as T
 import time
 import datetime
-from data import formatData
+from big_data import formatData
 import json
 import re
 import math
@@ -47,7 +47,7 @@ else:
         return pickle.load(f, encoding=encoding)
 
 
-BASENAME = "../R2192-screening/20141001_R2192_screening"
+BASENAME = "../R2192/20140110_R2192_track1"
 
 NUM_EPOCHS = 1000000
 BATCH_SIZE = 400
@@ -82,7 +82,7 @@ def load_data(tetrode_number=TETRODE_NUMBER):
         Get data with labels, split into training and test set.
     """
     print("Loading data...")
-    X_train, X_valid, X_test, y_train_labels, y_valid_labels, y_test_labels = formatData(tetrode_number,BASENAME,CONV)
+    X_train, X_valid, X_test, y_train_labels, y_valid_labels, y_test_labels = formatData(BASENAME)
     print("Done!")
 
     # X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1])
@@ -242,10 +242,11 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
         L_penalty=L_penalty
     )
 
-def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=200,num_code_units=50):
+def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=800,num_hidden_units_2=400,num_code_units=100):
     """
         This is the main method that sets up the experiment
     """
+
     print("Loading the data...")
     dataset = load_data(tetrode_number)
     print("Done!")
@@ -393,7 +394,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
                     # plt.plot(var2)
                     # fig.tight_layout()
-                    plt.savefig('../logs/auto/fig{}_{}.png'.format(i,j), bbox_inches='tight')
+                    plt.savefig('../logs/big_auto/fig{}_{}.png'.format(i,j), bbox_inches='tight')
                     plt.close()
                     
                     ran += 1
@@ -406,9 +407,8 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
                 # print(dataset['y_train'].shape)
                 plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:10000],alpha=0.8,lw=0)
-                plt.savefig('../logs/auto/tsne_{}.png'.format(i), bbox_inches='tight')
+                plt.savefig('../logs/big_auto/tsne_{}.png'.format(i), bbox_inches='tight')
                 plt.close()
-
 
                 # MEANSHIFT
 
@@ -440,7 +440,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                     plt.plot(cluster_center[0], cluster_center[1], 'o', markerfacecolor=col,
                              markeredgecolor='k', markersize=14)
                 plt.title('Estimated number of clusters: %d' % n_clusters_)
-                plt.savefig('../logs/auto/meanshift_{}.png'.format(i), bbox_inches='tight')
+                plt.savefig('../logs/big_auto/meanshift_{}.png'.format(i), bbox_inches='tight')
                 plt.close()
 
                 # DBSCAN
@@ -493,7 +493,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                              markeredgecolor='k', markersize=4)
 
                 plt.title('Estimated number of clusters: %d' % n_clusters_)
-                plt.savefig('../logs/auto/dbscan_{}.png'.format(i), bbox_inches='tight')
+                plt.savefig('../logs/big_auto/dbscan_{}.png'.format(i), bbox_inches='tight')
 
             trainvalidation.append([meanTrainCost,meanValidCost])
             accuracies.append(accuracy)
@@ -533,7 +533,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
             # NETWORK_PARAMS = lasagne.layers.get_all_params_values(network)
         )
         now = datetime.datetime.now()
-        filename = "experiments/auto/{}_{}_{}_NUMLAYERS_{}_OUTPUTDIM_{}".format(now,NUM_EPOCHS,NUM_HIDDEN_UNITS,len(log['NETWORK_LAYERS']),log['OUTPUT_DIM'])
+        filename = "experiments/big_auto/{}_{}_{}_NUMLAYERS_{}_OUTPUTDIM_{}".format(now,NUM_EPOCHS,NUM_HIDDEN_UNITS,len(log['NETWORK_LAYERS']),log['OUTPUT_DIM'])
         filename = re.sub("[^A-Za-z0-9_/ ,-:]", "", filename)
         with open(filename,"w") as outfile:
             outfile.write(str(log))
@@ -541,7 +541,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     if(SAVE_MODEL):
         print("Saving model...")
         all_param_values = lasagne.layers.get_all_param_values(network)
-        f=open('auto_network','w')
+        f=open('big_auto_network','w')
         pickle.dump(all_param_values, f)
         f.close()
 

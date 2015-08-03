@@ -14,21 +14,21 @@ def formatData(tetrodeNumber,basename,twoD=False,timed=False):
 	def concatanateChannels():
 		header, data = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
 		print(header)
+		timebase = float(re.sub("[^0-9]", "", header['timebase']))
+		print(timebase)
 		timesData = []
 		inputData = []
 		for i in range(0,len(data),4):
 			if i+3 > len(data):
 				break
 			entry = {}
-			entry['time'] = data[i][0]
+			entry['time'] = data[i][0] / timebase
 			m = 0# np.max()
 			for j in range(4):
 				for k in range(50):
 					val = abs(data[i+j][1][k])
 					if(val > m):
 						m = val
-
-
 			con = None
 
 			if twoD:
@@ -39,6 +39,8 @@ def formatData(tetrodeNumber,basename,twoD=False,timed=False):
 			entry['data'] = np.asarray(conData)
 			timesData.append(entry)
 			inputData.append(conData)
+
+		print(int(timesData[-1]['time']))
 
 		return np.asarray(inputData),timesData
 
@@ -74,18 +76,16 @@ def formatData(tetrodeNumber,basename,twoD=False,timed=False):
 
 		return trX, tvX, teX, trY, tvY, teY
 
-
 	if(timed):
-		w,e = concatanateChannels()
+		act,time = concatanateChannels()
 		f = formatCut()
-		return w,e,f
+		return act,time,f
 	else:
 		return getTrainingTest()
 
 
-
 if __name__=="__main__":
-	# trX, tvX, teX, trY, tvY, teY = formatData(9,BASENAME,twoD=True)
+	trX, tvX, teX, trY, tvY, teY = formatData(9,BASENAME)
 
 	# print(trX.shape)
 	# print(trX[1])
@@ -93,7 +93,7 @@ if __name__=="__main__":
 	# plt.plot(trX[4][1])
 	# plt.show()
 
-	for i in range(11,12):
-		header, data = readfile(BASENAME+"."+str(i),[('ts','>i'),('waveform','50b')])
-		print(header,len(data))
+	# for i in range(11,12):
+	# 	header, data = readfile(BASENAME+"."+str(i),[('ts','>i'),('waveform','50b')])
+	# 	print(header,len(data))
 	# print(trX.shape, teX.shape, trY.shape, teY.shape)

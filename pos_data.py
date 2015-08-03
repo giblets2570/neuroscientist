@@ -1,5 +1,5 @@
 import matplotlib
-# matplotlib.use('Agg')
+matplotlib.use('Agg')
 from reading_and_viewing_data.readDACQfile import _readFile as readfile 
 import sys
 
@@ -13,8 +13,10 @@ from moviepy.video.io.bindings import mplfig_to_npimage
 import moviepy.editor as mpy
 
 
-# FILENAME = "../R2192-screening/20141001_R2192_screening.pos"
-FILENAME = "../R2192/20140110_R2192_track1.pos"
+FILENAME = "../R2192-screening/20141001_R2192_screening.pos"
+# FILENAME = "../R2192/20140110_R2192_track1.pos"
+
+VIDEO_NAME = "mouse_moving.gif"
 
 def getXY(filename=FILENAME):
 	header, data = readfile(filename,[('ts','>i'),('pos','>8h')])
@@ -72,47 +74,39 @@ def getXY(filename=FILENAME):
 
 	return x, y
 
-def makeVideo(X, Y, slowdown=200):
+def makeVideo(X, Y):
 
-
-
-	duration = X.shape[0]/slowdown
-
-	fps = 15
-
+	duration = X.shape[0]
+	print("Duration: ",duration)
+	duration = 10
+	fps = 1
 	fig, ax = plt.subplots(1, figsize=(4, 4), facecolor='white')
 	fig.subplots_adjust(left=0, right=1, bottom=0)
-	# xx, yy = np.meshgrid(np.linspace(-2,3,500), np.linspace(-1,2,500))
-
+	
 	def make_frame(t):
 	    ax.clear()
 	    ax.set_title("Rat location", fontsize=16)
 
-	    # classifier = svm.SVC(gamma=2, C=1)
-	    # the varying weights make the points appear one after the other
-	    # weights = np.minimum(1, np.maximum(0, t**2+10-np.arange(50)))
-	    # classifier.fit(X, Y, sample_weight=weights)
-	    # Z = classifier.decision_function(np.c_[xx.ravel(), yy.ravel()])
-	    # Z = Z.reshape(xx.shape)
-	    # ax.contourf(xx, yy, Z, cmap=plt.cm.bone, alpha=0.8,
-	    #             vmin=-2.5, vmax=2.5, levels=np.linspace(-2,2,20))
-	    # ax.scatter(X[:,0], X[:,1])
-
 	    ax.axis((0.0,1.0,0.0,1.0))
-	    ax.scatter(X[t*slowdown],Y[t*slowdown])
+	    ax.scatter(X[t],Y[t])
 
 	    return mplfig_to_npimage(fig)
 
-	animation = mpy.VideoClip(make_frame, duration = duration/fps)
-	animation.write_gif("mouse_moving.gif", fps=15)
+	
+	animation = mpy.VideoClip(make_frame, duration = duration)
+	print(animation)
+	animation.write_gif(VIDEO_NAME, fps=30)
 
 if __name__=="__main__":
 	x, y = getXY()
-	# makeVideo(x,y)
+	clip = makeVideo(x,y)
+	myclip = mpy.VideoFileClip(VIDEO_NAME)
+	print(myclip.fps)
+	myclip.preview()
 	# print(data['pos'][1000:1030])
 	# plt.plot(data['pos'])
 	# plt.show()
-	plt.scatter(x, y)
-	plt.show()
+	# plt.scatter(x, y)
+	# plt.show()
 	# with open('pos.txt','w') as f:
 	# 	f.write(str(x) + " " + str(y))

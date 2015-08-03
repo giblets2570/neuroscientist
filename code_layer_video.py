@@ -88,13 +88,12 @@ def load_data(tetrode_number=TETRODE_NUMBER):
 
     return dict(
         data=data,
-        labels=[np.argmax(y) for  y in labels],
+        labels=[np.argmax(y) for y in labels],
         timed_activations=timed_activations,
         x=x,
         y=y,
         freq=50.0
     )
-
 
 def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code_units, batch_size=BATCH_SIZE):
     """
@@ -181,7 +180,7 @@ def makeVideo(X_2d,dataset):
 
     duration = X_2d.shape[0]
 
-    fps = 1
+    fps = 5
 
     fig, ax = plt.subplots(1, figsize=(4, 4), facecolor='white')
     fig.subplots_adjust(left=0, right=1, bottom=0)
@@ -190,15 +189,12 @@ def makeVideo(X_2d,dataset):
 
     def make_frame(t):
         ax.clear()
-        # old_i = i
         print(t)
-        # while(timed_activations[i]['time']/96000.0 < t):
-        #     i+=1
 
         ax.set_title("Activations", fontsize=16)
         ax.scatter(X_2d[:,0],X_2d[:,1],alpha=0.1,lw=0.0)
 
-        ax.scatter(X_2d[t:t+1,0],X_2d[t:t+1,1],alpha=1,lw=0.0)
+        ax.scatter(X_2d[t*fps:t*fps+1,0],X_2d[t*fps:t*fps+1,1],alpha=1,lw=0.0)
 
         return mplfig_to_npimage(fig)
 
