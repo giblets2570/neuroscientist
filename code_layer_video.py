@@ -74,7 +74,7 @@ CONV = False
 
 NUM_POINTS = 100
 
-MODEL_FILENAME = "sparse_auto_network"
+MODEL_FILENAME = "sparse_auto_network_complete"
 
 def load_data(tetrode_number=TETRODE_NUMBER):
     """
@@ -232,7 +232,6 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     codes = training['code'](dataset['data'][0:NUM_POINTS])
     print(codes.shape)
     codes_2d = bh_sne(codes)
-
 
     # This is where the code for the video will go
     makeVideo(codes_2d,dataset)

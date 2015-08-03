@@ -64,6 +64,8 @@ TETRODE_NUMBER = 11
 
 CONV = False
 
+SAVE_MODEL = True
+
 class DimshuffleLayer(lasagne.layers.Layer):
     def __init__(self, input_layer, pattern):
         super(DimshuffleLayer, self).__init__(input_layer)
@@ -139,14 +141,14 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
         print(shape)
         l_in = lasagne.layers.InputLayer(shape=shape)
 
-        # l_hidden_1 = lasagne.layers.DenseLayer(
-        #     l_in,
-        #     num_units=num_hidden_units,
-        #     nonlinearity=lasagne.nonlinearities.rectify,
-        #     )
+        l_hidden_1 = lasagne.layers.DenseLayer(
+            l_in,
+            num_units=num_hidden_units,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
 
         l_hidden_2 = lasagne.layers.DenseLayer(
-            l_in,
+            l_hidden_1,
             num_units=num_hidden_units_2,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
@@ -163,14 +165,14 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        # l_hidden_4 = lasagne.layers.DenseLayer(
-        #     l_hidden_3,
-        #     num_units=num_hidden_units,
-        #     nonlinearity=lasagne.nonlinearities.rectify,
-        #     )
+        l_hidden_4 = lasagne.layers.DenseLayer(
+            l_hidden_3,
+            num_units=num_hidden_units,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
 
         l_out = lasagne.layers.DenseLayer(
-            l_hidden_3,
+            l_hidden_4,
             num_units=output_dim,
             nonlinearity=None,
             )
@@ -334,8 +336,6 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                     # print(np.arange(dataset['output_dim']))
                     # print(output)
                     prediction = training['predict'](testing)[0]
-                    # print(prediction)
-                    # print(testing[0][0])
                     
                     code = training['code'](testing)
 
@@ -537,6 +537,13 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         filename = re.sub("[^A-Za-z0-9_/ ,-:]", "", filename)
         with open(filename,"w") as outfile:
             outfile.write(str(log))
+
+    if(SAVE_MODEL):
+        print("Saving model...")
+        all_param_values = lasagne.layers.get_all_param_values(network)
+        f=open('auto_network','w')
+        pickle.dump(all_param_values, f)
+        f.close()
 
 if __name__ == '__main__':
     main()
