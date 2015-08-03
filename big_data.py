@@ -3,10 +3,11 @@ import numpy as np
 import sys
 import matplotlib.pyplot as plt
 import re
+import pickle
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-def formatData(basename=BASENAME):
+def getData(basename=BASENAME):
 	output_labels_dims = []
 	for tetrodeNumber in range(9,17):
 		cutfilename = basename + ".clu." + str(tetrodeNumber)
@@ -66,8 +67,13 @@ def formatData(basename=BASENAME):
 	np.random.shuffle(activations)
 	np.random.set_state(rng_state)
 	np.random.shuffle(labels)
-
 	print("Done Shuffling")
+
+	return activations, labels
+
+def formatData(basename=BASENAME):
+
+	activations, labels = getData(basename)
 
 	num_entries = activations.shape[0]
 	n = int(num_entries*0.8)
@@ -78,7 +84,15 @@ def formatData(basename=BASENAME):
 	return activations[:n],activations[n:m],activations[m:],labels[:n],labels[n:m],labels[m:]
 
 if __name__=="__main__":
-	trX, tvX, teX, trY, tvY, teY = formatData()
+	activations, labels = getData(BASENAME)
+
+	f=open('activations.npy','w')
+	pickle.dump(activations, f)
+	f.close()
+
+	f=open('labels.npy','w')
+	pickle.dump(labels, f)
+	f.close()
 
 	print(trX.shape) 
 	print(tvX.shape) 
