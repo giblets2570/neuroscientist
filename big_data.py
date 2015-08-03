@@ -73,7 +73,13 @@ def getData(basename=BASENAME):
 
 def formatData(basename=BASENAME):
 
-	activations, labels = getData(basename)
+	f = open("activations.npy",'r')
+    activations = pickle.load(f)
+    f.close()
+
+    f = open("labels.npy",'r')
+    labels = pickle.load(f)
+    f.close()
 
 	num_entries = activations.shape[0]
 	n = int(num_entries*0.8)
