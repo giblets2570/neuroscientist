@@ -2,3 +2,4 @@
 experiments/
 *.png
 ./logs/*
+big_auto_network 
