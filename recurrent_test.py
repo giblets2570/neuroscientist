@@ -253,7 +253,7 @@ def main(tetrode_number=TETRODE_NUMBER):
         # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
         actuals.append(dataset['y_test'][start:end])
 
-
+    points_from = 1500
     print("Plotting the predictions")
     for i,(actual,prediction) in enumerate(zip(actuals,predictions)):
         prediction = np.asarray(prediction)
@@ -263,8 +263,8 @@ def main(tetrode_number=TETRODE_NUMBER):
         dist = np.linalg.norm(actual-prediction)
         print("Distance: {}".format(dist))
 
-        plt.scatter(prediction[i,:,0],prediction[i,:,1],lw=0.0)
-        plt.scatter(actual[i,:,0],actual[i,:,1],lw=0.2)
+        plt.scatter(prediction[i,points_from:,0],prediction[i,:,1],lw=0.0)
+        plt.scatter(actual[i,points_from:,0],actual[i,:,1],c=(1,0,0,1),lw=0.2)
         plt.savefig('../position/Position_{}.png'.format(i), bbox_inches='tight')
         plt.close()
 
