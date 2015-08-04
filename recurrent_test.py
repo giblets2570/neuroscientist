@@ -269,7 +269,9 @@ def main(tetrode_number=TETRODE_NUMBER):
         
 
         sub1.scatter(prediction[i,points_from:,0],prediction[i,points_from:,1],lw=0.0)
+        sub1.axis([0.0,1.0,0.0,1.0])
         sub2.scatter(actual[i,points_from:,0],actual[i,points_from:,1],c=(1,0,0,1),lw=0.2)
+        sub2.axis([0.0,1.0,0.0,1.0])
         sub1.grid(True)
         sub2.grid(True)
 
