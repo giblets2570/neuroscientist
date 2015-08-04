@@ -21,7 +21,7 @@ def getData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16]):
 	print(total_num_labels)
 
 	labels = []
-	for tetrodeNumber in range(9,17):
+	for tetrodeNumber in tetrodeRange:
 		cutfilename = basename + ".clu." + str(tetrodeNumber)
 		base = tetrodeNumber - 9
 		for n, i in enumerate(open(cutfilename,'r')):
@@ -91,19 +91,21 @@ def formatData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16]):
 	return activations[:n],activations[n:m],activations[m:],labels[:n],labels[n:m],labels[m:]
 
 if __name__=="__main__":
-	activations, labels = getData(BASENAME)
+	# activations, labels = getData(BASENAME,[9])
+
+	trX, tvX, teX, trY, tvY, teY = formatData(BASENAME,[9])
 
 	print("Saving the models")
 
-	f=open('labels.npy','w')
-	pickle.dump(labels, f)
-	f.close()
+	# f=open('labels.npy','w')
+	# pickle.dump(labels, f)
+	# f.close()
 
-	print("Done 1")
+	# print("Done 1")
 
-	f=open('activations.npy','w')
-	pickle.dump(activations, f)
-	f.close()
+	# f=open('activations.npy','w')
+	# pickle.dump(activations, f)
+	# f.close()
 
 	print("Done 2")
 
