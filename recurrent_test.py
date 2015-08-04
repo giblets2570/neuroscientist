@@ -274,6 +274,8 @@ def main(tetrode_number=TETRODE_NUMBER):
         sub1 = fig.add_subplot(121)
         sub2 = fig.add_subplot(122)
         
+        sub1.set_title("Predicted", fontsize=16)
+        sub2.set_title("Actual", fontsize=16)
         sub1.scatter(prediction[0,points_from:,0],prediction[0,points_from:,1],lw=0.0)
         sub1.axis([0.0,1.0,0.0,1.0])
         sub2.scatter(actual[0,points_from:,0],actual[0,points_from:,1],c=(1,0,0,1),lw=0.2)
