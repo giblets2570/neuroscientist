@@ -24,6 +24,8 @@ import json
 import re
 import math
 import matplotlib.pyplot as plt
+import os.path
+
 
 import warnings
 warnings.filterwarnings('ignore', '.*topo.*')
@@ -277,6 +279,13 @@ def main(tetrode_number=TETRODE_NUMBER):
     print("Making the model...")
     network = model(dataset['input_shape'],dataset['output_dim'])
     print("Done!")
+
+    if(os.path.isfile('recurrent_1_network')):
+        print("Loading old model")
+        f=open('recurrent_1_network','w')
+        all_param_values = pickle.load(f)
+        f.close()
+        lasagne.layers.set_all_param_values(network, all_param_values)
 
     print("Setting up the training functions...")
     training = funcs(dataset,network)

@@ -417,15 +417,17 @@ def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000):
 	# X = np.asarray([recData[i]['activity'] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,xdim))
 	# y = np.asarray([[recData[i]['x'],recData[i]['y']] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,ydim))
 
-	_X = np.asarray([totalLabel[i] for i in xrange(k)][:max_num_sequences*sequenceLength])
-	_Y = np.asarray([[_x[i],_y[i]] for i in xrange(k)][:max_num_sequences*sequenceLength])
+	_X = np.asarray([totalLabel[i] for i in xrange(k)][:])
+	_Y = np.asarray([[_x[i],_y[i]] for i in xrange(k)][:])
+
+	num_skip = 80
 
 	X = []
 	i = 0
 	print(_X.shape)
 	while(i + sequenceLength < _X.shape[0]):
 		X.append(_X[i:i+sequenceLength])
-		i+=100
+		i+=num_skip
 	X = np.asarray(X)
 	print(X.shape)
 
@@ -435,7 +437,7 @@ def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000):
 	while(i + sequenceLength < _Y.shape[0]):
 		y.append(_Y[i:i+sequenceLength])
 		# i+=25
-		i+=100
+		i+=num_skip
 	y = np.asarray(y)
 	print(y.shape)
 
