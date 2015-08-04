@@ -263,8 +263,18 @@ def main(tetrode_number=TETRODE_NUMBER):
         dist = np.linalg.norm(actual-prediction)
         print("Distance: {}".format(dist))
 
-        plt.scatter(prediction[i,points_from:,0],prediction[i,:,1],lw=0.0)
-        plt.scatter(actual[i,points_from:,0],actual[i,:,1],c=(1,0,0,1),lw=0.2)
+        fig = plt.figure(1)
+        sub1 = fig.add_subplot(121)
+        sub2 = fig.add_subplot(122)
+        
+
+        sub1.scatter(prediction[i,points_from:,0],prediction[i,points_from:,1],lw=0.0)
+        sub2.scatter(actual[i,points_from:,0],actual[i,points_from:,1],c=(1,0,0,1),lw=0.2)
+        sub1.grid(True)
+        sub2.grid(True)
+
+        fig.tight_layout()
+
         plt.savefig('../position/Position_{}.png'.format(i), bbox_inches='tight')
         plt.close()
 
