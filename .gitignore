@@ -4,3 +4,4 @@ experiments/
 ./logs/*
 big_auto_network
 *.npy
+recurrent_1_network
