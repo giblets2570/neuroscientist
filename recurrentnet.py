@@ -50,7 +50,7 @@ NUM_EPOCHS = 100000
 BATCH_SIZE = 26
 
 NUM_HIDDEN_UNITS = 100
-NUM_RECURRENT_UNITS = 100
+NUM_RECURRENT_UNITS = 200
 LEARNING_RATE = 0.02
 MOMENTUM = 0.9
 GRAD_CLIP = 100
@@ -108,27 +108,24 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         # Construct vanilla RNN
         l_in = lasagne.layers.InputLayer(shape=shape)
 
-
-
-
         # print("Input shape: ",lasagne.layers.get_output_shape(l_in))
 
-        # l_reshape_1 = lasagne.layers.ReshapeLayer(l_in, (batch_size*length, input_shape[-1]))
+        l_reshape_1 = lasagne.layers.ReshapeLayer(l_in, (batch_size*length, input_shape[-1]))
 
         # print("Reshape 1 shape: ",lasagne.layers.get_output_shape(l_reshape_1))
 
-        # l_hidden_1 = lasagne.layers.DenseLayer(
-        #     l_reshape_1,
-        #     num_units=reduced_length,
-        #     nonlinearity=lasagne.nonlinearities.rectify
-        #     )
+        l_hidden_1 = lasagne.layers.DenseLayer(
+            l_reshape_1,
+            num_units=reduced_length,
+            nonlinearity=lasagne.nonlinearities.rectify
+            )
 
         # print("Hidden 1 shape: ",lasagne.layers.get_output_shape(l_hidden_1))
 
-        # l_reshape_2 = lasagne.layers.ReshapeLayer(l_hidden_1, (batch_size, length, num_hidden_units))
+        l_reshape_2 = lasagne.layers.ReshapeLayer(l_hidden_1, (batch_size, length, num_hidden_units))
 
         l_recurrent = lasagne.layers.GRULayer(
-            l_in, num_hidden_units, 
+            l_reshape_2, num_hidden_units, 
             grad_clipping=GRAD_CLIP,
             gradient_steps=500,
             # W_in_to_hid=lasagne.init.HeUniform(),
