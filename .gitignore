@@ -2,5 +2,5 @@
 experiments/
 *.png
 ./logs/*
-big_auto_network 
+big_auto_network
 *.npy

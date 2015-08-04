@@ -60,7 +60,7 @@ STOPPING_RANGE = 10
 
 LOG_EXPERIMENT = True
 
-TETRODE_NUMBER = 11
+TETRODE_NUMBER = 9
 
 CONV = False
 
@@ -77,12 +77,12 @@ class DimshuffleLayer(lasagne.layers.Layer):
     def get_output_for(self, input, *args, **kwargs):
         return input.dimshuffle(self.pattern)
 
-def load_data(tetrode_number=TETRODE_NUMBER):
+def load_data(tetrodeRange=[TETRODE_NUMBER]):
     """
         Get data with labels, split into training and test set.
     """
     print("Loading data...")
-    X_train, X_valid, X_test, y_train_labels, y_valid_labels, y_test_labels = formatData(BASENAME)
+    X_train, X_valid, X_test, y_train_labels, y_valid_labels, y_test_labels = formatData(BASENAME,tetrodeRange)
     print("Done!")
 
     # X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1])
@@ -248,7 +248,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=800,num_hidden_units_2=4
     """
 
     print("Loading the data...")
-    dataset = load_data(tetrode_number)
+    dataset = load_data([tetrode_number])
     print("Done!")
 
     print("Tetrode number: {}, Num outputs: {}".format(tetrode_number,dataset['output_dim']))
@@ -292,7 +292,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=800,num_hidden_units_2=4
             if(np.isnan(meanTrainCost/meanValidCost)):
                 print("Nan value")
                 break
-                
+
             trainvalidation.append([meanTrainCost,meanValidCost])
             accuracies.append(accuracy)
             if(EARLY_STOPPING):
@@ -307,6 +307,14 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=800,num_hidden_units_2=4
                     accuracies.append(accuracy)
 
             epochsDone = epochsDone + 1
+
+            if(i%100 == 0):
+                tetrode_number += 1
+                if(tetrode_number > 16):
+                    tetrode_number = 9
+                print("Loading the data...")
+                dataset = load_data([tetrode_number])
+                print("Done!")
 
     except KeyboardInterrupt:
         pass
