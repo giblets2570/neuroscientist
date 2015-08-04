@@ -26,6 +26,9 @@ import math
 import matplotlib.pyplot as plt
 import os.path
 
+# We'll generate an animation with matplotlib and moviepy.
+from moviepy.video.io.bindings import mplfig_to_npimage
+import moviepy.editor as mpy
 
 import warnings
 warnings.filterwarnings('ignore', '.*topo.*')
@@ -47,7 +50,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 0
+NUM_EPOCHS = 5
 
 BATCH_SIZE = 26
 
@@ -271,9 +274,9 @@ def main(tetrode_number=TETRODE_NUMBER):
         sub1 = fig.add_subplot(121)
         sub2 = fig.add_subplot(122)
         
-        sub1.scatter(prediction[i,points_from:,0],prediction[i,points_from:,1],lw=0.0)
+        sub1.scatter(prediction[0,points_from:,0],prediction[0,points_from:,1],lw=0.0)
         sub1.axis([0.0,1.0,0.0,1.0])
-        sub2.scatter(actual[i,points_from:,0],actual[i,points_from:,1],c=(1,0,0,1),lw=0.2)
+        sub2.scatter(actual[0,points_from:,0],actual[0,points_from:,1],c=(1,0,0,1),lw=0.2)
         sub2.axis([0.0,1.0,0.0,1.0])
         sub1.grid(True)
         sub2.grid(True)
