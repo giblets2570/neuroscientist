@@ -50,7 +50,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 5
+NUM_EPOCHS = 1
 
 BATCH_SIZE = 26
 
@@ -76,15 +76,15 @@ def load_data(tetrode_number):
     # sequence length = number of time steps per example. 
     # num_features_per_timestep = 31 i.e labels per tetrode
 
-    X_train, X_valid, X_test, y_train, y_valid, y_test = formatData(sequenceLength=2000)
+    X_train, X_valid, X_test, y_train, y_valid, y_test = formatData(sequenceLength=2000,testing=True)
 
     return dict(
         X_train=X_train,
         y_train=y_train,
-        X_valid=X_valid,
-        y_valid=y_valid,
-        X_test=X_test,
-        y_test=y_test,
+        # X_valid=X_valid,
+        # y_valid=y_valid,
+        # X_test=X_test,
+        # y_test=y_test,
         num_examples_train=X_train.shape[0],
         num_examples_valid=X_valid.shape[0],
         num_examples_test=X_test.shape[0],
@@ -257,6 +257,7 @@ def main(tetrode_number=TETRODE_NUMBER):
         actuals.append(dataset['y_train'][start:end])
 
     points_from = 1500
+    
     print("Plotting the predictions")
 
 
@@ -273,7 +274,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
         sub1 = fig.add_subplot(121)
         sub2 = fig.add_subplot(122)
-        
+
         sub1.set_title("Predicted", fontsize=16)
         sub2.set_title("Actual", fontsize=16)
         sub1.scatter(prediction[0,points_from:,0],prediction[0,points_from:,1],lw=0.0)
@@ -303,9 +304,9 @@ def makeVideo(prediction, actual, number):
         sub1.set_title("Predicted", fontsize=16)
         sub2.set_title("Actual", fontsize=16)
 
-        sub1.scatter(prediction[i,points_from:points_from + 1 + t,0],prediction[i,points_from:points_from + 1 + t,1],lw=0.0)
+        sub1.scatter(prediction[0,points_from:points_from + 1 + t,0],prediction[0,points_from:points_from + 1 + t,1],lw=0.0)
         sub1.axis([0.0,1.0,0.0,1.0])
-        sub2.scatter(actual[i,points_from:points_from + 1 + t,0],actual[i,points_from:points_from + 1 + t,1],c=(1,0,0,1),lw=0.2)
+        sub2.scatter(actual[0,points_from:points_from + 1 + t,0],actual[0,points_from:points_from + 1 + t,1],c=(1,0,0,1),lw=0.2)
         sub2.axis([0.0,1.0,0.0,1.0])
         sub1.grid(True)
         sub2.grid(True)

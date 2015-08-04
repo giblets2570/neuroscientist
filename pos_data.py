@@ -26,11 +26,11 @@ def getXY(filename=FILENAME):
 	for n,i in enumerate(x):
 		if i>1000:
 			num_wrong+=1
-			# x[n] = x[n-1]
+			x[n] = x[n-1]
 	for n,i in enumerate(y):
 		if i>1000:
 			num_wrong+=1
-			# y[n] = y[n-1]
+			y[n] = y[n-1]
 
 	print("Num wrong: {}".format(num_wrong))
 
@@ -76,9 +76,9 @@ def getXY(filename=FILENAME):
 
 def makeVideo(X, Y):
 
-	duration = X.shape[0]
+	duration = X.shape[0] / 50
 	print("Duration: ",duration)
-	duration = 10
+	duration = 1000
 	fps = 1
 	fig, ax = plt.subplots(1, figsize=(4, 4), facecolor='white')
 	fig.subplots_adjust(left=0, right=1, bottom=0)
@@ -88,21 +88,21 @@ def makeVideo(X, Y):
 	    ax.set_title("Rat location", fontsize=16)
 
 	    ax.axis((0.0,1.0,0.0,1.0))
-	    ax.scatter(X[t],Y[t])
+	    ax.scatter(X[50*t],Y[50*t])
 
 	    return mplfig_to_npimage(fig)
 
 	
 	animation = mpy.VideoClip(make_frame, duration = duration)
 	print(animation)
-	animation.write_gif(VIDEO_NAME, fps=30)
+	animation.write_gif(VIDEO_NAME, fps=fps)
 
 if __name__=="__main__":
 	x, y = getXY()
 	clip = makeVideo(x,y)
 	myclip = mpy.VideoFileClip(VIDEO_NAME)
-	print(myclip.fps)
-	myclip.preview()
+	# print(myclip.fps)
+	# myclip.preview()
 	# print(data['pos'][1000:1030])
 	# plt.plot(data['pos'])
 	# plt.show()

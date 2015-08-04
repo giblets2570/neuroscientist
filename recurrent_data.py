@@ -386,7 +386,7 @@ def ratemap(activationResult,labelResult):
 		plt.scatter(x,y,c=rgba_colors,lw=0)
 		plt.show()
 
-def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000):
+def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=False):
 
 	# k = 69700
 	k = 54100
@@ -420,7 +420,11 @@ def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000):
 	_X = np.asarray([totalLabel[i] for i in xrange(k)][:])
 	_Y = np.asarray([[_x[i],_y[i]] for i in xrange(k)][:])
 
-	num_skip = 40
+	num_skip = None
+	if(testing == True):
+		num_skip = 52
+	else:
+		num_skip = 40
 
 	X = []
 	i = 0
