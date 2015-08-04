@@ -424,7 +424,7 @@ def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=Fal
 	if(testing == True):
 		num_skip = 52
 	else:
-		num_skip = 40
+		num_skip = 20
 
 	X = []
 	i = 0
