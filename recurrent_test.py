@@ -47,7 +47,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 10
+NUM_EPOCHS = 0
 
 BATCH_SIZE = 26
 
@@ -247,27 +247,30 @@ def main(tetrode_number=TETRODE_NUMBER):
         pass
 
     print("Begining to test the network...")
-    for start, end in zip(range(0, dataset['num_examples_test'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_test'], BATCH_SIZE)):
-        prediction = training['predict'](dataset['X_test'][start:end])
+    for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
+        prediction = training['predict'](dataset['X_train'][start:end])
         predictions.append(prediction)
-        # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
-        actuals.append(dataset['y_test'][start:end])
+        # accuracy = np.mean(np.argmax(dataset['y_train'], axis=1) == np.argmax(training['predict'](dataset['X_train']), axis=1))
+        actuals.append(dataset['y_train'][start:end])
 
     points_from = 1500
     print("Plotting the predictions")
+
+
     for i,(actual,prediction) in enumerate(zip(actuals,predictions)):
         prediction = np.asarray(prediction)
         actual = np.asarray(actual)
+
         print("Actual: {}".format(actual.shape))
         print("Prediction: {}".format(prediction.shape))
         dist = np.linalg.norm(actual-prediction)
         print("Distance: {}".format(dist))
 
         fig = plt.figure(1)
+
         sub1 = fig.add_subplot(121)
         sub2 = fig.add_subplot(122)
         
-
         sub1.scatter(prediction[i,points_from:,0],prediction[i,points_from:,1],lw=0.0)
         sub1.axis([0.0,1.0,0.0,1.0])
         sub2.scatter(actual[i,points_from:,0],actual[i,points_from:,1],c=(1,0,0,1),lw=0.2)
@@ -279,6 +282,35 @@ def main(tetrode_number=TETRODE_NUMBER):
 
         plt.savefig('../position/Position_{}.png'.format(i), bbox_inches='tight')
         plt.close()
+
+def makeVideo(prediction, actual, number):
+    duration = 500
+    fps = 1
+
+    fig = plt.figure(1)
+
+    sub1 = fig.add_subplot(121)
+    sub2 = fig.add_subplot(122)
+
+    def make_frame(t):
+        sub1.clear()
+        sub2.clear()
+        sub1.set_title("Predicted", fontsize=16)
+        sub2.set_title("Actual", fontsize=16)
+
+        sub1.scatter(prediction[i,points_from:points_from + 1 + t,0],prediction[i,points_from:points_from + 1 + t,1],lw=0.0)
+        sub1.axis([0.0,1.0,0.0,1.0])
+        sub2.scatter(actual[i,points_from:points_from + 1 + t,0],actual[i,points_from:points_from + 1 + t,1],c=(1,0,0,1),lw=0.2)
+        sub2.axis([0.0,1.0,0.0,1.0])
+        sub1.grid(True)
+        sub2.grid(True)
+
+        fig.tight_layout()
+
+        return mplfig_to_npimage(fig)
+
+    animation = mpy.VideoClip(make_frame, duration = duration)
+    animation.write_gif("../position/position_{}.gif".format(number), fps=fps)
 
 if __name__ == '__main__':
     
