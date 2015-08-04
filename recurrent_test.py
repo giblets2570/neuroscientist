@@ -47,7 +47,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 5
+NUM_EPOCHS = 10
 
 BATCH_SIZE = 26
 
@@ -226,27 +226,35 @@ def main(tetrode_number=TETRODE_NUMBER):
     print("Done!")
 
 
-    print("Begining to test the network...")
+    print("Begining to train the network...")
     predictions = []
     actuals = []
     try:
 
         for i in range(NUM_EPOCHS):
-            cost = None
+            costs = []
+            valid_costs = []
+
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
                 cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end],LEARNING_RATE)
+                costs.append(cost)
                 # costs.append(cost)
-            print('Epoch {}, Cost: {}'.format(i,cost))
+
+            meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
+            print("Epoch: {}, Training cost: {}".format(i+1,meanTrainCost))
 
     except KeyboardInterrupt:
         pass
 
+    print("Begining to test the network...")
     for start, end in zip(range(0, dataset['num_examples_test'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_test'], BATCH_SIZE)):
-            prediction = training['predict'](dataset['X_test'][start:end])
-            predictions.append(prediction)
-            # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
-            actuals.append(dataset['y_test'][start:end])
+        prediction = training['predict'](dataset['X_test'][start:end])
+        predictions.append(prediction)
+        # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
+        actuals.append(dataset['y_test'][start:end])
 
+
+    print("Plotting the predictions")
     for i,(actual,prediction) in enumerate(zip(actuals,predictions)):
         prediction = np.asarray(prediction)
         actual = np.asarray(actual)
@@ -255,11 +263,9 @@ def main(tetrode_number=TETRODE_NUMBER):
         dist = np.linalg.norm(actual-prediction)
         print("Distance: {}".format(dist))
 
-        
-
-        plt.scatter(prediction[:,0],prediction[:,1],lw=0.0)
-        plt.scatter(actual[:,0],actual[:,1],lw=0.1)
-        plt.savefig('position/Position_{}.png'.format(i), bbox_inches='tight')
+        plt.scatter(prediction[i,:,0],prediction[i,:,1],lw=0.0)
+        plt.scatter(actual[i,:,0],actual[i,:,1],lw=0.2)
+        plt.savefig('../position/Position_{}.png'.format(i), bbox_inches='tight')
         plt.close()
 
 if __name__ == '__main__':
