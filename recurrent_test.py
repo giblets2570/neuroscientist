@@ -50,7 +50,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 1
+NUM_EPOCHS = 5
 
 BATCH_SIZE = 26
 
@@ -257,7 +257,7 @@ def main(tetrode_number=TETRODE_NUMBER):
         actuals.append(dataset['y_train'][start:end])
 
     points_from = 1500
-    
+
     print("Plotting the predictions")
 
 
