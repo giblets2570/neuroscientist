@@ -301,7 +301,8 @@ def main(tetrode_number=TETRODE_NUMBER):
     makeVideo(predictions[-1],actual[-1],points_from,0)
 
 def makeVideo(prediction, actual, points_from, number):
-    duration = 500
+    
+    duration = 2000 - points_from
     fps = 1
 
     fig = plt.figure(1)
