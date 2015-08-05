@@ -268,6 +268,8 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     print("Plotting the predictions")
 
+    makeVideo(predictions[-1],actual[-1],points_from,0)
+
 
     # for i,(actual,prediction) in enumerate(zip(actuals,predictions)):
     #     prediction = np.asarray(prediction)
@@ -297,11 +299,8 @@ def main(tetrode_number=TETRODE_NUMBER):
     #     plt.savefig('../position/Position_{}.png'.format(i), bbox_inches='tight')
     #     plt.close()
 
-
-    makeVideo(predictions[-1],actual[-1],points_from,0)
-
 def makeVideo(prediction, actual, points_from, number):
-    
+
     duration = 2000 - points_from
     fps = 1
 
