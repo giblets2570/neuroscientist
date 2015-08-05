@@ -268,7 +268,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     print("Plotting the predictions")
 
-    makeVideo(predictions[-1],actual[-1],points_from,0)
+    makeVideo(predictions[-1],actuals[-1],points_from,0)
 
 
     # for i,(actual,prediction) in enumerate(zip(actuals,predictions)):

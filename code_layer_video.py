@@ -244,12 +244,13 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         codes = training['code'](dataset['data'][0:NUM_POINTS])
         # print(codes.shape)
         codes_2d = bh_sne(codes)
+
         # activations_1_2d = bh_sne(activations_1)
         # activations_2_2d = bh_sne(activations_2)
 
-        # plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
-        # plt.savefig('../tsne_codes.png', bbox_inches='tight')
-        # plt.close()
+        plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
+        plt.savefig('dbscan_labels/tsne_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
+        plt.close()
         # plt.scatter(activations_1_2d[:, 0], activations_1_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
         # plt.savefig('../tsne_activations_1.png', bbox_inches='tight')
         # plt.close()
@@ -261,10 +262,16 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
         ##############################################################################
         # Compute DBSCAN
-        db = DBSCAN(eps=1.5, min_samples=5).fit(codes_2d)
+        db = DBSCAN(eps=1.2, min_samples=5).fit(codes_2d)
         core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
         core_samples_mask[db.core_sample_indices_] = True
         labels = db.labels_
+
+        print(len(labels))
+
+        plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
+        plt.savefig('dbscan_labels/tsne_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
+        plt.close()
 
         f=open('dbscan_labels/tetrode_{}.npy'.format(tetrode_number),'w')
         pickle.dump(labels, f)

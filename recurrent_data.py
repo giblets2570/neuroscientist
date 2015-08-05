@@ -6,6 +6,7 @@ import re
 import json
 from pos_data import getXY
 import math
+import pickle
 
 
 # We'll generate an animation with matplotlib and moviepy.
@@ -295,7 +296,7 @@ def test():
 
 
 
-def organiseTetrodeData(tetrode):
+def organiseTetrodeData(tetrode,learned_labels=False):
 	
 	tetfilename = BASENAME+"."+str(tetrode)
 	tetheader,tetdata = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
@@ -308,14 +309,31 @@ def organiseTetrodeData(tetrode):
 
 	data = []
 	result = []
-	dim = 0
-	for n,j in enumerate(open(cutfilename,'r')):
-		if n>0:
-			label = np.zeros(dim)
-			label[int(re.sub("[^0-9]", "", j))-1] = 1.0
-			result.append(dict(label=label))
-		else:
-			dim = int(re.sub("[^0-9]", "", j))
+	if learned_labels:
+
+		f=open('dbscan_labels/tetrode_{}.npy'.format(tetrode),'r')
+        labels=pickle.load(f)
+        f.close()
+        labels = np.asarray(labels)
+        upper=np.amax(labels)
+        lower=np.amin(labels)
+        dim=upper-lower
+
+        print(upper, lower, dim)
+
+        for _label in labels:
+        	label = np.zeros(dim)
+        	label[_label+1] = 1.0
+        	result.append(dict(label=label))
+	else:
+		dim = 0
+		for n,j in enumerate(open(cutfilename,'r')):
+			if n>0:
+				label = np.zeros(dim)
+				label[int(re.sub("[^0-9]", "", j))-1] = 1.0
+				result.append(dict(label=label))
+			else:
+				dim = int(re.sub("[^0-9]", "", j))
 	# print(result)
 	# print(len(tetdata))
 	time = 0
@@ -377,7 +395,7 @@ def ratemap(activationResult,labelResult):
 				rgba_colors[j][3] = 0.0
 			elif labelResult[j][i] < 0.55:
 				rgba_colors[j][1] = 1.0
-			elif labelResult[j][i] < 1:
+			elif labelResult[j][i] < 1.0:
 				rgba_colors[j][0] = 1.0
 				rgba_colors[j][3] = 0.8
 			else:
@@ -456,10 +474,10 @@ def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=Fal
 	tvY = np.array(y[n:m],dtype=np.float32)
 	teY = np.array(y[m:],dtype=np.float32)
 
-	return trX, tvX, teX, trY, tvY, teY	
+	return trX, tvX, teX, trY, tvY, teY
 
 if __name__=="__main__":
-	# duration, result = organiseTetrodeData(12)
+	duration, result = organiseTetrodeData(12,learned_labels=True)
 	# activationResult, labelResult = newDownsampleData(duration,result,1000.0)
 	# #going to test the convolution
 	# print(labelResult.shape)
@@ -468,7 +486,7 @@ if __name__=="__main__":
 
 	# ratemap(activationResult, labelResult)
 
-	trX, tvX, teX, trY, tvY, teY = formatData()
+	# trX, tvX, teX, trY, tvY, teY = formatData()
 
 	# rate_maps(9,9)
 	# tetfilename = BASENAME+".1"
