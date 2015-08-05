@@ -389,9 +389,5 @@ def main(tetrode_number=TETRODE_NUMBER):
 
 
 if __name__ == '__main__':
-    # for i in range(16):
-    #     main(1+i)
-    # filter_sizes = [(4,1),(4,3),(4,5),(4,7)]
-
-    # pool_sizes = [(1,2),(1,4),(1,8)]
+  
     main()

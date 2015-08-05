@@ -239,13 +239,13 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         print("Done!")
 
 
-        activations_1 = training['activations_1'](dataset['data'][0:NUM_POINTS])
-        activations_2 = training['activations_2'](dataset['data'][0:NUM_POINTS])
+        # activations_1 = training['activations_1'](dataset['data'][0:NUM_POINTS])
+        # activations_2 = training['activations_2'](dataset['data'][0:NUM_POINTS])
         codes = training['code'](dataset['data'][0:NUM_POINTS])
         # print(codes.shape)
         codes_2d = bh_sne(codes)
-        activations_1_2d = bh_sne(activations_1)
-        activations_2_2d = bh_sne(activations_2)
+        # activations_1_2d = bh_sne(activations_1)
+        # activations_2_2d = bh_sne(activations_2)
 
         # plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
         # plt.savefig('../tsne_codes.png', bbox_inches='tight')

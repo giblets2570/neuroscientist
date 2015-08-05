@@ -125,9 +125,15 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             nonlinearity=lasagne.nonlinearities.rectify
             )
 
+        l_hidden_2 = lasagne.layers.DenseLayer(
+            l_hidden_1,
+            num_units=reduced_length,
+            nonlinearity=lasagne.nonlinearities.rectify
+            )
+
         # print("Hidden 1 shape: ",lasagne.layers.get_output_shape(l_hidden_1))
 
-        l_reshape_2 = lasagne.layers.ReshapeLayer(l_hidden_1, (batch_size, length, num_hidden_units))
+        l_reshape_2 = lasagne.layers.ReshapeLayer(l_hidden_2, (batch_size, length, num_hidden_units))
 
         l_recurrent = lasagne.layers.GRULayer(
             l_reshape_2, num_hidden_units, 
@@ -217,12 +223,14 @@ def main(tetrode_number=TETRODE_NUMBER):
     network = model(dataset['input_shape'],dataset['output_dim'])
     print("Done!")
 
-    if(os.path.isfile('recurrent_1_network_test')):
+    if(os.path.isfile('recurrent_2_network_test')):
         print("Loading old model")
-        f=open('recurrent_1_network_test','r')
+        f=open('recurrent_2_network_test','r')
         all_param_values = pickle.load(f)
         f.close()
         lasagne.layers.set_all_param_values(network, all_param_values)
+    else:
+        return 
 
     print("Setting up the testing functions...")
     training = funcs(dataset,network)
@@ -261,33 +269,33 @@ def main(tetrode_number=TETRODE_NUMBER):
     print("Plotting the predictions")
 
 
-    for i,(actual,prediction) in enumerate(zip(actuals,predictions)):
-        prediction = np.asarray(prediction)
-        actual = np.asarray(actual)
+    # for i,(actual,prediction) in enumerate(zip(actuals,predictions)):
+    #     prediction = np.asarray(prediction)
+    #     actual = np.asarray(actual)
 
-        print("Actual: {}".format(actual.shape))
-        print("Prediction: {}".format(prediction.shape))
-        dist = np.linalg.norm(actual-prediction)
-        print("Distance: {}".format(dist))
+    #     print("Actual: {}".format(actual.shape))
+    #     print("Prediction: {}".format(prediction.shape))
+    #     dist = np.linalg.norm(actual-prediction)
+    #     print("Distance: {}".format(dist))
 
-        fig = plt.figure(1)
+    #     fig = plt.figure(1)
 
-        sub1 = fig.add_subplot(121)
-        sub2 = fig.add_subplot(122)
+    #     sub1 = fig.add_subplot(121)
+    #     sub2 = fig.add_subplot(122)
 
-        sub1.set_title("Predicted", fontsize=16)
-        sub2.set_title("Actual", fontsize=16)
-        sub1.scatter(prediction[0,points_from:,0],prediction[0,points_from:,1],lw=0.0)
-        sub1.axis([0.0,1.0,0.0,1.0])
-        sub2.scatter(actual[0,points_from:,0],actual[0,points_from:,1],c=(1,0,0,1),lw=0.2)
-        sub2.axis([0.0,1.0,0.0,1.0])
-        sub1.grid(True)
-        sub2.grid(True)
+    #     sub1.set_title("Predicted", fontsize=16)
+    #     sub2.set_title("Actual", fontsize=16)
+    #     sub1.scatter(prediction[0,points_from:,0],prediction[0,points_from:,1],lw=0.0)
+    #     sub1.axis([0.0,1.0,0.0,1.0])
+    #     sub2.scatter(actual[0,points_from:,0],actual[0,points_from:,1],c=(1,0,0,1),lw=0.2)
+    #     sub2.axis([0.0,1.0,0.0,1.0])
+    #     sub1.grid(True)
+    #     sub2.grid(True)
 
-        fig.tight_layout()
+    #     fig.tight_layout()
 
-        plt.savefig('../position/Position_{}.png'.format(i), bbox_inches='tight')
-        plt.close()
+    #     plt.savefig('../position/Position_{}.png'.format(i), bbox_inches='tight')
+    #     plt.close()
 
 
     makeVideo(predictions[-1],actual[-1],points_from,0)
