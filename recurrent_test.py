@@ -268,36 +268,37 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     print("Plotting the predictions")
 
-    makeVideo(predictions[-1],actuals[-1],points_from,0)
+    
 
 
-    # for i,(actual,prediction) in enumerate(zip(actuals,predictions)):
-    #     prediction = np.asarray(prediction)
-    #     actual = np.asarray(actual)
+    for i,(actual,prediction) in enumerate(zip(actuals,predictions)):
+        # prediction = np.asarray(prediction)
+        # actual = np.asarray(actual)
 
-    #     print("Actual: {}".format(actual.shape))
-    #     print("Prediction: {}".format(prediction.shape))
-    #     dist = np.linalg.norm(actual-prediction)
-    #     print("Distance: {}".format(dist))
+        # print("Actual: {}".format(actual.shape))
+        # print("Prediction: {}".format(prediction.shape))
+        # dist = np.linalg.norm(actual-prediction)
+        # print("Distance: {}".format(dist))
 
-    #     fig = plt.figure(1)
+        # fig = plt.figure(1)
 
-    #     sub1 = fig.add_subplot(121)
-    #     sub2 = fig.add_subplot(122)
+        # sub1 = fig.add_subplot(121)
+        # sub2 = fig.add_subplot(122)
 
-    #     sub1.set_title("Predicted", fontsize=16)
-    #     sub2.set_title("Actual", fontsize=16)
-    #     sub1.scatter(prediction[0,points_from:,0],prediction[0,points_from:,1],lw=0.0)
-    #     sub1.axis([0.0,1.0,0.0,1.0])
-    #     sub2.scatter(actual[0,points_from:,0],actual[0,points_from:,1],c=(1,0,0,1),lw=0.2)
-    #     sub2.axis([0.0,1.0,0.0,1.0])
-    #     sub1.grid(True)
-    #     sub2.grid(True)
+        # sub1.set_title("Predicted", fontsize=16)
+        # sub2.set_title("Actual", fontsize=16)
+        # sub1.scatter(prediction[0,points_from:,0],prediction[0,points_from:,1],lw=0.0)
+        # sub1.axis([0.0,1.0,0.0,1.0])
+        # sub2.scatter(actual[0,points_from:,0],actual[0,points_from:,1],c=(1,0,0,1),lw=0.2)
+        # sub2.axis([0.0,1.0,0.0,1.0])
+        # sub1.grid(True)
+        # sub2.grid(True)
 
-    #     fig.tight_layout()
+        # fig.tight_layout()
 
-    #     plt.savefig('../position/Position_{}.png'.format(i), bbox_inches='tight')
-    #     plt.close()
+        # plt.savefig('../position/Position_{}.png'.format(i), bbox_inches='tight')
+        # plt.close()
+        makeVideo(prediction,actual,points_from,i)
 
 def makeVideo(prediction, actual, points_from, number):
 
@@ -315,9 +316,9 @@ def makeVideo(prediction, actual, points_from, number):
         sub1.set_title("Predicted", fontsize=16)
         sub2.set_title("Actual", fontsize=16)
 
-        sub1.scatter(prediction[0,points_from:points_from + 1 + t,0],prediction[0,points_from:points_from + 1 + t,1],lw=0.0)
+        sub1.scatter(prediction[0,points_from+t:points_from + 1 + t,0],prediction[0,points_from+t:points_from + 1 + t,1],lw=0.0)
         sub1.axis([0.0,1.0,0.0,1.0])
-        sub2.scatter(actual[0,points_from:points_from + 1 + t,0],actual[0,points_from:points_from + 1 + t,1],c=(1,0,0,1),lw=0.2)
+        sub2.scatter(actual[0,points_from+t:points_from + 1 + t,0],actual[0,points_from+t:points_from + 1 + t,1],c=(1,0,0,1),lw=0.2)
         sub2.axis([0.0,1.0,0.0,1.0])
         sub1.grid(True)
         sub2.grid(True)

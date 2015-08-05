@@ -311,14 +311,13 @@ def organiseTetrodeData(tetrode,learned_labels=False):
 	result = []
 	if learned_labels:
 		print("Loading the learned labels")
-		
 		f=open('dbscan_labels/tetrode_{}.npy'.format(tetrode),'r')
 		labels=pickle.load(f)
 		f.close()
 		labels = np.asarray(labels)
 		upper=np.amax(labels)
 		lower=np.amin(labels)
-		dim=upper-lower
+		dim=upper-lower+1
 
 		print(upper, lower, dim)
 
@@ -478,7 +477,8 @@ def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=Fal
 	return trX, tvX, teX, trY, tvY, teY
 
 if __name__=="__main__":
-	duration, result = organiseTetrodeData(12,learned_labels=True)
+	duration, result = organiseTetrodeData(9,learned_labels=True)
+	print(result[0]['label'].shape)
 	# activationResult, labelResult = newDownsampleData(duration,result,1000.0)
 	# #going to test the convolution
 	# print(labelResult.shape)
