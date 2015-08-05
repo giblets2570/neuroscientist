@@ -310,21 +310,22 @@ def organiseTetrodeData(tetrode,learned_labels=False):
 	data = []
 	result = []
 	if learned_labels:
-
+		print("Loading the learned labels")
+		
 		f=open('dbscan_labels/tetrode_{}.npy'.format(tetrode),'r')
-        labels=pickle.load(f)
-        f.close()
-        labels = np.asarray(labels)
-        upper=np.amax(labels)
-        lower=np.amin(labels)
-        dim=upper-lower
+		labels=pickle.load(f)
+		f.close()
+		labels = np.asarray(labels)
+		upper=np.amax(labels)
+		lower=np.amin(labels)
+		dim=upper-lower
 
-        print(upper, lower, dim)
+		print(upper, lower, dim)
 
-        for _label in labels:
-        	label = np.zeros(dim)
-        	label[_label+1] = 1.0
-        	result.append(dict(label=label))
+		for _label in labels:
+			label = np.zeros(dim)
+			label[_label+1] = 1.0
+			result.append(dict(label=label))
 	else:
 		dim = 0
 		for n,j in enumerate(open(cutfilename,'r')):
