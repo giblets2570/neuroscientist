@@ -122,9 +122,14 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             nonlinearity=lasagne.nonlinearities.rectify
             )
 
+        l_dropout = lasagne.layers.DropoutLayer(
+            l_hidden_1,
+            p=0.5,
+            )
+
 
         l_hidden_2 = lasagne.layers.DenseLayer(
-            l_hidden_1,
+            l_dropout,
             num_units=reduced_length,
             nonlinearity=lasagne.nonlinearities.rectify
             )

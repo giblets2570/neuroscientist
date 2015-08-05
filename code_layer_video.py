@@ -72,7 +72,7 @@ SAVE_MODEL = False
 
 CONV = False
 
-NUM_POINTS = 10000
+NUM_POINTS = 100000
 
 MODEL_FILENAME = "auto_network"
 
@@ -213,13 +213,11 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     """
         This is the main method that sets up the experiment
     """
-    print("Loading the data...")
-    dataset = load_data(tetrode_number)
-    print("Done!")
-    
+   
     print("Making the model...")
     network = model((None,200),200,num_hidden_units,num_hidden_units_2,num_code_units)
     print("Done!")
+
 
     print("Loading the model parameters from {}".format(MODEL_FILENAME))
     f = open(MODEL_FILENAME,'r')
@@ -228,41 +226,49 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     # print(all_param_values)
     lasagne.layers.set_all_param_values(network, all_param_values)
 
-    print("Setting up the training functions...")
-    training = funcs(dataset,network)
-    print("Done!")
+
+    for tetrode_number in [9,10,11,12,13,14,15,16]:
+        print("Loading the data...")
+        dataset = load_data(tetrode_number)
+        print("Done!")
+
+        print(dataset['data'].shape)
+
+        print("Setting up the training functions...")
+        training = funcs(dataset,network)
+        print("Done!")
 
 
+        activations_1 = training['activations_1'](dataset['data'][0:NUM_POINTS])
+        activations_2 = training['activations_2'](dataset['data'][0:NUM_POINTS])
+        codes = training['code'](dataset['data'][0:NUM_POINTS])
+        # print(codes.shape)
+        codes_2d = bh_sne(codes)
+        activations_1_2d = bh_sne(activations_1)
+        activations_2_2d = bh_sne(activations_2)
 
-    activations_1 = training['activations_1'](dataset['data'][0:NUM_POINTS])
-    activations_2 = training['activations_2'](dataset['data'][0:NUM_POINTS])
-    codes = training['code'](dataset['data'][0:NUM_POINTS])
-    # print(codes.shape)
-    # codes_2d = bh_sne(codes)
-    # activations_1_2d = bh_sne(activations_1)
-    # activations_2_2d = bh_sne(activations_2)
+        # plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
+        # plt.savefig('../tsne_codes.png', bbox_inches='tight')
+        # plt.close()
+        # plt.scatter(activations_1_2d[:, 0], activations_1_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
+        # plt.savefig('../tsne_activations_1.png', bbox_inches='tight')
+        # plt.close()
+        # plt.scatter(activations_2_2d[:, 0], activations_2_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
+        # plt.savefig('../tsne_activations_2.png', bbox_inches='tight')
+        # plt.close()
 
-    # plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
-    # plt.savefig('../tsne_codes.png', bbox_inches='tight')
-    # plt.close()
-    # plt.scatter(activations_1_2d[:, 0], activations_1_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
-    # plt.savefig('../tsne_activations_1.png', bbox_inches='tight')
-    # plt.close()
-    # plt.scatter(activations_2_2d[:, 0], activations_2_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
-    # plt.savefig('../tsne_activations_2.png', bbox_inches='tight')
-    # plt.close()
+        # This is where the code for the video will go
 
-    # This is where the code for the video will go
+        ##############################################################################
+        # Compute DBSCAN
+        db = DBSCAN(eps=1.5, min_samples=5).fit(codes_2d)
+        core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
+        core_samples_mask[db.core_sample_indices_] = True
+        labels = db.labels_
 
-    ##############################################################################
-    # Compute DBSCAN
-    db = DBSCAN(eps=0.5, min_samples=5).fit(codes)
-    core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
-    core_samples_mask[db.core_sample_indices_] = True
-    labels = db.labels_
-
-    print(np.asarray(labels).shape)
-    print(list(labels))
+        f=open('dbscan_labels/tetrode_{}.npy'.format(tetrode_number),'w')
+        pickle.dump(labels, f)
+        f.close()
 
 
 if __name__ == '__main__':
