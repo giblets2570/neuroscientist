@@ -230,6 +230,7 @@ def main(tetrode_number=TETRODE_NUMBER):
         f.close()
         lasagne.layers.set_all_param_values(network, all_param_values)
     else:
+        print('recurrent_2_network doesnt exist')
         return 
 
     print("Setting up the testing functions...")
