@@ -289,7 +289,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     if(os.path.isfile('recurrent_2_network')):
         print("Loading old model")
-        f=open('recurrent_1_network','r')
+        f=open('recurrent_2_network','r')
         all_param_values = pickle.load(f)
         f.close()
         lasagne.layers.set_all_param_values(network, all_param_values)

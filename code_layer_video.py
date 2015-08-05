@@ -237,24 +237,33 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     activations_1 = training['activations_1'](dataset['data'][0:NUM_POINTS])
     activations_2 = training['activations_2'](dataset['data'][0:NUM_POINTS])
     codes = training['code'](dataset['data'][0:NUM_POINTS])
-    print(codes.shape)
-    codes_2d = bh_sne(codes)
-    activations_1_2d = bh_sne(activations_1)
-    activations_2_2d = bh_sne(activations_2)
+    # print(codes.shape)
+    # codes_2d = bh_sne(codes)
+    # activations_1_2d = bh_sne(activations_1)
+    # activations_2_2d = bh_sne(activations_2)
 
-
-
-    plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
-    plt.savefig('../tsne_codes.png', bbox_inches='tight')
-    plt.close()
-    plt.scatter(activations_1_2d[:, 0], activations_1_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
-    plt.savefig('../tsne_activations_1.png', bbox_inches='tight')
-    plt.close()
-    plt.scatter(activations_2_2d[:, 0], activations_2_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
-    plt.savefig('../tsne_activations_2.png', bbox_inches='tight')
-    plt.close()
+    # plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
+    # plt.savefig('../tsne_codes.png', bbox_inches='tight')
+    # plt.close()
+    # plt.scatter(activations_1_2d[:, 0], activations_1_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
+    # plt.savefig('../tsne_activations_1.png', bbox_inches='tight')
+    # plt.close()
+    # plt.scatter(activations_2_2d[:, 0], activations_2_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
+    # plt.savefig('../tsne_activations_2.png', bbox_inches='tight')
+    # plt.close()
 
     # This is where the code for the video will go
+
+    ##############################################################################
+    # Compute DBSCAN
+    db = DBSCAN(eps=0.5, min_samples=5).fit(codes)
+    core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
+    core_samples_mask[db.core_sample_indices_] = True
+    labels = db.labels_
+
+    print(np.asarray(labels).shape)
+    print(list(labels))
+
 
 if __name__ == '__main__':
     main()

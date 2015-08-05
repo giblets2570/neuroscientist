@@ -256,7 +256,7 @@ def main(tetrode_number=TETRODE_NUMBER):
         # accuracy = np.mean(np.argmax(dataset['y_train'], axis=1) == np.argmax(training['predict'](dataset['X_train']), axis=1))
         actuals.append(dataset['y_train'][start:end])
 
-    points_from = 1500
+    points_from = 1900
 
     print("Plotting the predictions")
 
