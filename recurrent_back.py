@@ -124,7 +124,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         l_dropout = lasagne.layers.DropoutLayer(
             l_hidden_1,
-            p=0.5,
+            p=0.8,
             )
 
 
