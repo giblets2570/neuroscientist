@@ -223,9 +223,9 @@ def main(tetrode_number=TETRODE_NUMBER):
     network = model(dataset['input_shape'],dataset['output_dim'])
     print("Done!")
 
-    if(os.path.isfile('recurrent_2_network_test')):
+    if(os.path.isfile('recurrent_2_network')):
         print("Loading old model")
-        f=open('recurrent_2_network_test','r')
+        f=open('recurrent_2_network','r')
         all_param_values = pickle.load(f)
         f.close()
         lasagne.layers.set_all_param_values(network, all_param_values)
@@ -249,7 +249,6 @@ def main(tetrode_number=TETRODE_NUMBER):
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
                 cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end],LEARNING_RATE)
                 costs.append(cost)
-                # costs.append(cost)
 
             meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
             print("Epoch: {}, Training cost: {}".format(i+1,meanTrainCost))
