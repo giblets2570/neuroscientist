@@ -72,9 +72,9 @@ SAVE_MODEL = False
 
 CONV = False
 
-NUM_POINTS = 100
+NUM_POINTS = 10000
 
-MODEL_FILENAME = "sparse_auto_network_complete"
+MODEL_FILENAME = "auto_network"
 
 def load_data(tetrode_number=TETRODE_NUMBER):
     """
@@ -108,14 +108,14 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
     print(shape)
     l_in = lasagne.layers.InputLayer(shape=shape)
 
-    # l_hidden_1 = lasagne.layers.DenseLayer(
-    #     l_in,
-    #     num_units=num_hidden_units,
-    #     nonlinearity=lasagne.nonlinearities.rectify,
-    #     )
+    l_hidden_1 = lasagne.layers.DenseLayer(
+        l_in,
+        num_units=num_hidden_units,
+        nonlinearity=lasagne.nonlinearities.rectify,
+        )
 
     l_hidden_2 = lasagne.layers.DenseLayer(
-        l_in,
+        l_hidden_1,
         num_units=num_hidden_units_2,
         nonlinearity=lasagne.nonlinearities.rectify,
         )
@@ -132,14 +132,14 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
         nonlinearity=lasagne.nonlinearities.rectify,
         )
 
-    # l_hidden_4 = lasagne.layers.DenseLayer(
-    #     l_hidden_3,
-    #     num_units=num_hidden_units,
-    #     nonlinearity=lasagne.nonlinearities.rectify,
-    #     )
+    l_hidden_4 = lasagne.layers.DenseLayer(
+        l_hidden_3,
+        num_units=num_hidden_units,
+        nonlinearity=lasagne.nonlinearities.rectify,
+        )
 
     l_out = lasagne.layers.DenseLayer(
-        l_hidden_3,
+        l_hidden_4,
         num_units=output_dim,
         nonlinearity=None,
         )
@@ -162,14 +162,22 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     num_layers = len(layers)
 
     code_layer = layers[num_layers/2]
+    activations_2_layer = layers[num_layers/2 - 1]
+    activations_1_layer = layers[num_layers/2 - 2]
 
-    # code output 
+    # code and activation outputs
     code_output = lasagne.layers.get_output(code_layer, X_batch, deterministic=True)
+    activations_1_output = lasagne.layers.get_output(activations_1_layer, X_batch, deterministic=True)
+    activations_2_output = lasagne.layers.get_output(activations_2_layer, X_batch, deterministic=True)
 
     code = theano.function(inputs=[X_batch], outputs=code_output, allow_input_downcast=True)
+    activations_1 = theano.function(inputs=[X_batch], outputs=activations_1_output, allow_input_downcast=True)
+    activations_2 = theano.function(inputs=[X_batch], outputs=activations_2_output, allow_input_downcast=True)
 
     return dict(
-        code=code
+        code=code,
+        activations_1=activations_1,
+        activations_2=activations_2
     )
 
 def makeVideo(X_2d,dataset):
@@ -218,19 +226,35 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     all_param_values = pickle.load(f)
     f.close()
     # print(all_param_values)
-
     lasagne.layers.set_all_param_values(network, all_param_values)
 
     print("Setting up the training functions...")
     training = funcs(dataset,network)
     print("Done!")
 
+
+
+    activations_1 = training['activations_1'](dataset['data'][0:NUM_POINTS])
+    activations_2 = training['activations_2'](dataset['data'][0:NUM_POINTS])
     codes = training['code'](dataset['data'][0:NUM_POINTS])
     print(codes.shape)
     codes_2d = bh_sne(codes)
+    activations_1_2d = bh_sne(activations_1)
+    activations_2_2d = bh_sne(activations_2)
+
+
+
+    plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
+    plt.savefig('../tsne_codes.png', bbox_inches='tight')
+    plt.close()
+    plt.scatter(activations_1_2d[:, 0], activations_1_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
+    plt.savefig('../tsne_activations_1.png', bbox_inches='tight')
+    plt.close()
+    plt.scatter(activations_2_2d[:, 0], activations_2_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
+    plt.savefig('../tsne_activations_2.png', bbox_inches='tight')
+    plt.close()
 
     # This is where the code for the video will go
-    makeVideo(codes_2d,dataset)
 
 if __name__ == '__main__':
     main()
