@@ -215,7 +215,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     print("Done!")
 
 
-    for tetrode_number in [9]:
+    for tetrode_number in [10]:
 
         print("Loading the model parameters from {}".format(MODEL_FILENAME+str(tetrode_number)))
         f = open(MODEL_FILENAME+str(tetrode_number),'r')
@@ -233,7 +233,6 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         print("Setting up the training functions...")
         training = funcs(dataset,network)
         print("Done!")
-
 
         # activations_1 = training['activations_1'](dataset['data'][0:NUM_POINTS])
         # activations_2 = training['activations_2'](dataset['data'][0:NUM_POINTS])
