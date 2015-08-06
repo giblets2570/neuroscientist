@@ -183,17 +183,13 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 def makeVideo(X_2d,dataset):
 
     labels = dataset['labels']
-    # print(labels.shape)
     timed_activations = dataset['timed_activations']
-
     duration = X_2d.shape[0]
 
     fps = 5
 
     fig, ax = plt.subplots(1, figsize=(4, 4), facecolor='white')
     fig.subplots_adjust(left=0, right=1, bottom=0)
-
-    i = 0
 
     def make_frame(t):
         ax.clear()
@@ -219,7 +215,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     print("Done!")
 
 
-    for tetrode_number in [9,10,11,12,13,14,15,16]:
+    for tetrode_number in [9]:
 
         print("Loading the model parameters from {}".format(MODEL_FILENAME+str(tetrode_number)))
         f = open(MODEL_FILENAME+str(tetrode_number),'r')
@@ -272,6 +268,8 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         f=open('dbscan_labels/tetrode_{}.npy'.format(tetrode_number),'w')
         pickle.dump(labels, f)
         f.close()
+
+
 
 
 if __name__ == '__main__':

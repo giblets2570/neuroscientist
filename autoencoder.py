@@ -156,7 +156,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
         l_code_layer = lasagne.layers.DenseLayer(
             l_hidden_2,
             num_units=num_code_units,
-            nonlinearity=lasagne.nonlinearities.rectify,
+            nonlinearity=lasagne.nonlinearities.softmax,
             )
 
         l_hidden_3 = lasagne.layers.DenseLayer(

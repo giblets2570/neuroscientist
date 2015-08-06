@@ -7,3 +7,5 @@ big_auto_network
 recurrent_1_network
 position/
 dbscan_labels/
+auto_models/
+
