@@ -398,7 +398,7 @@ def makeVideo(prediction, actual, points_from, number):
         return mplfig_to_npimage(fig)
 
     animation = mpy.VideoClip(make_frame, duration = duration)
-    animation.write_gif("../position/position_{}.gif".format(number), fps=fps)
+    animation.write_gif("../position/test/position_{}.gif".format(number), fps=fps)
 
 if __name__ == '__main__':
     
