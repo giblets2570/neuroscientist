@@ -108,14 +108,14 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
     print(shape)
     l_in = lasagne.layers.InputLayer(shape=shape)
 
-    l_hidden_1 = lasagne.layers.DenseLayer(
-        l_in,
-        num_units=num_hidden_units,
-        nonlinearity=lasagne.nonlinearities.rectify,
-        )
+    # l_hidden_1 = lasagne.layers.DenseLayer(
+    #     l_in,
+    #     num_units=num_hidden_units,
+    #     nonlinearity=lasagne.nonlinearities.rectify,
+    #     )
 
     l_hidden_2 = lasagne.layers.DenseLayer(
-        l_hidden_1,
+        l_in,
         num_units=num_hidden_units_2,
         nonlinearity=lasagne.nonlinearities.rectify,
         )
@@ -132,14 +132,14 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
         nonlinearity=lasagne.nonlinearities.rectify,
         )
 
-    l_hidden_4 = lasagne.layers.DenseLayer(
-        l_hidden_3,
-        num_units=num_hidden_units,
-        nonlinearity=lasagne.nonlinearities.rectify,
-        )
+    # l_hidden_4 = lasagne.layers.DenseLayer(
+    #     l_hidden_3,
+    #     num_units=num_hidden_units,
+    #     nonlinearity=lasagne.nonlinearities.rectify,
+    #     )
 
     l_out = lasagne.layers.DenseLayer(
-        l_hidden_4,
+        l_hidden_3,
         num_units=output_dim,
         nonlinearity=None,
         )
