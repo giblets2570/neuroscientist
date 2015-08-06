@@ -345,6 +345,76 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
             pickle.dump(all_param_values, f)
             f.close()
 
+        ran = randint(dataset['num_examples_test'],size=10)
+        for j in ran:
+            testing = [dataset['X_test'][ran]]
+            # print(testing[0].shape)
+            output = dataset['y_test'][ran]
+            # print(np.arange(dataset['output_dim']))
+            # print(output)
+            prediction = training['predict'](testing)[0]
+            # print(prediction)
+            # print(testing[0][0])
+            
+            code = training['code'](testing)
+
+            if(j == 0):
+                L_penalty = training['L_penalty'](testing)
+                print ("L_penalty = {}".format(L_penalty))
+            
+            # plotting the figure
+
+            fig = plt.figure(1)
+            sub1 = fig.add_subplot(311)
+            sub2 = fig.add_subplot(312)
+            sub3 = fig.add_subplot(313)
+
+            # add titles
+
+            sub1.set_title('Desired output')
+            sub2.set_title('Net output')
+            sub3.set_title('Code layer output')
+
+            # adding x labels
+
+            sub1.set_xlabel('Time')
+            sub2.set_xlabel('Time')
+            sub3.set_xlabel('Code label')
+
+            # adding y labels
+
+            sub1.set_ylabel('Amplitude')
+            sub2.set_ylabel('Amplitude')
+            sub3.set_ylabel('Probability')
+
+            # Plotting data
+
+            # print(testing[0][0])
+            # inp = []
+            # for z in range(4):
+            #     inp += list(testing[0][0][z])
+
+
+            sub1.plot(output)
+            # sub1.bar(x_axis, output, width=1)
+            sub1.grid(True)
+
+            sub2.plot(prediction)
+            sub2.grid(True)
+
+            x_axis = list(np.arange(len(code[0])))
+
+            # sub3.plot(code[0])
+            sub3.bar(x_axis, code[0], width=1)
+            # plt.show()
+
+            fig.tight_layout()
+
+            # plt.plot(var2)
+            # fig.tight_layout()
+            plt.savefig('auto_models/fig{}_{}.png'.format(tetrode_number,j), bbox_inches='tight')
+            plt.close()
+
 if __name__ == '__main__':
     main()
     
