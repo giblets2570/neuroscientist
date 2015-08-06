@@ -236,11 +236,11 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
         # activations_1 = training['activations_1'](dataset['data'][0:NUM_POINTS])
         # activations_2 = training['activations_2'](dataset['data'][0:NUM_POINTS])
-        codes = training['code'](dataset['data'][0:NUM_POINTS])
+        # codes = training['code'](dataset['data'][0:NUM_POINTS])
         # print(codes.shape)
         # codes_2d = bh_sne(codes)
 
-        codes_2d = bh_sne(codes)
+        codes_2d = bh_sne(np.asarray(dataset['data'][0:NUM_POINTS],dtype=float))
 
         # activations_1_2d = bh_sne(activations_1)
         # activations_2_2d = bh_sne(activations_2)
@@ -264,11 +264,9 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         plt.savefig('dbscan_labels/dbscan_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
         plt.close()
 
-        f=open('dbscan_labels/tetrode_{}.npy'.format(tetrode_number),'w')
+        f=open('dbscan_labels/input/tetrode_{}.npy'.format(tetrode_number),'w')
         pickle.dump(labels, f)
         f.close()
-
-
 
 
 if __name__ == '__main__':

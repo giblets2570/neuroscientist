@@ -53,9 +53,10 @@ def getData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16]):
 						m = val
 			
 			con = list(np.asarray(data[i][1],dtype=np.float16)/m)+list(np.asarray(data[i+1][1],dtype=np.float16)/m)+list(np.asarray(data[i+2][1],dtype=np.float16)/m)+list(np.asarray(data[i+3][1],dtype=np.float16)/m)
-			entry = np.zeros(1600)
-			for i in range(base,base+200):
-				entry[i] = con[i-base]
+			# entry = np.zeros(1600)
+			# for i in range(base,base+200):
+			# 	entry[i] = con[i-base]
+			entry = np.asarray(con)
 			activations.append(entry)
 
 	activations = np.asarray(activations)

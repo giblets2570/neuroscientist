@@ -50,7 +50,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 5
+NUM_EPOCHS = 10
 
 BATCH_SIZE = 26
 
@@ -81,10 +81,10 @@ def load_data(tetrode_number):
     return dict(
         X_train=X_train,
         y_train=y_train,
-        # X_valid=X_valid,
-        # y_valid=y_valid,
-        # X_test=X_test,
-        # y_test=y_test,
+        X_valid=X_valid,
+        y_valid=y_valid,
+        X_test=X_test,
+        y_test=y_test,
         num_examples_train=X_train.shape[0],
         num_examples_valid=X_valid.shape[0],
         num_examples_test=X_test.shape[0],
@@ -152,6 +152,71 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         print("Recurrent shape: ",lasagne.layers.get_output_shape(l_recurrent))
 
+        # l_recurrent_back = lasagne.layers.GRULayer(
+        #     l_in, num_hidden_units, 
+        #     grad_clipping=GRAD_CLIP,
+        #     gradient_steps=500,
+        #     # W_in_to_hid=lasagne.init.HeUniform(),
+        #     # W_hid_to_hid=lasagne.init.HeUniform(),
+        #     # nonlinearity=lasagne.nonlinearities.sigmoid
+        #     backwards=True
+        #     )
+
+        # print("Recurrent back shape: ",lasagne.layers.get_output_shape(l_recurrent_back))
+
+        # l_recurrent_3 = lasagne.layers.GRULayer(
+        #     l_recurrent_2, num_hidden_units, 
+        #     grad_clipping=GRAD_CLIP,
+        #     # W_in_to_hid=lasagne.init.HeUniform(),
+        #     # W_hid_to_hid=lasagne.init.HeUniform(),
+        #     # nonlinearity=lasagne.nonlinearities.sigmoid
+        #     )
+
+
+        # this is great
+
+        # print("Recurrent 3 shape: ",lasagne.layers.get_output_shape(l_recurrent_3))
+
+        # l_recurrent_back = lasagne.layers.RecurrentLayer(
+        #     l_in, num_hidden_units, 
+        #     grad_clipping=GRAD_CLIP,
+        #     W_in_to_hid=lasagne.init.HeUniform(),
+        #     W_hid_to_hid=lasagne.init.HeUniform(),
+        #     nonlinearity=lasagne.nonlinearities.tanh, 
+        #     backwards=True
+        #     )
+
+        # l_recurrent_2 = lasagne.layers.RecurrentLayer(
+        #     l_recurrent, num_hidden_units, 
+        #     grad_clipping=GRAD_CLIP,
+        #     W_in_to_hid=lasagne.init.HeUniform(),
+        #     W_hid_to_hid=lasagne.init.HeUniform(),
+        #     nonlinearity=lasagne.nonlinearities.tanh
+        #     )
+
+        # l_recurrent_back_2 = lasagne.layers.RecurrentLayer(
+        #     l_recurrent_back, num_hidden_units, 
+        #     grad_clipping=GRAD_CLIP,
+        #     W_in_to_hid=lasagne.init.HeUniform(),
+        #     W_hid_to_hid=lasagne.init.HeUniform(),
+        #     nonlinearity=lasagne.nonlinearities.tanh, 
+        #     backwards=True
+        #     )
+
+        # l_recurrent_3 = lasagne.layers.RecurrentLayer(
+        #     l_recurrent_2, num_hidden_units, 
+        #     grad_clipping=GRAD_CLIP,
+        #     W_in_to_hid=lasagne.init.HeUniform(),
+        #     W_hid_to_hid=lasagne.init.HeUniform(),
+        #     nonlinearity=lasagne.nonlinearities.tanh
+        #     )
+        
+
+        # l_sum = lasagne.layers.ElemwiseSumLayer([l_recurrent, l_recurrent_back])
+
+        # We need a reshape layer which combines the first (batch size) and second
+        # (number of timesteps) dimensions, otherwise the DenseLayer will treat the
+        # number of time steps as a feature dimension.
         l_reshape_3 = lasagne.layers.ReshapeLayer(l_recurrent, (batch_size*length, num_hidden_units))
 
         print("Reshape shape: ",lasagne.layers.get_output_shape(l_reshape_3))
@@ -179,6 +244,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
         training and testing. These are the train and predict functions.
         The predict function returns out output of the network.
     """
+
     # symbolic variables 
     X_batch = T.tensor3()
     y_batch = T.tensor3()
@@ -274,9 +340,6 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     print("Plotting the predictions")
 
-    
-
-
     for i,(actual,prediction) in enumerate(zip(actuals,predictions)):
         prediction = np.asarray(prediction)
         actual = np.asarray(actual)
@@ -304,7 +367,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
         plt.savefig('../position/Position_{}.png'.format(i), bbox_inches='tight')
         plt.close()
-        # makeVideo(prediction,actual,points_from,i)
+        makeVideo(prediction,actual,points_from,i)
 
 def makeVideo(prediction, actual, points_from, number):
 
