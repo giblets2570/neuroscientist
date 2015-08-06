@@ -253,7 +253,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         ##############################################################################
         # Compute DBSCAN
 
-        db = DBSCAN(eps=1.2, min_samples=10).fit(codes_2d)
+        db = DBSCAN(eps=1.0, min_samples=10).fit(codes_2d)
         core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
         core_samples_mask[db.core_sample_indices_] = True
         labels = db.labels_
