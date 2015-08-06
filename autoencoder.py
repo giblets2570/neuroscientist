@@ -49,7 +49,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 1000000
+NUM_EPOCHS = 1000
 BATCH_SIZE = 400
 NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
@@ -58,9 +58,9 @@ MOMENTUM = 0.9
 EARLY_STOPPING = False
 STOPPING_RANGE = 10
 
-LOG_EXPERIMENT = True
+LOG_EXPERIMENT = False
 
-TETRODE_NUMBER = 11
+TETRODE_NUMBER = 9
 
 CONV = False
 
@@ -141,14 +141,14 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
         print(shape)
         l_in = lasagne.layers.InputLayer(shape=shape)
 
-        l_hidden_1 = lasagne.layers.DenseLayer(
-            l_in,
-            num_units=num_hidden_units,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_1 = lasagne.layers.DenseLayer(
+        #     l_in,
+        #     num_units=num_hidden_units,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
         l_hidden_2 = lasagne.layers.DenseLayer(
-            l_hidden_1,
+            l_in,
             num_units=num_hidden_units_2,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
@@ -156,7 +156,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
         l_code_layer = lasagne.layers.DenseLayer(
             l_hidden_2,
             num_units=num_code_units,
-            nonlinearity=lasagne.nonlinearities.softmax,
+            nonlinearity=lasagne.nonlinearities.rectify,
             )
 
         l_hidden_3 = lasagne.layers.DenseLayer(
@@ -165,14 +165,14 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_hidden_4 = lasagne.layers.DenseLayer(
-            l_hidden_3,
-            num_units=num_hidden_units,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_4 = lasagne.layers.DenseLayer(
+        #     l_hidden_3,
+        #     num_units=num_hidden_units,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
         l_out = lasagne.layers.DenseLayer(
-            l_hidden_4,
+            l_hidden_3,
             num_units=output_dim,
             nonlinearity=None,
             )
@@ -242,308 +242,108 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
         L_penalty=L_penalty
     )
 
-def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=200,num_code_units=50):
+def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=200,num_code_units=30):
     """
         This is the main method that sets up the experiment
     """
-    print("Loading the data...")
-    dataset = load_data(tetrode_number)
-    print("Done!")
 
-    print("Tetrode number: {}, Num outputs: {}".format(tetrode_number,dataset['output_dim']))
+    for tetrode_number in range(9,17):
 
-    print(dataset['input_shape'])
-    print(dataset['output_dim'])
-    
-    print("Making the model...")
-    network = model(dataset['input_shape'],dataset['output_dim'],num_hidden_units,num_hidden_units_2,num_code_units)
-    print("Done!")
+        print("Loading the data...")
+        dataset = load_data(tetrode_number)
+        print("Done!")
 
-    print("Setting up the training functions...")
-    training = funcs(dataset,network)
-    print("Done!")
+        print("Tetrode number: {}, Num outputs: {}".format(tetrode_number,dataset['output_dim']))
 
-    accuracies = []
-    trainvalidation = []
+        print(dataset['input_shape'])
+        print(dataset['output_dim'])
+        
+        print("Making the model...")
+        network = model(dataset['input_shape'],dataset['output_dim'],num_hidden_units,num_hidden_units_2,num_code_units)
+        print("Done!")
 
-    print("Begining to train the network...")
-    epochsDone = 0
-    try:
-        for i in range(NUM_EPOCHS):
-            costs = []
-            valid_costs = []
+        print("Setting up the training functions...")
+        training = funcs(dataset,network)
+        print("Done!")
 
-            for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
-                cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
-                costs.append(cost)
-            
-            for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
-                cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
-                valid_costs.append(cost)
+        accuracies = []
+        trainvalidation = []
 
+        print("Begining to train the network...")
+        epochsDone = 0
+        try:
+            for i in range(NUM_EPOCHS):
+                costs = []
+                valid_costs = []
 
-            meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
-            meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
-            accuracy = training['accuracy'](dataset['X_test'],dataset['y_test'])
-
-            print("Epoch: {}, Accuracy: {}, Training cost: {}, validation cost: {}".format(i+1,accuracy,meanTrainCost,meanValidCost))
-
-            if(np.isnan(meanTrainCost/meanValidCost)):
-                print("Nan value")
-                break
+                for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
+                    cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
+                    costs.append(cost)
+                
+                for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
+                    cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
+                    valid_costs.append(cost)
 
 
-            # this is the test to see if the autoencoder is learning how to 
-            # get the same labels as caswells
-            # if i%20==0:
-            #     acs = []
-            #     for j in range(dataset['caswells_dim']):
-            #         # print(dataset['labeled_test'][j].shape)
-            #         codes = training['code'](dataset['labeled_test'][j])
-            #         np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
-            #         format_codes = []
-            #         for code in codes:
-                        
-            #             format_codes.append(np.argmax(code))
+                meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
+                meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
+                accuracy = training['accuracy'](dataset['X_test'],dataset['y_test'])
 
-            #         prev = sorted(format_codes)[0]
-            #         # print(sorted(format_codes))
-            #         k = 0
-            #         same = [1]
-            #         for code in sorted(format_codes)[1:]:
-            #             if(code == prev):
-            #                 same[k] = same[k] + 1
-            #             else:
-            #                 k+=1
-            #                 same.append(1)
-            #             prev = code
+                print("Epoch: {}, Accuracy: {}, Training cost: {}, validation cost: {}".format(i+1,accuracy,meanTrainCost,meanValidCost))
 
-            #         same = np.asarray(same)
-            #         # print(same,np.argmax(same),same[np.argmax(same)],np.sum(same))
-            #         label_acc = same[np.argmax(same)]*1.0/np.sum(same)
-            #         acs.append(label_acc)
-            #         print("Label: {}, Num examples: {}, Same label with autoencoder: {} ".format(j,dataset['labeled_test'][j].shape[0],label_acc))
-            #     acs = np.asarray(acs)
-            #     print("Average agreement: {}".format(np.mean(acs)))
+                if(np.isnan(meanTrainCost/meanValidCost)):
+                    print("Nan value")
+                    break
 
-            # # this is where we plot the data
-            # if i%50 == 0:
-            #     ran = randint(0,dataset['num_examples_test']-20)
-            #     for j in range(10):
-            #         testing = [dataset['X_test'][ran]]
-            #         # print(testing[0].shape)
-            #         output = dataset['y_test'][ran]
-            #         # print(np.arange(dataset['output_dim']))
-            #         # print(output)
-            #         prediction = training['predict'](testing)[0]
-                    
-            #         code = training['code'](testing)
+                trainvalidation.append([meanTrainCost,meanValidCost])
+                accuracies.append(accuracy)
+                if(EARLY_STOPPING):
+                    if(len(accuracies) < STOPPING_RANGE):
+                        pass
+                    else:
+                        test = [k for k in accuracies if k < accuracy]
+                        if not test:
+                            print('Early stopping causing training to finish at epoch {}'.format(i+1))
+                            break
+                        del accuracies[0]
+                        accuracies.append(accuracy)
 
-            #         # if(j == 0):
-            #         #     L_penalty = training['L_penalty'](testing)
-            #         #     print ("L_penalty = {}".format(L_penalty))
-                    
-            #         # plotting the figure
+                epochsDone = epochsDone + 1
 
-            #         fig = plt.figure(1)
-            #         sub1 = fig.add_subplot(311)
-            #         sub2 = fig.add_subplot(312)
-            #         sub3 = fig.add_subplot(313)
+        except KeyboardInterrupt:
+            pass
 
-            #         # add titles
+        # plt.plot(trainvalidation)
+        # plt.show()
 
-            #         sub1.set_title('Desired output')
-            #         sub2.set_title('Net output')
-            #         sub3.set_title('Code layer output')
+        if(LOG_EXPERIMENT):
+            print("Logging the experiment details...")
+            log = dict(
+                NET_TYPE = "Auto encoder 2 hidden 1 code 300 200 100",
+                TETRODE_NUMBER = tetrode_number,
+                BASENAME = BASENAME,
+                NUM_EPOCHS = epochsDone,
+                BATCH_SIZE = BATCH_SIZE,
+                TRAIN_VALIDATION = trainvalidation,
+                LEARNING_RATE = LEARNING_RATE,
+                MOMENTUM = MOMENTUM,
+                ACCURACY = accuracies,
+                NETWORK_LAYERS = [str(type(layer)) for layer in lasagne.layers.get_all_layers(network)],
+                OUTPUT_DIM = dataset['output_dim'],
+                # NETWORK_PARAMS = lasagne.layers.get_all_params_values(network)
+            )
+            now = datetime.datetime.now()
+            filename = "experiments/auto/{}_{}_{}_NUMLAYERS_{}_OUTPUTDIM_{}".format(now,NUM_EPOCHS,NUM_HIDDEN_UNITS,len(log['NETWORK_LAYERS']),log['OUTPUT_DIM'])
+            filename = re.sub("[^A-Za-z0-9_/ ,-:]", "", filename)
+            with open(filename,"w") as outfile:
+                outfile.write(str(log))
 
-            #         # adding x labels
-
-            #         sub1.set_xlabel('Time')
-            #         sub2.set_xlabel('Time')
-            #         sub3.set_xlabel('Code label')
-
-            #         # adding y labels
-
-            #         sub1.set_ylabel('Amplitude')
-            #         sub2.set_ylabel('Amplitude')
-            #         sub3.set_ylabel('Probability')
-
-            #         # Plotting data
-
-            #         # print(testing[0][0])
-            #         # inp = []
-            #         # for z in range(4):
-            #         #     inp += list(testing[0][0][z])
-
-
-            #         sub1.plot(output)
-            #         # sub1.bar(x_axis, output, width=1)
-            #         sub1.grid(True)
-
-            #         sub2.plot(prediction)
-            #         sub2.grid(True)
-
-            #         x_axis = list(np.arange(len(code[0])))
-
-            #         # sub3.plot(code[0])
-            #         sub3.bar(x_axis, code[0], width=1)
-            #         # plt.show()
-
-            #         fig.tight_layout()
-
-            #         # plt.plot(var2)
-            #         # fig.tight_layout()
-            #         plt.savefig('../logs/auto/fig{}_{}.png'.format(i,j), bbox_inches='tight')
-            #         plt.close()
-                    
-            #         ran += 1
-            #     # break
-
-            # if i%100==0:
-            #     codes = training['code'](dataset['X_train'][0:10000])
-            #     print(codes.shape)
-            #     codes_2d = bh_sne(codes)
-
-            #     # print(dataset['y_train'].shape)
-            #     plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:10000],alpha=0.8,lw=0)
-            #     plt.savefig('../logs/auto/tsne_{}.png'.format(i), bbox_inches='tight')
-            #     plt.close()
-
-
-            #     # MEANSHIFT
-
-            #     X = codes_2d
-
-            #     bandwidth = estimate_bandwidth(X, quantile=0.2, n_samples=500)
-
-            #     ms = MeanShift(bandwidth=bandwidth, bin_seeding=True)
-            #     ms.fit(X)
-            #     labels = ms.labels_
-            #     cluster_centers = ms.cluster_centers_
-
-            #     labels_unique = np.unique(labels)
-            #     n_clusters_ = len(labels_unique)
-
-            #     print("number of estimated clusters : %d" % n_clusters_)
-
-            #     ###############################################################################
-            #     # Plot result
-
-            #     plt.figure(1)
-            #     plt.clf()
-
-            #     colors = cycle('bgrcmykbgrcmykbgrcmykbgrcmyk')
-            #     for k, col in zip(range(n_clusters_), colors):
-            #         my_members = labels == k
-            #         cluster_center = cluster_centers[k]
-            #         plt.plot(X[my_members, 0], X[my_members, 1], col + '.')
-            #         plt.plot(cluster_center[0], cluster_center[1], 'o', markerfacecolor=col,
-            #                  markeredgecolor='k', markersize=14)
-            #     plt.title('Estimated number of clusters: %d' % n_clusters_)
-            #     plt.savefig('../logs/auto/meanshift_{}.png'.format(i), bbox_inches='tight')
-            #     plt.close()
-
-            #     # DBSCAN
-
-            #     # X = StandardScaler().fit_transform(codes_2d)
-
-            #     # print(X)
-
-            #     ##############################################################################
-            #     # Compute DBSCAN
-            #     db = DBSCAN(eps=1.5, min_samples=5).fit(codes_2d)
-            #     core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
-            #     core_samples_mask[db.core_sample_indices_] = True
-            #     labels = db.labels_
-
-            #     # Number of clusters in labels, ignoring noise if present.
-            #     n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
-
-            #     print('Estimated number of clusters: %d' % n_clusters_)
-            #     print("Homogeneity: %0.3f" % metrics.homogeneity_score(dataset['y_train_labels'][:10000], labels))
-            #     print("Completeness: %0.3f" % metrics.completeness_score(dataset['y_train_labels'][:10000], labels))
-            #     print("V-measure: %0.3f" % metrics.v_measure_score(dataset['y_train_labels'][:10000], labels))
-            #     print("Adjusted Rand Index: %0.3f"
-            #           % metrics.adjusted_rand_score(dataset['y_train_labels'][:10000], labels))
-            #     print("Adjusted Mutual Information: %0.3f"
-            #           % metrics.adjusted_mutual_info_score(dataset['y_train_labels'][:10000], labels))
-            #     print("Silhouette Coefficient: %0.3f"
-            #           % metrics.silhouette_score(X, labels))
-
-            #     ##############################################################################
-            #     # Plot result
-            #     # import matplotlib.pyplot as plt
-
-            #     # Black removed and is used for noise instead.
-            #     unique_labels = set(labels)
-            #     colors = plt.cm.Spectral(np.linspace(0, 1, len(unique_labels)))
-            #     for k, col in zip(unique_labels, colors):
-            #         if k == -1:
-            #             # Black used for noise.
-            #             col = 'k'
-
-            #         class_member_mask = (labels == k)
-
-            #         xy = X[class_member_mask & core_samples_mask]
-            #         plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=col,
-            #                  markeredgecolor='k', markersize=7)
-
-            #         xy = X[class_member_mask & ~core_samples_mask]
-            #         plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=col,
-            #                  markeredgecolor='k', markersize=4)
-
-            #     plt.title('Estimated number of clusters: %d' % n_clusters_)
-            #     plt.savefig('../logs/auto/dbscan_{}.png'.format(i), bbox_inches='tight')
-
-            trainvalidation.append([meanTrainCost,meanValidCost])
-            accuracies.append(accuracy)
-            if(EARLY_STOPPING):
-                if(len(accuracies) < STOPPING_RANGE):
-                    pass
-                else:
-                    test = [k for k in accuracies if k < accuracy]
-                    if not test:
-                        print('Early stopping causing training to finish at epoch {}'.format(i+1))
-                        break
-                    del accuracies[0]
-                    accuracies.append(accuracy)
-
-            epochsDone = epochsDone + 1
-
-    except KeyboardInterrupt:
-        pass
-
-    # plt.plot(trainvalidation)
-    # plt.show()
-
-    if(LOG_EXPERIMENT):
-        print("Logging the experiment details...")
-        log = dict(
-            NET_TYPE = "Auto encoder 2 hidden 1 code 300 200 100",
-            TETRODE_NUMBER = tetrode_number,
-            BASENAME = BASENAME,
-            NUM_EPOCHS = epochsDone,
-            BATCH_SIZE = BATCH_SIZE,
-            TRAIN_VALIDATION = trainvalidation,
-            LEARNING_RATE = LEARNING_RATE,
-            MOMENTUM = MOMENTUM,
-            ACCURACY = accuracies,
-            NETWORK_LAYERS = [str(type(layer)) for layer in lasagne.layers.get_all_layers(network)],
-            OUTPUT_DIM = dataset['output_dim'],
-            # NETWORK_PARAMS = lasagne.layers.get_all_params_values(network)
-        )
-        now = datetime.datetime.now()
-        filename = "experiments/auto/{}_{}_{}_NUMLAYERS_{}_OUTPUTDIM_{}".format(now,NUM_EPOCHS,NUM_HIDDEN_UNITS,len(log['NETWORK_LAYERS']),log['OUTPUT_DIM'])
-        filename = re.sub("[^A-Za-z0-9_/ ,-:]", "", filename)
-        with open(filename,"w") as outfile:
-            outfile.write(str(log))
-
-    if(SAVE_MODEL):
-        print("Saving model...")
-        all_param_values = lasagne.layers.get_all_param_values(network)
-        f=open('auto_network','w')
-        pickle.dump(all_param_values, f)
-        f.close()
+        if(SAVE_MODEL):
+            print("Saving model...")
+            all_param_values = lasagne.layers.get_all_param_values(network)
+            f=open('auto_models/auto_network_{}'.format(tetrode_number),'w')
+            pickle.dump(all_param_values, f)
+            f.close()
 
 if __name__ == '__main__':
     main()

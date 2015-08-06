@@ -404,14 +404,14 @@ def ratemap(activationResult,labelResult):
 		plt.scatter(x,y,c=rgba_colors,lw=0)
 		plt.show()
 
-def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=False):
+def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=False,learned_labels=False):
 
 	# k = 69700
 	k = 54100
 	# this has to work
 	totalLabel = None
 	for n,tetrode in enumerate(tetrodes):
-		duration, result = organiseTetrodeData(tetrode)
+		duration, result = organiseTetrodeData(tetrode,learned_labels)
 		activationResult, labelResult = newDownsampleData(duration,result,1000.0)
 		# activationResult = gaussConv(k,activationResult)
 		labelResult = gaussConv(k,labelResult)	
@@ -477,15 +477,22 @@ def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=Fal
 	return trX, tvX, teX, trY, tvY, teY
 
 if __name__=="__main__":
+
+	# for tetrode in range(9,17):
+
 	duration, result = organiseTetrodeData(9,learned_labels=True)
 	print(result[0]['label'].shape)
-	# activationResult, labelResult = newDownsampleData(duration,result,1000.0)
-	# #going to test the convolution
+	activationResult, labelResult = newDownsampleData(duration,result,1000.0)
+	#going to test the convolution
 	# print(labelResult.shape)
-	# activationResult = gaussConv(69700,activationResult)
-	# labelResult = gaussConv(69700,labelResult)
 
-	# ratemap(activationResult, labelResult)
+	activationResult = gaussConv(54100,activationResult)
+	labelResult = gaussConv(54100,labelResult)
+
+	activationResult = normalizeMatrix(activationResult)
+	labelResult = normalizeMatrix(labelResult)
+
+	ratemap(activationResult, labelResult)
 
 	# trX, tvX, teX, trY, tvY, teY = formatData()
 
