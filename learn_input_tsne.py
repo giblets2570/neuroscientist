@@ -246,14 +246,14 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         # activations_2_2d = bh_sne(activations_2)
 
         plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
-        plt.savefig('dbscan_labels/tsne_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
+        plt.savefig('dbscan_labels/input/tsne_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
         plt.close()
 
         # This is where the code for the video will go
         ##############################################################################
         # Compute DBSCAN
 
-        db = DBSCAN(eps=1.5, min_samples=10).fit(codes_2d)
+        db = DBSCAN(eps=1.2, min_samples=10).fit(codes_2d)
         core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
         core_samples_mask[db.core_sample_indices_] = True
         labels = db.labels_
@@ -261,7 +261,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         print("Num learned labels: {}".format(np.amax(labels)))
 
         plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
-        plt.savefig('dbscan_labels/dbscan_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
+        plt.savefig('dbscan_labels/input/dbscan_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
         plt.close()
 
         f=open('dbscan_labels/input/tetrode_{}.npy'.format(tetrode_number),'w')

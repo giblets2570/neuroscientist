@@ -368,6 +368,7 @@ def main(tetrode_number=TETRODE_NUMBER):
         plt.savefig('../position/Position_{}.png'.format(i), bbox_inches='tight')
         plt.close()
         makeVideo(prediction,actual,points_from,i)
+        plt.close()
 
 def makeVideo(prediction, actual, points_from, number):
 
