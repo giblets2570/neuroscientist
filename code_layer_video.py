@@ -241,7 +241,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         # print(codes.shape)
         # codes_2d = bh_sne(codes)
 
-        codes_2d = bh_sne(np.asarray(dataset['data'][0:NUM_POINTS], dtype=float))
+        codes_2d = bh_sne(codes)
 
         # activations_1_2d = bh_sne(activations_1)
         # activations_2_2d = bh_sne(activations_2)
@@ -254,7 +254,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         ##############################################################################
         # Compute DBSCAN
 
-        db = DBSCAN(eps=1.0, min_samples=10).fit(codes_2d)
+        db = DBSCAN(eps=1.5, min_samples=10).fit(codes_2d)
         core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
         core_samples_mask[db.core_sample_indices_] = True
         labels = db.labels_

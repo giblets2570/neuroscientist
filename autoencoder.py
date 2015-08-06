@@ -345,11 +345,11 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
             pickle.dump(all_param_values, f)
             f.close()
 
-        ran = randint(dataset['num_examples_test'],size=10)
+        ran = np.random.randint(dataset['num_examples_test'],size=10)
         for j in ran:
-            testing = [dataset['X_test'][ran]]
+            testing = [dataset['X_test'][j]]
             # print(testing[0].shape)
-            output = dataset['y_test'][ran]
+            output = dataset['y_test'][j]
             # print(np.arange(dataset['output_dim']))
             # print(output)
             prediction = training['predict'](testing)[0]
