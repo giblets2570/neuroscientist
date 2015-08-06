@@ -74,7 +74,7 @@ CONV = False
 
 NUM_POINTS = 100000
 
-MODEL_FILENAME = "auto_network"
+MODEL_FILENAME = "auto_models/auto_network_"
 
 def load_data(tetrode_number=TETRODE_NUMBER):
     """
@@ -219,15 +219,15 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     print("Done!")
 
 
-    print("Loading the model parameters from {}".format(MODEL_FILENAME))
-    f = open(MODEL_FILENAME,'r')
-    all_param_values = pickle.load(f)
-    f.close()
-    # print(all_param_values)
-    lasagne.layers.set_all_param_values(network, all_param_values)
-
-
     for tetrode_number in [9,10,11,12,13,14,15,16]:
+
+        print("Loading the model parameters from {}".format(MODEL_FILENAME+str(tetrode_number)))
+        f = open(MODEL_FILENAME+str(tetrode_number),'r')
+        all_param_values = pickle.load(f)
+        f.close()
+        # print(all_param_values)
+        lasagne.layers.set_all_param_values(network, all_param_values)
+
         print("Loading the data...")
         dataset = load_data(tetrode_number)
         print("Done!")
