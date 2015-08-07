@@ -179,7 +179,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
 
         return l_out
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.02, beta=0.1, momentum=MOMENTUM):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.02, beta=0.01, momentum=MOMENTUM):
 
     """
         Method the returns the theano functions that are used in 
@@ -242,7 +242,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
         L_penalty=L_penalty
     )
 
-def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=600,num_hidden_units_2=400,num_code_units=200):
+def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=400,num_code_units=300):
     """
         This is the main method that sets up the experiment
     """
@@ -308,12 +308,12 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=600,num_hidden_units_2=4
 
             epochsDone = epochsDone + 1
 
-            if(i%100 == 0):
+            if(i%50 == 0):
                 tetrode_number += 1
                 if(tetrode_number > 16):
                     tetrode_number = 9
                 print("Loading the data...")
-                dataset = load_data([tetrode_number])
+                dataset = load_data(tetrodeRange=[tetrode_number])
                 print("Done!")
 
     except KeyboardInterrupt:
