@@ -421,7 +421,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                 if (i+1)%100==0:
                     codes = training['code'](dataset['X_train'][0:NUM_POINTS])
                     print(codes.shape)
-                    codes_2d = bh_sne(np.asarray(codes,dtype=np.float32)
+                    codes_2d = bh_sne(np.asarray(codes, dtype=np.float32))
 
                     # print(dataset['y_train'].shape)
                     plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:NUM_POINTS],alpha=0.8,lw=0)
