@@ -292,9 +292,9 @@ def main(tetrode_number=TETRODE_NUMBER):
     network = model(dataset['input_shape'],dataset['output_dim'])
     print("Done!")
 
-    if(os.path.isfile('recurrent_2_learned')):
+    if(os.path.isfile('recurrent_2_input')):
         print("Loading old model")
-        f=open('recurrent_2_learned','r')
+        f=open('recurrent_2_input','r')
         all_param_values = pickle.load(f)
         f.close()
         lasagne.layers.set_all_param_values(network, all_param_values)
@@ -382,7 +382,7 @@ def main(tetrode_number=TETRODE_NUMBER):
     if(SAVE_MODEL):
         print("Saving model...")
         all_param_values = lasagne.layers.get_all_param_values(network)
-        f=open('recurrent_2_learned','w')
+        f=open('recurrent_2_input','w')
         pickle.dump(all_param_values, f)
         f.close()
 
