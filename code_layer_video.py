@@ -239,7 +239,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     print("Done!")
 
 
-    for tetrode_number in [9]:#,10,11,12,13,14,15,16]:
+    for tetrode_number in [9,10,11,12,13,14,15,16]:
 
         print("Loading the model parameters from {}".format(MODEL_FILENAME+str(tetrode_number)))
         f = open(MODEL_FILENAME+str(tetrode_number),'r')
