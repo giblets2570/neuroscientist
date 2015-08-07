@@ -47,7 +47,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 500
+NUM_EPOCHS = 2000
 
 BATCH_SIZE = 26
 
