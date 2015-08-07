@@ -296,7 +296,7 @@ def test():
 
 
 
-def organiseTetrodeData(tetrode,learned_labels=False):
+def organiseTetrodeData(tetrode,learned_labels=False,inp=False):
 	
 	tetfilename = BASENAME+"."+str(tetrode)
 	tetheader,tetdata = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
@@ -311,9 +311,15 @@ def organiseTetrodeData(tetrode,learned_labels=False):
 	result = []
 	if learned_labels:
 		print("Loading the learned labels")
-		f=open('dbscan_labels/tetrode_{}.npy'.format(tetrode),'r')
-		labels=pickle.load(f)
-		f.close()
+		labels=None
+		if(inp):
+			f=open('dbscan_labels/input/tetrode_{}.npy'.format(tetrode),'r')
+			labels=pickle.load(f)
+			f.close()
+		else:
+			f=open('dbscan_labels/tetrode_{}.npy'.format(tetrode),'r')
+			labels=pickle.load(f)
+			f.close()
 		labels = np.asarray(labels)
 		upper=np.amax(labels)
 		lower=np.amin(labels)
@@ -404,14 +410,14 @@ def ratemap(activationResult,labelResult):
 		plt.scatter(x,y,c=rgba_colors,lw=0)
 		plt.show()
 
-def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=False,learned_labels=False):
+def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=False,learned_labels=False,inp=False):
 
 	# k = 69700
 	k = 54100
 	# this has to work
 	totalLabel = None
 	for n,tetrode in enumerate(tetrodes):
-		duration, result = organiseTetrodeData(tetrode,learned_labels)
+		duration, result = organiseTetrodeData(tetrode,learned_labels,inp)
 		activationResult, labelResult = newDownsampleData(duration,result,1000.0)
 		# activationResult = gaussConv(k,activationResult)
 		labelResult = gaussConv(k,labelResult)	
