@@ -236,7 +236,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
         # activations_1 = training['activations_1'](dataset['data'][0:NUM_POINTS])
         # activations_2 = training['activations_2'](dataset['data'][0:NUM_POINTS])
-        codes = training['code'](dataset['data'][0:NUM_POINTS])
+        codes = training['code'](np.asarray(dataset['data'][0:NUM_POINTS],dtype=np.float64_t))
         # print(codes.shape)
         # codes_2d = bh_sne(codes)
 
