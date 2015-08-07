@@ -55,7 +55,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 1000000
+NUM_EPOCHS = 20
 BATCH_SIZE = 400
 NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
@@ -165,16 +165,40 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     activations_2_layer = layers[num_layers/2 - 1]
     activations_1_layer = layers[num_layers/2 - 2]
 
-    # code and activation outputs
+    # code output 
     code_output = lasagne.layers.get_output(code_layer, X_batch, deterministic=True)
+
+    l = T.sub(1,code_output)
+    ll = T.mul(code_output,l)
+    L = T.mul(4,ll)
+    L = L.mean()
+
+    rho_hat = T.mean(code_output,axis=1)
+    # L = T.sum(sparsity * T.log(sparsity/rho_hat) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat)))
+
+    # reg = 0.0001*lasagne.regularization.l2(network)
+    # this is the cost of the network when fed throught the noisey network
+    train_output = lasagne.layers.get_output(network, X_batch)
+    cost = lasagne.objectives.mse(train_output, y_batch) 
+    cost = cost.mean() + beta * L
+
+    all_params = lasagne.layers.get_all_params(network)
+    updates = lasagne.updates.nesterov_momentum(cost, all_params, learning_rate, momentum)
+
+    
+
+    # code and activation outputs
+    
     activations_1_output = lasagne.layers.get_output(activations_1_layer, X_batch, deterministic=True)
     activations_2_output = lasagne.layers.get_output(activations_2_layer, X_batch, deterministic=True)
 
+    train = theano.function(inputs=[X_batch, y_batch], outputs=cost, updates=updates, allow_input_downcast=True)
     code = theano.function(inputs=[X_batch], outputs=code_output, allow_input_downcast=True)
     activations_1 = theano.function(inputs=[X_batch], outputs=activations_1_output, allow_input_downcast=True)
     activations_2 = theano.function(inputs=[X_batch], outputs=activations_2_output, allow_input_downcast=True)
 
     return dict(
+        train=train,
         code=code,
         activations_1=activations_1,
         activations_2=activations_2
@@ -215,7 +239,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     print("Done!")
 
 
-    for tetrode_number in [9,10,11,12,13,14,15,16]:
+    for tetrode_number in [9]:#,10,11,12,13,14,15,16]:
 
         print("Loading the model parameters from {}".format(MODEL_FILENAME+str(tetrode_number)))
         f = open(MODEL_FILENAME+str(tetrode_number),'r')
@@ -233,6 +257,19 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         print("Setting up the training functions...")
         training = funcs(dataset,network)
         print("Done!")
+
+        for i in range(NUM_EPOCHS):
+            costs = []
+
+            for start, end in zip(range(0, dataset['data'].shape[0], BATCH_SIZE), range(BATCH_SIZE, dataset['data'].shape[0], BATCH_SIZE)):
+                cost = training['train'](dataset['data'][start:end],dataset['data'][start:end])
+                costs.append(cost)
+
+            meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
+            # accuracy = training['accuracy'](dataset['X_test'],dataset['y_test'])
+
+            print("Epoch: {}, Training cost: {}".format(i+1,meanTrainCost))
+
 
         # activations_1 = training['activations_1'](dataset['data'][0:NUM_POINTS])
         # activations_2 = training['activations_2'](dataset['data'][0:NUM_POINTS])
