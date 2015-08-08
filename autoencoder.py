@@ -249,8 +249,8 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         print(dataset['input_shape'])
         print(dataset['output_dim'])
 
-        print("Caswell's dims: ", dataset['caswells_dim'])
-        print("Labeled test: {}".format(dataset['labeled_test']))
+        # print("Caswell's dims: ", dataset['caswells_dim'])
+        # print("Labeled test: {}".format(dataset['labeled_test']))
         
         print("Making the model...")
         network = model(dataset['input_shape'],dataset['output_dim'],num_hidden_units,num_hidden_units_2,num_code_units)
