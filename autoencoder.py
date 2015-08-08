@@ -259,6 +259,9 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
         print(dataset['input_shape'])
         print(dataset['output_dim'])
+
+        print("Caswell's dims: ", dataset['caswells_dim'])
+        print("Labeled test: {}".format(dataset['labeled_test']))
         
         print("Making the model...")
         network = model(dataset['input_shape'],dataset['output_dim'],num_hidden_units,num_hidden_units_2,num_code_units)
@@ -316,30 +319,33 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                     acs = []
                     for j in range(dataset['caswells_dim']):
                         # print(dataset['labeled_test'][j].shape)
-                        codes = training['code'](dataset['labeled_test'][j])
-                        np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
-                        format_codes = []
-                        for code in codes:
-                            
-                            format_codes.append(np.argmax(code))
+                        try:
+                            codes = training['code'](dataset['labeled_test'][j])
+                            np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
+                            format_codes = []
+                            for code in codes:
+                                
+                                format_codes.append(np.argmax(code))
 
-                        prev = sorted(format_codes)[0]
-                        # print(sorted(format_codes))
-                        k = 0
-                        same = [1]
-                        for code in sorted(format_codes)[1:]:
-                            if(code == prev):
-                                same[k] = same[k] + 1
-                            else:
-                                k+=1
-                                same.append(1)
-                            prev = code
+                            prev = sorted(format_codes)[0]
+                            # print(sorted(format_codes))
+                            k = 0
+                            same = [1]
+                            for code in sorted(format_codes)[1:]:
+                                if(code == prev):
+                                    same[k] = same[k] + 1
+                                else:
+                                    k+=1
+                                    same.append(1)
+                                prev = code
 
-                        same = np.asarray(same)
-                        # print(same,np.argmax(same),same[np.argmax(same)],np.sum(same))
-                        label_acc = same[np.argmax(same)]*1.0/np.sum(same)
-                        acs.append(label_acc)
-                        print("Label: {}, Num examples: {}, Same label with autoencoder: {} ".format(j,dataset['labeled_test'][j].shape[0],label_acc))
+                            same = np.asarray(same)
+                            # print(same,np.argmax(same),same[np.argmax(same)],np.sum(same))
+                            label_acc = same[np.argmax(same)]*1.0/np.sum(same)
+                            acs.append(label_acc)
+                            print("Label: {}, Num examples: {}, Same label with autoencoder: {} ".format(j,dataset['labeled_test'][j].shape[0],label_acc))
+                        except KeyError:
+                            continue
                     acs = np.asarray(acs)
                     print("Average agreement: {}".format(np.mean(acs)))
 
