@@ -50,7 +50,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 10
+NUM_EPOCHS = 20
 
 BATCH_SIZE = 26
 
@@ -76,7 +76,7 @@ def load_data(tetrode_number):
     # sequence length = number of time steps per example. 
     # num_features_per_timestep = 31 i.e labels per tetrode
 
-    X_train, X_valid, X_test, y_train, y_valid, y_test = formatData(sequenceLength=2000,testing=True)
+    X_train, X_valid, X_test, y_train, y_valid, y_test = formatData(sequenceLength=2000,learned_labels=True,inp=True)
 
     return dict(
         X_train=X_train,
@@ -295,14 +295,14 @@ def main(tetrode_number=TETRODE_NUMBER):
     network = model(dataset['input_shape'],dataset['output_dim'])
     print("Done!")
 
-    if(os.path.isfile('recurrent_2_network')):
+    if(os.path.isfile('recurrent_2_input')):
         print("Loading old model")
-        f=open('recurrent_2_network','r')
+        f=open('recurrent_2_input','r')
         all_param_values = pickle.load(f)
         f.close()
         lasagne.layers.set_all_param_values(network, all_param_values)
     else:
-        print('recurrent_2_network doesnt exist')
+        print('recurrent_2_input doesnt exist')
         return 
 
     print("Setting up the testing functions...")
