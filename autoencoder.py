@@ -300,8 +300,8 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                     print("Nan value")
                     break
 
-                trainvalidation.append([meanTrainCost,meanValidCost])
-                accuracies.append(accuracy)
+                # trainvalidation.append([meanTrainCost,meanValidCost])
+                # accuracies.append(accuracy)
                 if(EARLY_STOPPING):
                     if(len(accuracies) < STOPPING_RANGE):
                         pass
