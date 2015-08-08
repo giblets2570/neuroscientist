@@ -283,7 +283,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
                 meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
                 # accuracy = training['accuracy'](dataset['X_test'],dataset['y_test'])
 
-                print("Epoch: {}, Accuracy: {}, Training cost: {}, validation cost: {}".format(i+1,accuracy,meanTrainCost,meanValidCost))
+                print("Epoch: {}, Training cost: {}, validation cost: {}".format(i+1,meanTrainCost,meanValidCost))
 
                 if(np.isnan(meanTrainCost/meanValidCost)):
                     print("Nan value")
