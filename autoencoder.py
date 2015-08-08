@@ -49,7 +49,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 10000
+NUM_EPOCHS = 8000
 BATCH_SIZE = 400
 NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
@@ -67,17 +67,6 @@ CONV = False
 SAVE_MODEL = True
 
 NUM_POINTS = 1000
-
-class DimshuffleLayer(lasagne.layers.Layer):
-    def __init__(self, input_layer, pattern):
-        super(DimshuffleLayer, self).__init__(input_layer)
-        self.pattern = pattern
-
-    def get_output_shape_for(self, input_shape):
-        return tuple([input_shape[i] for i in self.pattern])
-
-    def get_output_for(self, input, *args, **kwargs):
-        return input.dimshuffle(self.pattern)
 
 def load_data(tetrode_number=TETRODE_NUMBER):
     """
@@ -97,17 +86,17 @@ def load_data(tetrode_number=TETRODE_NUMBER):
     y_test = X_test
 
     r={}
-    for x,y in zip(X_test,y_test_labels):
-        # print("x: {}".format(x))
-        # print("y: {}".format(y))
-        _y = list(y)
-        if int(_y.index(1.0)) not in r:
-            r[int(_y.index(1.0))]=[x]
-        else:
-            r[int(_y.index(1.0))].append(x)
+    # for x,y in zip(X_test,y_test_labels):
+    #     # print("x: {}".format(x))
+    #     # print("y: {}".format(y))
+    #     _y = list(y)
+    #     if int(_y.index(1.0)) not in r:
+    #         r[int(_y.index(1.0))]=[x]
+    #     else:
+    #         r[int(_y.index(1.0))].append(x)
 
-    for key in r:
-        r[key] = np.asarray(r[key])
+    # for key in r:
+    #     r[key] = np.asarray(r[key])
 
 
     return dict(
@@ -120,8 +109,8 @@ def load_data(tetrode_number=TETRODE_NUMBER):
         X_test=X_test,
         y_test=y_test,
         y_test_labels=[np.argmax(y) for  y in y_test_labels],
-        labeled_test=r,
-        caswells_dim = y_train_labels.shape[-1],
+        # labeled_test=r,
+        # caswells_dim = y_train_labels.shape[-1],
         num_examples_train=X_train.shape[0],
         num_examples_valid=X_valid.shape[0],
         num_examples_test=X_test.shape[0],
@@ -292,7 +281,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
                 meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
                 meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
-                accuracy = training['accuracy'](dataset['X_test'],dataset['y_test'])
+                # accuracy = training['accuracy'](dataset['X_test'],dataset['y_test'])
 
                 print("Epoch: {}, Accuracy: {}, Training cost: {}, validation cost: {}".format(i+1,accuracy,meanTrainCost,meanValidCost))
 
@@ -302,16 +291,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
                 # trainvalidation.append([meanTrainCost,meanValidCost])
                 # accuracies.append(accuracy)
-                if(EARLY_STOPPING):
-                    if(len(accuracies) < STOPPING_RANGE):
-                        pass
-                    else:
-                        test = [k for k in accuracies if k < accuracy]
-                        if not test:
-                            print('Early stopping causing training to finish at epoch {}'.format(i+1))
-                            break
-                        del accuracies[0]
-                        accuracies.append(accuracy)
+                
 
                 # this is the test to see if the autoencoder is learning how to 
                 # get the same labels as caswells
