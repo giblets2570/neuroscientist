@@ -132,14 +132,14 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
         print(shape)
         l_in = lasagne.layers.InputLayer(shape=shape)
 
-        # l_hidden_1 = lasagne.layers.DenseLayer(
-        #     l_in,
-        #     num_units=num_hidden_units,
-        #     nonlinearity=lasagne.nonlinearities.rectify,
-        #     )
+        l_hidden_1 = lasagne.layers.DenseLayer(
+            l_in,
+            num_units=num_hidden_units,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
 
         l_hidden_2 = lasagne.layers.DenseLayer(
-            l_in,
+            l_hidden_1,
             num_units=num_hidden_units_2,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
@@ -156,14 +156,14 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        # l_hidden_4 = lasagne.layers.DenseLayer(
-        #     l_hidden_3,
-        #     num_units=num_hidden_units,
-        #     nonlinearity=lasagne.nonlinearities.rectify,
-        #     )
+        l_hidden_4 = lasagne.layers.DenseLayer(
+            l_hidden_3,
+            num_units=num_hidden_units,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
 
         l_out = lasagne.layers.DenseLayer(
-            l_hidden_3,
+            l_hidden_4,
             num_units=output_dim,
             nonlinearity=None,
             )
@@ -539,7 +539,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         if(SAVE_MODEL):
             print("Saving model...")
             all_param_values = lasagne.layers.get_all_param_values(network)
-            f=open('auto_models/auto_network_{}'.format(tetrode_number),'w')
+            f=open('auto_models/deep/auto_network_{}'.format(tetrode_number),'w')
             pickle.dump(all_param_values, f)
             f.close()
 
