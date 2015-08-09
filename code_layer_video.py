@@ -146,7 +146,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
 
     return l_out
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.02, beta=0.001, momentum=MOMENTUM):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.02, beta=0.01, momentum=MOMENTUM):
 
     """
         Method the returns the theano functions that are used in 
@@ -239,7 +239,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     print("Done!")
 
 
-    for tetrode_number in [9]:
+    for tetrode_number in [9, 10, 11, 12, 13, 14, 15, 16]:
 
         print("Loading the model parameters from {}".format(MODEL_FILENAME+str(tetrode_number)))
         f = open(MODEL_FILENAME+str(tetrode_number),'r')
@@ -290,7 +290,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         ##############################################################################
         # Compute DBSCAN
 
-        db = DBSCAN(eps=0.75, min_samples=10).fit(codes_2d)
+        db = DBSCAN(eps=0.8, min_samples=10).fit(codes_2d)
         core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
         core_samples_mask[db.core_sample_indices_] = True
         labels = db.labels_
