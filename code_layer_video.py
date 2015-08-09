@@ -291,7 +291,6 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         # Compute DBSCAN
         db = None
         core_samples_mask = None
-        core_samples_mask[db.core_sample_indices_] = None
         labels = None
 
         num_labels = 0
