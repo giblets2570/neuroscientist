@@ -486,7 +486,7 @@ if __name__=="__main__":
 
 	# for tetrode in range(9,17):
 
-	duration, result = organiseTetrodeData(10,learned_labels=True)
+	duration, result = organiseTetrodeData(9,learned_labels=True)
 	print(result[0]['label'].shape)
 	activationResult, labelResult = newDownsampleData(duration,result,1000.0)
 	#going to test the convolution

@@ -55,7 +55,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 2000
+NUM_EPOCHS = 1000
 BATCH_SIZE = 400
 NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
@@ -239,7 +239,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
     print("Done!")
 
 
-    for tetrode_number in [9, 10, 11, 12, 13, 14, 15, 16]:
+    for tetrode_number in [9,10,11,12,13,14,15,16]:
 
         print("Loading the model parameters from {}".format(MODEL_FILENAME+str(tetrode_number)))
         f = open(MODEL_FILENAME+str(tetrode_number),'r')
@@ -289,13 +289,22 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         # This is where the code for the video will go
         ##############################################################################
         # Compute DBSCAN
+        db = None
+        core_samples_mask = None
+        core_samples_mask[db.core_sample_indices_] = None
+        labels = None
 
-        db = DBSCAN(eps=0.8, min_samples=10).fit(codes_2d)
-        core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
-        core_samples_mask[db.core_sample_indices_] = True
-        labels = db.labels_
+        num_labels = 0
+        eps=1.5
+        while(num_labels < 10):
+            db = DBSCAN(eps=eps, min_samples=10).fit(codes_2d)
+            core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
+            core_samples_mask[db.core_sample_indices_] = True
+            labels = db.labels_
+            num_labels = np.amax(labels)
+            eps -= 0.1
 
-        print("Num learned labels: {}".format(np.amax(labels)))
+        print("Num learned labels: {}".format(num_labels))
 
         plt.title('Estimated number of clusters: {}'.format(np.amax(labels)))
         plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
