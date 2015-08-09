@@ -55,7 +55,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 20
+NUM_EPOCHS = 2000
 BATCH_SIZE = 400
 NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
@@ -123,7 +123,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
     l_code_layer = lasagne.layers.DenseLayer(
         l_hidden_2,
         num_units=num_code_units,
-        nonlinearity=lasagne.nonlinearities.rectify,
+        nonlinearity=lasagne.nonlinearities.softmax,
         )
 
     l_hidden_3 = lasagne.layers.DenseLayer(
@@ -290,13 +290,14 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         ##############################################################################
         # Compute DBSCAN
 
-        db = DBSCAN(eps=1.0, min_samples=10).fit(codes_2d)
+        db = DBSCAN(eps=0.75, min_samples=10).fit(codes_2d)
         core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
         core_samples_mask[db.core_sample_indices_] = True
         labels = db.labels_
 
         print("Num learned labels: {}".format(np.amax(labels)))
 
+        plt.title('Estimated number of clusters: {}'.format(np.amax(labels)))
         plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
         plt.savefig('dbscan_labels/dbscan_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
         plt.close()
