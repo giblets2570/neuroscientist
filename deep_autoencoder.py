@@ -119,7 +119,7 @@ def load_data(tetrode_number=TETRODE_NUMBER):
     )
 
 
-def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code_units, batch_size=BATCH_SIZE):
+def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2,num_hidden_units_3, num_code_units, batch_size=BATCH_SIZE):
         """
             Create a symbolic representation of a neural network with `intput_dim`
             input nodes, `output_dim` output nodes and `num_hidden_units` per hidden
@@ -144,26 +144,38 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_code_layer = lasagne.layers.DenseLayer(
+        l_hidden_3 = lasagne.layers.DenseLayer(
             l_hidden_2,
+            num_units=num_hidden_units_3,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
+
+        l_code_layer = lasagne.layers.DenseLayer(
+            l_hidden_3,
             num_units=num_code_units,
             nonlinearity=lasagne.nonlinearities.softmax,
             )
 
         l_hidden_3 = lasagne.layers.DenseLayer(
             l_code_layer,
-            num_units=num_hidden_units_2,
+            num_units=num_hidden_units_3,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
         l_hidden_4 = lasagne.layers.DenseLayer(
             l_hidden_3,
+            num_units=num_hidden_units_2,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
+
+        l_hidden_5 = lasagne.layers.DenseLayer(
+            l_hidden_4,
             num_units=num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
         l_out = lasagne.layers.DenseLayer(
-            l_hidden_4,
+            l_hidden_5,
             num_units=output_dim,
             nonlinearity=None,
             )
@@ -233,7 +245,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
         L_penalty=L_penalty
     )
 
-def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=200,num_code_units=50):
+def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=300,num_hidden_units_3=200,num_code_units=50):
     """
         This is the main method that sets up the experiment
     """
@@ -253,7 +265,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         # print("Labeled test: {}".format(dataset['labeled_test']))
         
         print("Making the model...")
-        network = model(dataset['input_shape'],dataset['output_dim'],num_hidden_units,num_hidden_units_2,num_code_units)
+        network = model(dataset['input_shape'],dataset['output_dim'],num_hidden_units,num_hidden_units_2,num_hidden_units_3,num_code_units)
         print("Done!")
 
         print("Setting up the training functions...")
