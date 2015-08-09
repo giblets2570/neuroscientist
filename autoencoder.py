@@ -49,7 +49,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 8000
+NUM_EPOCHS = 10000
 BATCH_SIZE = 400
 NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
@@ -610,7 +610,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
             # plt.plot(var2)
             # fig.tight_layout()
-            plt.savefig('auto_models/fig{}_{}.png'.format(tetrode_number,j), bbox_inches='tight')
+            plt.savefig('auto_models/fig{}.png'.format(tetrode_number), bbox_inches='tight')
             plt.close()
 
 if __name__ == '__main__':
