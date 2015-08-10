@@ -252,13 +252,13 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     # this is the cost of the network when fed throught the noisey network
     train_output = lasagne.layers.get_output(network, X_batch)
-    cost = lasagne.objectives.mse(train_output, y_batch)
-    cost = cost.mean()
+    cost_array = lasagne.objectives.mse(train_output, y_batch)
+    cost = cost_array.mean()
 
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch, deterministic=True)
-    valid_cost = lasagne.objectives.mse(valid_output, y_batch)
-    valid_cost = valid_cost.mean()
+    valid_cost_array = lasagne.objectives.mse(valid_output, y_batch)
+    valid_cost = valid_cost_array.mean()
 
     # test the performance of the netowork without noise
     test = lasagne.layers.get_output(network, X_batch, deterministic=True)
@@ -269,12 +269,14 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     updates = lasagne.updates.adagrad(cost, all_params, l_rate)
     
     train = theano.function(inputs=[X_batch, y_batch, l_rate], outputs=cost, updates=updates, allow_input_downcast=True)
+    cost_array = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost_array, allow_input_downcast=True)
     valid = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
     predict = theano.function(inputs=[X_batch], outputs=test, allow_input_downcast=True)
 
     return dict(
         train=train,
         valid=valid,
+        cost_array=cost_array,
         predict=predict
     )
 
@@ -312,6 +314,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     print("Begining to train the network...")
     predictions = []
+    cost_arrays = []
     actuals = []
     try:
 
@@ -333,9 +336,12 @@ def main(tetrode_number=TETRODE_NUMBER):
     for start, end in zip(range(0, dataset['num_examples_test'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_test'], BATCH_SIZE)):
         prediction = training['predict'](dataset['X_test'][start:end])
         predictions.append(prediction)
+        cost_array = training['cost_array'](dataset['X_test'][start:end])
+        cost_arrays.append(cost_array)
         # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
         actuals.append(dataset['y_test'][start:end])
 
+    print(cost_arrays)
     points_from = 1900
 
     print("Plotting the predictions")

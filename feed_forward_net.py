@@ -88,9 +88,9 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
     A theano expression which represents such a network is returned.
     """
 
-    l_in = lasagne.layers.InputLayer(shape=input_shape)
+    l_in = lasagne.layers.InputLayer(shape=(BATCH_SIZE,input_shape[-1]))
     
-    # l_in_dropout = lasagne.layers.DropoutLayer(l_in,p=p_drop_input)
+    l_in_dropout = lasagne.layers.DropoutLayer(l_in,p=p_drop_input)
 
     print("Input shape: ",lasagne.layers.get_output_shape(l_in))
 
@@ -102,48 +102,41 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
 
     print("Hidden 1 shape: ",lasagne.layers.get_output_shape(l_hidden))
 
-    # l_hidden_dropout = lasagne.layers.DropoutLayer(
-    #     l_hidden,
-    #     p=0.6
-    #     )
+    l_hidden_dropout = lasagne.layers.DropoutLayer(
+        l_hidden,
+        p=p_drop_hidden
+        )
 
     # print("Hidden drop 1 shape: ",lasagne.layers.get_output_shape(l_hidden_dropout))
 
     l_hidden_2 = lasagne.layers.DenseLayer(
-        l_hidden,
+        l_hidden_dropout,
         num_units=num_hidden_units,
         nonlinearity=lasagne.nonlinearities.rectify,
         )
 
     print("Hidden 2 shape: ",lasagne.layers.get_output_shape(l_hidden_2))
 
-    # l_hidden_2_dropout = lasagne.layers.DropoutLayer(
-    #     l_hidden_2,
-    #     p=p_drop_hidden
-    #     )
-    l_hidden_3 = lasagne.layers.DenseLayer(
+    l_hidden_2_dropout = lasagne.layers.DropoutLayer(
         l_hidden_2,
+        p=p_drop_hidden
+        )
+
+    l_hidden_3 = lasagne.layers.DenseLayer(
+        l_hidden_2_dropout,
         num_units=num_hidden_units,
         nonlinearity=lasagne.nonlinearities.rectify,
         )
 
     print("Hidden 3 shape: ",lasagne.layers.get_output_shape(l_hidden_3))
 
-    # l_hidden_3_dropout = lasagne.layers.DropoutLayer(
-    #     l_hidden_3,
-    #     p=p_drop_hidden
-    #     )
-    # l_hidden_4 = lasagne.layers.DenseLayer(
-    #     l_hidden_3,
-    #     num_units=num_hidden_units,
-    #     nonlinearity=lasagne.nonlinearities.rectify,
-    #     )
-    # l_hidden_4_dropout = lasagne.layers.DropoutLayer(
-    #     l_hidden_4,
-    #     p=p_drop_hidden
-    #     )
-    l_out = lasagne.layers.DenseLayer(
+    l_hidden_3_dropout = lasagne.layers.DropoutLayer(
         l_hidden_3,
+        p=p_drop_hidden
+        )
+  
+    l_out = lasagne.layers.DenseLayer(
+        l_hidden_3_dropout,
         num_units=output_dim,
         nonlinearity=lasagne.nonlinearities.softmax,
         )
@@ -199,7 +192,7 @@ def main(tetrode_number=TETRODE_NUMBER):
     print(dataset['input_shape'])
 
     print("Making the model...")
-    network = model(dataset['input_shape'],dataset['output_dim'],NUM_HIDDEN_UNITS,0.5,0.5)
+    network = model(dataset['input_shape'],dataset['output_dim'],NUM_HIDDEN_UNITS,0.8,0.5)
     print("Done!")
 
     print("Setting up the training functions...")
