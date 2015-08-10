@@ -76,7 +76,7 @@ CONV = False
 
 NUM_POINTS = 100000
 
-MODEL_FILENAME = "auto_models/deep/auto_network_"
+MODEL_FILENAME = "auto_models/deep/sparse/auto_network_"
 
 def load_data(tetrode_number=TETRODE_NUMBER):
     """
@@ -97,7 +97,7 @@ def load_data(tetrode_number=TETRODE_NUMBER):
         freq=50.0
     )
 
-def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code_units, batch_size=BATCH_SIZE):
+def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2,num_hidden_units_3, num_code_units, batch_size=BATCH_SIZE):
     """
         Create a symbolic representation of a neural network with `intput_dim`
         input nodes, `output_dim` output nodes and `num_hidden_units` per hidden
@@ -122,26 +122,38 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
         nonlinearity=lasagne.nonlinearities.rectify,
         )
 
-    l_code_layer = lasagne.layers.DenseLayer(
+    l_hidden_3 = lasagne.layers.DenseLayer(
         l_hidden_2,
+        num_units=num_hidden_units_3,
+        nonlinearity=lasagne.nonlinearities.rectify,
+        )
+
+    l_code_layer = lasagne.layers.DenseLayer(
+        l_hidden_3,
         num_units=num_code_units,
         nonlinearity=lasagne.nonlinearities.softmax,
         )
 
     l_hidden_3 = lasagne.layers.DenseLayer(
         l_code_layer,
-        num_units=num_hidden_units_2,
+        num_units=num_hidden_units_3,
         nonlinearity=lasagne.nonlinearities.rectify,
         )
 
     l_hidden_4 = lasagne.layers.DenseLayer(
         l_hidden_3,
+        num_units=num_hidden_units_2,
+        nonlinearity=lasagne.nonlinearities.rectify,
+        )
+
+    l_hidden_5 = lasagne.layers.DenseLayer(
+        l_hidden_4,
         num_units=num_hidden_units,
         nonlinearity=lasagne.nonlinearities.rectify,
         )
 
     l_out = lasagne.layers.DenseLayer(
-        l_hidden_4,
+        l_hidden_5,
         num_units=output_dim,
         nonlinearity=None,
         )
@@ -231,17 +243,17 @@ def makeVideo(X_2d,dataset):
     animation = mpy.VideoClip(make_frame, duration = duration)
     animation.write_gif("code_tnse.gif", fps=fps)
 
-def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=200,num_code_units=50):
+def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=300,num_hidden_units_3=200,num_code_units=50):
     """
         This is the main method that sets up the experiment
     """
    
     print("Making the model...")
-    network = model((None,200),200,num_hidden_units,num_hidden_units_2,num_code_units)
+    network = model((None,200),200,num_hidden_units,num_hidden_units_2,num_hidden_units_3,num_code_units)
     print("Done!")
 
 
-    for tetrode_number in [9]:
+    for tetrode_number in [11]:
 
         print("Loading the model parameters from {}".format(MODEL_FILENAME+str(tetrode_number)))
         f = open(MODEL_FILENAME+str(tetrode_number),'r')
@@ -271,7 +283,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
             # accuracy = training['accuracy'](dataset['X_test'],dataset['y_test'])
 
             print("Epoch: {}, Training cost: {}".format(i+1,meanTrainCost))
-        NUM_POINTS = 5000
+        # NUM_POINTS = 5000
         codes = training['code'](dataset['data'][0:NUM_POINTS])
 
         # d = DPGMM(n_components=10, covariance_type='full',alpha=20.0)
@@ -287,46 +299,46 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         # codes = training['code'](dataset['data'][0:NUM_POINTS])
         # # print(codes.shape)
         # # codes_2d = bh_sne(codes)
-        for k in range(0,codes.shape[0],12000):
-            codes_2d = bh_sne(10*np.asarray(codes[k:k+12000],dtype=np.float64))
+        
+        codes_2d = bh_sne(10*np.asarray(codes,dtype=np.float64))
 
-            # m = TSNE(n_components=2, random_state=0)
-            
-            # codes_2d = m.fit_transform(codes[:NUM_POINTS])
-            # activations_1_2d = bh_sne(activations_1)
-            # activations_2_2d = bh_sne(activations_2)
+        # m = TSNE(n_components=2, random_state=0)
+        
+        # codes_2d = m.fit_transform(codes[:NUM_POINTS])
+        # activations_1_2d = bh_sne(activations_1)
+        # activations_2_2d = bh_sne(activations_2)
 
-            plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
-            plt.savefig('dbscan_labels/deep/tsne_codes_{}_{}.png'.format(tetrode_number,k), bbox_inches='tight')
-            plt.close()
+        plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
+        plt.savefig('dbscan_labels/deep/sparse/tsne_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
+        plt.close()
 
-            # This is where the code for the video will go
-            ##############################################################################
-            # Compute DBSCAN
-            db = None
-            core_samples_mask = None
-            labels = None
+        # This is where the code for the video will go
+        ##############################################################################
+        # Compute DBSCAN
+        db = None
+        core_samples_mask = None
+        labels = None
 
-            num_labels = 0
-            eps=1.5
-            while(num_labels < 10):
-                db = DBSCAN(eps=eps, min_samples=10).fit(codes_2d)
-                core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
-                core_samples_mask[db.core_sample_indices_] = True
-                labels = db.labels_
-                num_labels = np.amax(labels)
-                eps -= 0.1
+        num_labels = 0
+        eps=1.5
+        while(num_labels < 10):
+            db = DBSCAN(eps=eps, min_samples=10).fit(codes_2d)
+            core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
+            core_samples_mask[db.core_sample_indices_] = True
+            labels = db.labels_
+            num_labels = np.amax(labels)
+            eps -= 0.1
 
-            print("Num learned labels: {}".format(num_labels))
+        print("Num learned labels: {}".format(num_labels))
 
-            plt.title('Estimated number of clusters: {}'.format(np.amax(labels)))
-            plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
-            plt.savefig('dbscan_labels/deep/dbscan_codes_{}_{}.png'.format(tetrode_number,k), bbox_inches='tight')
-            plt.close()
+        plt.title('Estimated number of clusters: {}'.format(np.amax(labels)))
+        plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
+        plt.savefig('dbscan_labels/deep/sparse/dbscan_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
+        plt.close()
 
-            f=open('dbscan_labels/deep/tetrode_{}_{}.npy'.format(tetrode_number,k),'w')
-            pickle.dump(labels, f)
-            f.close()
+        f=open('dbscan_labels/deep/sparse/tetrode_{}.npy'.format(tetrode_number),'w')
+        pickle.dump(labels, f)
+        f.close()
 
 if __name__ == '__main__':
     main()
