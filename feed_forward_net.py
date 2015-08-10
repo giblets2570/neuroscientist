@@ -203,35 +203,40 @@ def main(tetrode_number=TETRODE_NUMBER):
 
 
     print("Begining to train the network...")
-    for i in range(NUM_EPOCHS):
-        costs = []
-        valid_costs = []
+    try:
 
-        for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
-            cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
-            costs.append(cost)
-        for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
-            cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
-            valid_costs.append(cost)
+        for i in range(NUM_EPOCHS):
+            costs = []
+            valid_costs = []
 
-        accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test']))
+            for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
+                cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
+                costs.append(cost)
+            for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
+                cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
+                valid_costs.append(cost)
 
-        meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
-        meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
+            accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test']))
 
-        # print("Epoch: {}, Accuracy: {}".format(i+1,accuracy))
-        print("Epoch: {}, Accuracy: {}, Training cost: {}, validation cost: {}".format(i+1,accuracy,meanTrainCost,meanValidCost))
+            meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
+            meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
 
-        if(EARLY_STOPPING):
-            if(len(accuracies) < STOPPING_RANGE):
-                accuracies.append(accuracy)
-            else:
-                test = [k for k in accuracies if k < accuracy]
-                if not test:
-                    print('Early stopping causing training to finish at epoch {}'.format(i))
-                    break
-                del accuracies[0]
-                accuracies.append(accuracy)
+            # print("Epoch: {}, Accuracy: {}".format(i+1,accuracy))
+            print("Epoch: {}, Accuracy: {}, Training cost: {}, validation cost: {}".format(i+1,accuracy,meanTrainCost,meanValidCost))
+
+            if(EARLY_STOPPING):
+                if(len(accuracies) < STOPPING_RANGE):
+                    accuracies.append(accuracy)
+                else:
+                    test = [k for k in accuracies if k < accuracy]
+                    if not test:
+                        print('Early stopping causing training to finish at epoch {}'.format(i))
+                        break
+                    del accuracies[0]
+                    accuracies.append(accuracy)
+
+    except KeyboardInterrupt:
+        pass
 
     if(LOG_EXPERIMENT):
         print("Logging the experiment details...")
@@ -254,7 +259,7 @@ def main(tetrode_number=TETRODE_NUMBER):
         with open(filename,"w") as outfile:
             json.dump(log, outfile)
 
-
+    
 
 if __name__ == '__main__':
     # for i in range(16):
