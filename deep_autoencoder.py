@@ -551,7 +551,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
         if(SAVE_MODEL):
             print("Saving model...")
             all_param_values = lasagne.layers.get_all_param_values(network)
-            f=open('auto_models/deep/auto_network_{}'.format(tetrode_number),'w')
+            f=open('auto_models/deep/sparse/auto_network_{}'.format(tetrode_number),'w')
             pickle.dump(all_param_values, f)
             f.close()
 
@@ -622,7 +622,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
 
             # plt.plot(var2)
             # fig.tight_layout()
-            plt.savefig('auto_models/deep/fig{}_{}.png'.format(tetrode_number,j), bbox_inches='tight')
+            plt.savefig('auto_models/deep/sparse/fig{}.png'.format(tetrode_number), bbox_inches='tight')
             plt.close()
 
 if __name__ == '__main__':
