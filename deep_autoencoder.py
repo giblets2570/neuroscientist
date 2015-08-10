@@ -156,26 +156,26 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2,num_hidde
             nonlinearity=lasagne.nonlinearities.softmax,
             )
 
-        l_hidden_3 = lasagne.layers.DenseLayer(
+        l_hidden_4 = lasagne.layers.DenseLayer(
             l_code_layer,
             num_units=num_hidden_units_3,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_hidden_4 = lasagne.layers.DenseLayer(
-            l_hidden_3,
+        l_hidden_5 = lasagne.layers.DenseLayer(
+            l_hidden_4,
             num_units=num_hidden_units_2,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_hidden_5 = lasagne.layers.DenseLayer(
-            l_hidden_4,
+        l_hidden_6 = lasagne.layers.DenseLayer(
+            l_hidden_5,
             num_units=num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
         l_out = lasagne.layers.DenseLayer(
-            l_hidden_5,
+            l_hidden_6,
             num_units=output_dim,
             nonlinearity=None,
             )
