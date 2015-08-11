@@ -253,7 +253,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
     print("Done!")
 
 
-    for tetrode_number in [12]:
+    for tetrode_number in [11]:
 
         print("Loading the model parameters from {}".format(MODEL_FILENAME+str(tetrode_number)))
         f = open(MODEL_FILENAME+str(tetrode_number),'r')
@@ -286,9 +286,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
         # NUM_POINTS = 5000
         codes = training['code'](dataset['data'][0:NUM_POINTS])
 
-        # d = DPGMM(n_components=10, covariance_type='full',alpha=20.0)
-
-        # d.fit(dataset['data'][0:NUM_POINTS])
+        
 
         # y = set(list(d.predict(dataset['data'][0:NUM_POINTS])))
 
@@ -302,6 +300,16 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
 
         for k in range(3):
             print(k)
+
+            d = DPGMM(n_components=10, covariance_type='full',alpha=20.0)
+
+            d.fit(codes[:(k+1)*12000])
+
+            hdp = d.predict_proba(codes[:(k+1)*12000])
+
+            print(hdp.shape)
+
+
             codes_2d = bh_sne(np.asarray(codes[:(k+1)*12000],dtype=np.float64))
 
             # m = TSNE(n_components=2, random_state=0)
@@ -322,7 +330,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
             labels = None
 
             num_labels = 0
-            eps=0.8
+            eps=1.0
             while(num_labels < 10):
                 db = DBSCAN(eps=eps, min_samples=10).fit(codes_2d)
                 core_samples_mask = np.zeros_like(db.labels_, dtype=bool)

@@ -347,7 +347,7 @@ def main(tetrode_number=TETRODE_NUMBER):
         plt.close()
 
     print(cost_arrays)
-    points_from = 1900
+    points_from = 0
 
     print("Plotting the predictions")
 
