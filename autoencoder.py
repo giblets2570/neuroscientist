@@ -254,9 +254,9 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         # print("Caswell's dims: ", dataset['caswells_dim'])
         # print("Labeled test: {}".format(dataset['labeled_test']))
 
-        f = open(MODEL_FILENAME+str(tetrode_number),'r')
-        all_param_values = pickle.load(f)
-        f.close()
+        # f = open(MODEL_FILENAME+str(tetrode_number),'r')
+        # all_param_values = pickle.load(f)
+        # f.close()
         # print(all_param_values)
         
         
@@ -264,7 +264,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         network = model(dataset['input_shape'],dataset['output_dim'],num_hidden_units,num_hidden_units_2,num_code_units)
         print("Done!")
 
-        lasagne.layers.set_all_param_values(network, all_param_values)
+        # lasagne.layers.set_all_param_values(network, all_param_values)
 
         print("Setting up the training functions...")
         training = funcs(dataset,network)
