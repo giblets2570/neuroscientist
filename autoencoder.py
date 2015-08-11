@@ -64,9 +64,11 @@ TETRODE_NUMBER = 9
 
 CONV = False
 
-SAVE_MODEL = True
+SAVE_MODEL = False
 
 NUM_POINTS = 1000
+
+MODEL_FILENAME = "auto_models/deep/auto_network_"
 
 def load_data(tetrode_number=TETRODE_NUMBER):
     """
@@ -251,10 +253,18 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
         # print("Caswell's dims: ", dataset['caswells_dim'])
         # print("Labeled test: {}".format(dataset['labeled_test']))
+
+        f = open(MODEL_FILENAME+str(tetrode_number),'r')
+        all_param_values = pickle.load(f)
+        f.close()
+        # print(all_param_values)
+        
         
         print("Making the model...")
         network = model(dataset['input_shape'],dataset['output_dim'],num_hidden_units,num_hidden_units_2,num_code_units)
         print("Done!")
+
+        lasagne.layers.set_all_param_values(network, all_param_values)
 
         print("Setting up the training functions...")
         training = funcs(dataset,network)
@@ -539,7 +549,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         if(SAVE_MODEL):
             print("Saving model...")
             all_param_values = lasagne.layers.get_all_param_values(network)
-            f=open('auto_models/deep/auto_network_{}'.format(tetrode_number),'w')
+            f=open(MODEL_FILENAME+'{}'.format(tetrode_number),'w')
             pickle.dump(all_param_values, f)
             f.close()
 
@@ -610,7 +620,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
             # plt.plot(var2)
             # fig.tight_layout()
-            plt.savefig('auto_models/fig{}.png'.format(tetrode_number), bbox_inches='tight')
+            plt.savefig('auto_models/deep/fig{}.png'.format(tetrode_number), bbox_inches='tight')
             plt.close()
 
 if __name__ == '__main__':
