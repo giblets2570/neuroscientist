@@ -64,7 +64,7 @@ TETRODE_NUMBER = 9
 
 CONV = False
 
-SAVE_MODEL = False
+SAVE_MODEL = True
 
 NUM_POINTS = 1000
 
