@@ -147,7 +147,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
         l_code_layer = lasagne.layers.DenseLayer(
             l_hidden_2,
             num_units=num_code_units,
-            nonlinearity=lasagne.nonlinearities.softmax,
+            nonlinearity=lasagne.nonlinearities.rectify,
             )
 
         l_hidden_3 = lasagne.layers.DenseLayer(
@@ -170,7 +170,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
 
         return l_out
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.02, beta=0.1, momentum=MOMENTUM):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.01, beta=0.1, momentum=MOMENTUM):
 
     """
         Method the returns the theano functions that are used in 
@@ -191,13 +191,13 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     # code output 
     code_output = lasagne.layers.get_output(code_layer, X_batch, deterministic=True)
 
-    l = T.sub(1,code_output)
-    ll = T.mul(code_output,l)
-    L = T.mul(4,ll)
-    L = L.mean()
+    # l = T.sub(1,code_output)
+    # ll = T.mul(code_output,l)
+    # L = T.mul(4,ll)
+    # L = L.mean()
 
     rho_hat = T.mean(code_output,axis=1)
-    # L = T.sum(sparsity * T.log(sparsity/rho_hat) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat)))
+    L = T.sum(sparsity * T.log(sparsity/rho_hat) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat)))
 
     # reg = 0.0001*lasagne.regularization.l2(network)
     # this is the cost of the network when fed throught the noisey network

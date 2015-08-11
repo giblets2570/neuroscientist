@@ -310,7 +310,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
             # activations_1_2d = bh_sne(activations_1)
             # activations_2_2d = bh_sne(activations_2)
 
-            plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
+            plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS][:(k+1)*12000],alpha=0.8,lw=0)
             plt.savefig('dbscan_labels/deep/sparse/tsne_codes_{}_{}.png'.format(tetrode_number,k), bbox_inches='tight')
             plt.close()
 
@@ -334,7 +334,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
             print("Num learned labels: {}".format(num_labels))
 
             plt.title('Estimated number of clusters: {}'.format(np.amax(labels)))
-            plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
+            plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS][:(k+1)*12000],lw=0)
             plt.savefig('dbscan_labels/deep/sparse/dbscan_codes_{}_{}.png'.format(tetrode_number,k), bbox_inches='tight')
             plt.close()
 
