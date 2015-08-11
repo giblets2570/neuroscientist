@@ -6,7 +6,6 @@ from __future__ import print_function
 
 import matplotlib
 matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab!
-
 from random import randint
 import gzip
 import itertools
@@ -34,9 +33,7 @@ from sklearn.datasets.samples_generator import make_blobs
 from sklearn.preprocessing import StandardScaler
 from sklearn.mixture import DPGMM
 from sklearn.manifold import TSNE
-
 from pos_data import getXY
-
 # We'll generate an animation with matplotlib and moviepy.
 from moviepy.video.io.bindings import mplfig_to_npimage
 import moviepy.editor as mpy
@@ -67,13 +64,9 @@ EARLY_STOPPING = False
 STOPPING_RANGE = 10
 
 LOG_EXPERIMENT = True
-
 TETRODE_NUMBER = 11
-
 SAVE_MODEL = False
-
 CONV = False
-
 NUM_POINTS = 100000
 
 MODEL_FILENAME = "auto_models/deep/auto_network_"
@@ -240,8 +233,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
     network = model((None,200),200,num_hidden_units,num_hidden_units_2,num_hidden_units_3,num_code_units)
     print("Done!")
 
-
-    for tetrode_number in [16]:
+    for tetrode_number in [9]:
 
         print("Loading the model parameters from {}".format(MODEL_FILENAME+str(tetrode_number)))
         f = open(MODEL_FILENAME+str(tetrode_number),'r')
