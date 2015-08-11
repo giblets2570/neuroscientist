@@ -116,19 +116,24 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         # print("Reshape 1 shape: ",lasagne.layers.get_output_shape(l_reshape_1))
 
-        l_hidden_1 = lasagne.layers.DenseLayer(
+        l_dropout_1 = lasagne.layers.DropoutLayer(
             l_reshape_1,
+            p=0.8
+            )
+
+        l_hidden_1 = lasagne.layers.DenseLayer(
+            l_dropout_1,
             num_units=reduced_length,
             nonlinearity=lasagne.nonlinearities.rectify
             )
 
-        l_dropout = lasagne.layers.DropoutLayer(
+        l_dropout_2 = lasagne.layers.DropoutLayer(
             l_hidden_1,
-            p=0.8
+            p=0.5
             )
 
         l_hidden_2 = lasagne.layers.DenseLayer(
-            l_dropout,
+            l_dropout_2,
             num_units=reduced_length,
             nonlinearity=lasagne.nonlinearities.rectify
             )
@@ -167,45 +172,6 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         #     # W_hid_to_hid=lasagne.init.HeUniform(),
         #     # nonlinearity=lasagne.nonlinearities.sigmoid
         #     )
-
-
-        # this is great
-
-        # print("Recurrent 3 shape: ",lasagne.layers.get_output_shape(l_recurrent_3))
-
-        # l_recurrent_back = lasagne.layers.RecurrentLayer(
-        #     l_in, num_hidden_units, 
-        #     grad_clipping=GRAD_CLIP,
-        #     W_in_to_hid=lasagne.init.HeUniform(),
-        #     W_hid_to_hid=lasagne.init.HeUniform(),
-        #     nonlinearity=lasagne.nonlinearities.tanh, 
-        #     backwards=True
-        #     )
-
-        # l_recurrent_2 = lasagne.layers.RecurrentLayer(
-        #     l_recurrent, num_hidden_units, 
-        #     grad_clipping=GRAD_CLIP,
-        #     W_in_to_hid=lasagne.init.HeUniform(),
-        #     W_hid_to_hid=lasagne.init.HeUniform(),
-        #     nonlinearity=lasagne.nonlinearities.tanh
-        #     )
-
-        # l_recurrent_back_2 = lasagne.layers.RecurrentLayer(
-        #     l_recurrent_back, num_hidden_units, 
-        #     grad_clipping=GRAD_CLIP,
-        #     W_in_to_hid=lasagne.init.HeUniform(),
-        #     W_hid_to_hid=lasagne.init.HeUniform(),
-        #     nonlinearity=lasagne.nonlinearities.tanh, 
-        #     backwards=True
-        #     )
-
-        # l_recurrent_3 = lasagne.layers.RecurrentLayer(
-        #     l_recurrent_2, num_hidden_units, 
-        #     grad_clipping=GRAD_CLIP,
-        #     W_in_to_hid=lasagne.init.HeUniform(),
-        #     W_hid_to_hid=lasagne.init.HeUniform(),
-        #     nonlinearity=lasagne.nonlinearities.tanh
-        #     )
         
 
         # l_sum = lasagne.layers.ElemwiseSumLayer([l_recurrent, l_recurrent_back])
@@ -217,8 +183,19 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         print("Reshape shape: ",lasagne.layers.get_output_shape(l_reshape_3))
 
-        l_recurrent_out = lasagne.layers.DenseLayer(
+        l_dropout_3 = lasagne.layers.DropoutLayer(
             l_reshape_3,
+            p=0.5
+            )
+
+        l_hidden_3 = lasagne.layers.DenseLayer(
+            l_dropout_3,
+            num_units=reduced_length,
+            nonlinearity=lasagne.nonlinearities.rectify
+            )
+
+        l_recurrent_out = lasagne.layers.DenseLayer(
+            l_hidden_3,
             num_units=output_dim,
             nonlinearity=None
             )
