@@ -320,7 +320,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
         labels = None
 
         num_labels = 0
-        eps=1.5
+        eps=1.0
         while(num_labels < 10):
             db = DBSCAN(eps=eps, min_samples=10).fit(codes_2d)
             core_samples_mask = np.zeros_like(db.labels_, dtype=bool)

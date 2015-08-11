@@ -341,6 +341,10 @@ def main(tetrode_number=TETRODE_NUMBER):
         # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
         actuals.append(dataset['y_test'][start:end])
 
+    plt.plot(cost_arrays[0][0])
+    plt.savefig('../position/test/costs_{}.png'.format(i), bbox_inches='tight')
+    plt.close()
+
     print(cost_arrays)
     points_from = 1900
 
