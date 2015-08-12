@@ -106,62 +106,62 @@ def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_s
         print(filter_size, pool_size, filter_size_2, pool_size_2, num_hidden_units_1, num_hidden_units_2, num_hidden_units_3,num_hidden_units_4,num_hidden_units_5)
         l_in = lasagne.layers.InputLayer(shape=shape)
 
-        l_reshape_1 = lasagne.layers.ReshapeLayer(
-            l_in,
-            shape=([0],1,200)
-            )
-
-        # l_conv2D_1 = lasagne.layers.Conv2DLayer(
-        #     l_in, 
-        #     num_filters=16,
-        #     filter_size=filter_size, 
-        #     stride=(1, 1), 
-        #     border_mode="valid", 
-        #     untie_biases=False, 
-        #     nonlinearity=lasagne.nonlinearities.rectify,
+        # l_reshape_1 = lasagne.layers.ReshapeLayer(
+        #     l_in,
+        #     shape=([0],input_shape[1:])
         #     )
 
-        # l_pool2D_1 = lasagne.layers.MaxPool2DLayer(
-        #     l_conv2D_1, 
-        #     pool_size=pool_size, 
-        #     stride=None, 
-        #     pad=0, 
-        #     ignore_border=False,
-        # )
+        l_conv2D_1 = lasagne.layers.Conv2DLayer(
+            l_in, 
+            num_filters=16,
+            filter_size=filter_size, 
+            stride=(1, 1), 
+            border_mode="valid", 
+            untie_biases=False, 
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
+
+        l_pool2D_1 = lasagne.layers.MaxPool2DLayer(
+            l_conv2D_1, 
+            pool_size=pool_size, 
+            stride=None, 
+            pad=0, 
+            ignore_border=False,
+        )
 
         # l_pool2D_1 = lasagne.layers.FeaturePoolLayer(
         #     l_conv2D_1, 
         #     pool_size=pool_size, 
         # )
 
-        # l_conv2D_2 = lasagne.layers.Conv2DLayer(
-        #     l_conv2D_1, 
-        #     num_filters=32,
-        #     filter_size=filter_size_2, 
-        #     stride=(1, 1), 
-        #     border_mode="valid", 
-        #     untie_biases=False, 
-        #     nonlinearity=lasagne.nonlinearities.rectify,
-        #     )
+        l_conv2D_2 = lasagne.layers.Conv2DLayer(
+            l_pool2D_1, 
+            num_filters=32,
+            filter_size=filter_size_2, 
+            stride=(1, 1), 
+            border_mode="valid", 
+            untie_biases=False, 
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
 
-        # l_pool2D_2 = lasagne.layers.MaxPool2DLayer(
-        #     l_conv2D_2, 
-        #     pool_size=pool_size_2, 
-        #     stride=None, 
-        #     pad=0, 
-        #     ignore_border=False,
-        # )
+        l_pool2D_2 = lasagne.layers.MaxPool2DLayer(
+            l_conv2D_2, 
+            pool_size=pool_size_2, 
+            stride=None, 
+            pad=0, 
+            ignore_border=False,
+        )
 
         # # l_pool2D_2 = lasagne.layers.FeaturePoolLayer(
         # #     l_conv2D_2, 
         # #     pool_size=2, 
         # # )
 
-        # l_hidden_1 = lasagne.layers.DenseLayer(
-        #     l_reshape_1,
-        #     num_units=num_hidden_units_1,
-        #     nonlinearity=lasagne.nonlinearities.rectify,
-        #     )
+        l_hidden_1 = lasagne.layers.DenseLayer(
+            l_pool2D_2,
+            num_units=num_hidden_units_5,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
 
         # l_hidden_2 = lasagne.layers.DenseLayer(
         #     l_hidden_1,
@@ -181,14 +181,14 @@ def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_s
         #     nonlinearity=lasagne.nonlinearities.rectify,
         #     )
 
-        l_hidden_5 = lasagne.layers.DenseLayer(
-            l_in,
-            num_units=num_hidden_units_5,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_5 = lasagne.layers.DenseLayer(
+        #     l_in,
+        #     num_units=num_hidden_units_5,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
         l_out = lasagne.layers.DenseLayer(
-            l_hidden_5,
+            l_hidden_1,
             num_units=output_dim,
             nonlinearity=lasagne.nonlinearities.softmax,
             )
