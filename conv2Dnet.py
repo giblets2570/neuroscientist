@@ -404,9 +404,9 @@ if __name__ == '__main__':
     # filter_sizes = [(4,1),(4,3),(4,5),(4,7)]
 
     # pool_sizes = [(1,2),(1,4),(1,8)]
-    filter_size = (4,1)
-    pool_size = (1,2)
-    filter_size_2 = (1,7)
+    filter_size = (3,1)
+    pool_size = (2,1)
+    filter_size_2 = (1,5)
     pool_size_2 = (1,2)
     num_hidden_units_1 = 800
     num_hidden_units_2 = 500
