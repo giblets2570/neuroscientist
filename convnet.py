@@ -240,6 +240,11 @@ def main(tetrode_number=TETRODE_NUMBER):
             # print("Epoch: {}, Accuracy: {}".format(i+1,accuracy))
             print("Epoch: {}, Accuracy: {}, Training cost: {}, validation cost: {}".format(i+1,accuracy,meanTrainCost,meanValidCost))
 
+            if(np.isnan(meanTrainCost/meanValidCost)):
+                print("Nan value")
+                break
+
+
             trainvalidation.append([meanTrainCost,meanValidCost])
 
     	accuracies.append(accuracy)
