@@ -104,10 +104,10 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
 
         l_conv1D_1 = lasagne.layers.Conv1DLayer(
             l_in,
-            num_filters=32,
+            num_filters=16,
             filter_size=(5,),
             stride=1,
-            nonlinearity=None,
+            nonlinearity=lasagne.nonlinearities.rectify,
         )
 
         l_pool1D_1 = lasagne.layers.FeaturePoolLayer(
@@ -117,10 +117,10 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
 
         l_conv1D_2 = lasagne.layers.Conv1DLayer(
             l_pool1D_1,
-            num_filters=32,
+            num_filters=16,
             filter_size=(5,),
             stride=1,
-            nonlinearity=None,
+            nonlinearity=lasagne.nonlinearities.rectify,
         )
 
         l_pool1D_2 = lasagne.layers.FeaturePoolLayer(
@@ -228,18 +228,17 @@ def main(tetrode_number=TETRODE_NUMBER):
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
                 cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
                 costs.append(cost)
-
-
             for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
-                cost = training['train'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
+                cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
                 valid_costs.append(cost)
-                break
+
+            accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test']))
 
             meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
             meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
-            accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test']))
 
-            print("Epoch: {}, Accuracy: {}, Training cost / validation cost: {}".format(i+1,accuracy,meanTrainCost/meanValidCost))
+            # print("Epoch: {}, Accuracy: {}".format(i+1,accuracy))
+            print("Epoch: {}, Accuracy: {}, Training cost: {}, validation cost: {}".format(i+1,accuracy,meanTrainCost,meanValidCost))
 
             trainvalidation.append([meanTrainCost,meanValidCost])
 
