@@ -107,11 +107,11 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
 
     # # print("Hidden drop 1 shape: ",lasagne.layers.get_output_shape(l_hidden_dropout))
 
-    # l_hidden_2 = lasagne.layers.DenseLayer(
-    #     l_hidden_dropout,
-    #     num_units=num_hidden_units,
-    #     nonlinearity=lasagne.nonlinearities.rectify,
-    #     )
+    l_hidden_2 = lasagne.layers.DenseLayer(
+        l_hidden,
+        num_units=num_hidden_units,
+        nonlinearity=lasagne.nonlinearities.rectify,
+        )
 
     # print("Hidden 2 shape: ",lasagne.layers.get_output_shape(l_hidden_2))
 
@@ -134,7 +134,7 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
     #     )
   
     l_out = lasagne.layers.DenseLayer(
-        l_hidden,
+        l_hidden_2,
         num_units=output_dim,
         nonlinearity=lasagne.nonlinearities.softmax,
         )
@@ -216,11 +216,15 @@ def main(tetrode_number=TETRODE_NUMBER):
 
             accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test']))
 
-            meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
+            meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32)
             meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
 
             # print("Epoch: {}, Accuracy: {}".format(i+1,accuracy))
             print("Epoch: {}, Accuracy: {}, Training cost: {}, validation cost: {}".format(i+1,accuracy,meanTrainCost,meanValidCost))
+
+            if(np.isnan(meanValidCost)):
+                print("Nan value")
+                break
 
             if(EARLY_STOPPING):
                 if(len(accuracies) < STOPPING_RANGE):
