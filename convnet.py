@@ -35,7 +35,7 @@ else:
         return pickle.load(f, encoding=encoding)
 
 
-BASENAME = "../R2192/20140110_R2192_track1"
+BASENAME = "../R2192-screening/20141001_R2192_screening"
 
 NUM_EPOCHS = 100
 BATCH_SIZE = 400
@@ -104,7 +104,7 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
 
         l_conv1D_1 = lasagne.layers.Conv1DLayer(
             l_in, 
-            num_filters=8, 
+            num_filters=32, 
             filter_size=(5,), 
             stride=1, 
             nonlinearity=None,
@@ -117,7 +117,7 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
 
         l_conv1D_2 = lasagne.layers.Conv1DLayer(
             l_pool1D_1, 
-            num_filters=16, 
+            num_filters=32, 
             filter_size=(5,), 
             stride=1, 
             nonlinearity=None,
@@ -134,16 +134,16 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_dropout_1 = lasagne.layers.DropoutLayer(
-            l_hidden_1,
-            p=0.4
-            )
+        # l_dropout_1 = lasagne.layers.DropoutLayer(
+        #     l_hidden_1,
+        #     p=0.4
+        #     )
 
-        l_hidden_2 = lasagne.layers.DenseLayer(
-            l_dropout_1,
-            num_units=num_hidden_units,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_2 = lasagne.layers.DenseLayer(
+        #     l_dropout_1,
+        #     num_units=num_hidden_units,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
         # l_dropout_2 = lasagne.layers.DropoutLayer(
         #     l_hidden_2,

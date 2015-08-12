@@ -17,7 +17,7 @@ BASENAME = "../R2192-screening/20141001_R2192_screening"
 
 def getTotalInputDimension(tetrodeNumber=9,endTetrode=16,basename=BASENAME):
 	"""
-		Method to return the total number 
+		Method to return the total number
 		of dimension of the input
 	"""
 	total = 0
@@ -41,7 +41,7 @@ def getCutTimes(tetfilename,cutfilename):
 	"""
 	timesData = []
 	header, data = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
-	
+
 	labels = []
 	for i,j in enumerate(open(cutfilename,'r')):
 		if(i == 0):
@@ -58,8 +58,8 @@ def getCutTimes(tetfilename,cutfilename):
 
 def getData(tetrodeNumber=9,endTetrode=16,basename=BASENAME):
 	"""
-		Gets the data into the format of 
-		a dictionary with the times as the 
+		Gets the data into the format of
+		a dictionary with the times as the
 		key and the activation over all
 		tetrodes as the value (large vector)
 	"""
@@ -140,7 +140,7 @@ def recurrentData(tetrodeNumber=9,endTetrode=16,basename=BASENAME):
 
 def gaussConv(outDim,data):
 	"""
-		This is the functio that performs 
+		This is the functio that performs
 		the convolution on the input data.
 		It works by having a saved conv matrix,
 		and iterating over steps of the input
@@ -175,8 +175,8 @@ def gaussConv(outDim,data):
 
 # def formatData(tetrodeNumber=9,basename=BASENAME,sequenceLength=2000,endTetrode=16):
 # 	"""
-# 		This method formats the data so it 
-# 		can be used by the recurrent net. 
+# 		This method formats the data so it
+# 		can be used by the recurrent net.
 # 		The format is (batch_size, sequence_length,sequence_shape)
 
 # 	"""
@@ -186,9 +186,9 @@ def gaussConv(outDim,data):
 # 	k = len(recData)
 # 	xdim = recData[0]['activity'].shape[0]
 # 	ydim = 2
-	
+
 # 	max_num_sequences = int(k/sequenceLength)
-	
+
 # 	# X = np.asarray([recData[i]['activity'] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,xdim))
 # 	# y = np.asarray([[recData[i]['x'],recData[i]['y']] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,ydim))
 
@@ -256,7 +256,7 @@ def rate_maps(tetrodeNumber=9,endTetrode=16,basename=BASENAME):
 	y = np.asarray([[recData[i]['x'],recData[i]['y']] for i in xrange(k)])
 
 	# print("k",k)
-	
+
 	num_neurons = X.shape[1]
 	print(num_neurons)
 	for i in range(num_neurons):
@@ -297,9 +297,9 @@ def test():
 
 
 def organiseTetrodeData(tetrode,learned_labels=False,inp=False):
-	
+
 	tetfilename = BASENAME+"."+str(tetrode)
-	tetheader,tetdata = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
+	tetheader, tetdata = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
 	print(tetheader)
 	cutfilename = BASENAME+".clu."+str(tetrode)
 
@@ -317,7 +317,7 @@ def organiseTetrodeData(tetrode,learned_labels=False,inp=False):
 			labels=pickle.load(f)
 			f.close()
 		else:
-			f=open('dbscan_labels/tetrode_{}.npy'.format(tetrode),'r')
+			f=open('dbscan_labels/deep/tetrode_{}.npy'.format(tetrode),'r')
 			labels=pickle.load(f)
 			f.close()
 		labels = np.asarray(labels)
@@ -413,14 +413,15 @@ def ratemap(activationResult,labelResult):
 def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=False,learned_labels=False,inp=False):
 
 	# k = 69700
-	k = 54100
+	k = None
 	# this has to work
 	totalLabel = None
 	for n,tetrode in enumerate(tetrodes):
 		duration, result = organiseTetrodeData(tetrode,learned_labels,inp)
+		k = 50*duration
 		activationResult, labelResult = newDownsampleData(duration,result,1000.0)
 		# activationResult = gaussConv(k,activationResult)
-		labelResult = gaussConv(k,labelResult)	
+		labelResult = gaussConv(k,labelResult)
 		# totalLabel += list(labelResult)
 		print("Neuron {}".format(n))
 		print(labelResult.shape)
@@ -435,9 +436,9 @@ def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=Fal
 
 	xdim = totalLabel.shape[0]
 	ydim = 2
-	
+
 	max_num_sequences = int(k/sequenceLength)
-	
+
 	# X = np.asarray([recData[i]['activity'] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,xdim))
 	# y = np.asarray([[recData[i]['x'],recData[i]['y']] for i in xrange(k)][:max_num_sequences*sequenceLength]).reshape((max_num_sequences, sequenceLength,ydim))
 
@@ -484,16 +485,14 @@ def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=Fal
 
 if __name__=="__main__":
 
-	# for tetrode in range(9,17):
-
 	duration, result = organiseTetrodeData(9,learned_labels=True)
 	print(result[0]['label'].shape)
 	activationResult, labelResult = newDownsampleData(duration,result,1000.0)
 	#going to test the convolution
 	# print(labelResult.shape)
 
-	activationResult = gaussConv(54100,activationResult)
-	labelResult = gaussConv(54100,labelResult)
+	activationResult = gaussConv(duration*50,activationResult)
+	labelResult = gaussConv(duration*50,labelResult)
 
 	activationResult = normalizeMatrix(activationResult)
 	labelResult = normalizeMatrix(labelResult)

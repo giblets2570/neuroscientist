@@ -89,8 +89,6 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
     """
 
     l_in = lasagne.layers.InputLayer(shape=(BATCH_SIZE,input_shape[-1]))
-    
-    l_in_dropout = lasagne.layers.DropoutLayer(l_in,p=p_drop_input)
 
     print("Input shape: ",lasagne.layers.get_output_shape(l_in))
 
