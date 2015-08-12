@@ -170,7 +170,6 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     y_batch = T.matrix()
 
 
-    reg = 0.0001*lasagne.regularization.l2(network)
     # this is the cost of the network when fed throught the noisey network
     train_output = lasagne.layers.get_output(network, X_batch)
     cost = lasagne.objectives.categorical_crossentropy(train_output, y_batch) + reg
