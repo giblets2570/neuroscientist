@@ -98,7 +98,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             `batch_size`.
             A theano expression which represents such a network is returned.
 
-            Need to create a dense layer that converts the input to a 
+            Need to create a dense layer that converts the input to a
 
         """
         length = input_shape[1]

@@ -103,29 +103,29 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
         l_in = lasagne.layers.InputLayer(shape=shape)
 
         l_conv1D_1 = lasagne.layers.Conv1DLayer(
-            l_in, 
-            num_filters=32, 
-            filter_size=(5,), 
-            stride=1, 
+            l_in,
+            num_filters=32,
+            filter_size=(5,),
+            stride=1,
             nonlinearity=None,
         )
 
         l_pool1D_1 = lasagne.layers.FeaturePoolLayer(
-            l_conv1D_1, 
-            pool_size=2, 
+            l_conv1D_1,
+            pool_size=2,
         )
 
         l_conv1D_2 = lasagne.layers.Conv1DLayer(
-            l_pool1D_1, 
-            num_filters=32, 
-            filter_size=(5,), 
-            stride=1, 
+            l_pool1D_1,
+            num_filters=32,
+            filter_size=(5,),
+            stride=1,
             nonlinearity=None,
         )
 
         l_pool1D_2 = lasagne.layers.FeaturePoolLayer(
-            l_conv1D_2, 
-            pool_size=2, 
+            l_conv1D_2,
+            pool_size=2,
         )
 
         l_hidden_1 = lasagne.layers.DenseLayer(
@@ -160,12 +160,12 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
 def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM):
 
     """
-        Method the returns the theano functions that are used in 
+        Method the returns the theano functions that are used in
         training and testing. These are the train and predict functions.
         The predict function returns out output of the network.
     """
 
-    # symbolic variables 
+    # symbolic variables
     X_batch = T.tensor3()
     y_batch = T.matrix()
 
@@ -174,11 +174,11 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     # this is the cost of the network when fed throught the noisey network
     train_output = lasagne.layers.get_output(network, X_batch)
     cost = lasagne.objectives.categorical_crossentropy(train_output, y_batch) + reg
-    cost = cost.mean() 
+    cost = cost.mean()
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch)
     valid_cost = lasagne.objectives.categorical_crossentropy(valid_output, y_batch) + reg
-    valid_cost = valid_cost.mean() 
+    valid_cost = valid_cost.mean()
 
     # test the performance of the netowork without noise
     test = lasagne.layers.get_output(network, X_batch, deterministic=True)
@@ -187,7 +187,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     all_params = lasagne.layers.get_all_params(network)
     updates = lasagne.updates.nesterov_momentum(cost, all_params, learning_rate, momentum)
-    
+
     train = theano.function(inputs=[X_batch, y_batch], outputs=cost, updates=updates, allow_input_downcast=True)
     valid = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
     predict = theano.function(inputs=[X_batch], outputs=pred, allow_input_downcast=True)
@@ -229,8 +229,8 @@ def main(tetrode_number=TETRODE_NUMBER):
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
                 cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
                 costs.append(cost)
-            
-            
+
+
             for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
                 cost = training['train'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
                 valid_costs.append(cost)
@@ -243,18 +243,9 @@ def main(tetrode_number=TETRODE_NUMBER):
             print("Epoch: {}, Accuracy: {}, Training cost / validation cost: {}".format(i+1,accuracy,meanTrainCost/meanValidCost))
 
             trainvalidation.append([meanTrainCost,meanValidCost])
-            
+
     	accuracies.append(accuracy)
-        if(EARLY_STOPPING):
-            if(len(accuracies) < STOPPING_RANGE):
-                pass
-            else:
-                test = [k for k in accuracies if k < accuracy]
-                if not test:
-                    print('Early stopping causing training to finish at epoch {}'.format(i+1))
-                    break
-                del accuracies[0]
-                accuracies.append(accuracy)
+
 
         epochsDone = epochsDone + 1
     except KeyboardInterrupt:
