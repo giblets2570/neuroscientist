@@ -133,11 +133,11 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
     #     p=p_drop_hidden
     #     )
   
-    # l_out = lasagne.layers.DenseLayer(
-    #     l_hidden_3_dropout,
-    #     num_units=output_dim,
-    #     nonlinearity=lasagne.nonlinearities.softmax,
-    #     )
+    l_out = lasagne.layers.DenseLayer(
+        l_hidden,
+        num_units=output_dim,
+        nonlinearity=lasagne.nonlinearities.softmax,
+        )
 
     print("Output shape: ",lasagne.layers.get_output_shape(l_out))
 
