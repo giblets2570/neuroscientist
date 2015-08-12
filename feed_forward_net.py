@@ -15,7 +15,7 @@ import theano
 import theano.tensor as T
 import time
 import datetime
-from neuroscientist.data import formatData
+from data import formatData
 import json
 import re
 
