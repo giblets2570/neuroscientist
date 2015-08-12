@@ -258,8 +258,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
         # all_param_values = pickle.load(f)
         # f.close()
         # print(all_param_values)
-        
-        
+
         print("Making the model...")
         network = model(dataset['input_shape'],dataset['output_dim'],num_hidden_units,num_hidden_units_2,num_code_units)
         print("Done!")

@@ -144,12 +144,12 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2,num_hidde
 def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.02, beta=0.1, momentum=MOMENTUM):
 
     """
-        Method the returns the theano functions that are used in 
+        Method the returns the theano functions that are used in
         training and testing. These are the train and predict functions.
         The predict function returns out output of the network.
     """
 
-    # symbolic variables 
+    # symbolic variables
     X_batch = T.matrix()
     y_batch = T.matrix()
 
@@ -160,7 +160,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     activations_2_layer = layers[num_layers/2 - 1]
     activations_1_layer = layers[num_layers/2 - 2]
 
-    # code output 
+    # code output
     code_output = lasagne.layers.get_output(code_layer, X_batch, deterministic=True)
 
     # l = T.sub(1,code_output)
@@ -180,10 +180,10 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     all_params = lasagne.layers.get_all_params(network)
     updates = lasagne.updates.nesterov_momentum(cost, all_params, learning_rate, momentum)
 
-    
+
 
     # code and activation outputs
-    
+
     activations_1_output = lasagne.layers.get_output(activations_1_layer, X_batch, deterministic=True)
     activations_2_output = lasagne.layers.get_output(activations_2_layer, X_batch, deterministic=True)
 
@@ -228,12 +228,12 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
     """
         This is the main method that sets up the experiment
     """
-   
+
     print("Making the model...")
     network = model((None,200),200,num_hidden_units,num_hidden_units_2,num_hidden_units_3,num_code_units)
     print("Done!")
 
-    for tetrode_number in [9]:
+    for tetrode_number in [10]:
 
         print("Loading the model parameters from {}".format(MODEL_FILENAME+str(tetrode_number)))
         f = open(MODEL_FILENAME+str(tetrode_number),'r')
@@ -266,7 +266,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
         # NUM_POINTS = 5000
         codes = training['code'](dataset['data'][0:NUM_POINTS])
 
-        
+
 
         # y = set(list(d.predict(dataset['data'][0:NUM_POINTS])))
 
@@ -299,7 +299,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
             plt.close()
 
             # m = TSNE(n_components=2, random_state=0)
-            
+
             # codes_2d = m.fit_transform(codes[:NUM_POINTS])
             # activations_1_2d = bh_sne(activations_1)
             # activations_2_2d = bh_sne(activations_2)
@@ -354,7 +354,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
         plt.close()
 
         # m = TSNE(n_components=2, random_state=0)
-        
+
         # codes_2d = m.fit_transform(codes[:NUM_POINTS])
         # activations_1_2d = bh_sne(activations_1)
         # activations_2_2d = bh_sne(activations_2)
