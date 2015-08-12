@@ -344,6 +344,7 @@ def organiseTetrodeData(tetrode,learned_labels=False,inp=False):
 	# print(len(tetdata))
 	time = 0
 	activation = 0
+	print(len(result))
 	for n,j in enumerate(tetdata):
 		if n%4==3:
 			activation += list(j[1])

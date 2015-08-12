@@ -37,7 +37,7 @@ BASENAME = "../R2192/20140110_R2192_track1"
 
 NUM_EPOCHS = 1000000
 BATCH_SIZE = 600
-NUM_HIDDEN_UNITS = 400
+NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
 MOMENTUM = 0.9
 
@@ -100,44 +100,44 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
 
     print("Hidden 1 shape: ",lasagne.layers.get_output_shape(l_hidden))
 
-    l_hidden_dropout = lasagne.layers.DropoutLayer(
-        l_hidden,
-        p=p_drop_hidden
-        )
+    # l_hidden_dropout = lasagne.layers.DropoutLayer(
+    #     l_hidden,
+    #     p=p_drop_hidden
+    #     )
 
-    # print("Hidden drop 1 shape: ",lasagne.layers.get_output_shape(l_hidden_dropout))
+    # # print("Hidden drop 1 shape: ",lasagne.layers.get_output_shape(l_hidden_dropout))
 
-    l_hidden_2 = lasagne.layers.DenseLayer(
-        l_hidden_dropout,
-        num_units=num_hidden_units,
-        nonlinearity=lasagne.nonlinearities.rectify,
-        )
+    # l_hidden_2 = lasagne.layers.DenseLayer(
+    #     l_hidden_dropout,
+    #     num_units=num_hidden_units,
+    #     nonlinearity=lasagne.nonlinearities.rectify,
+    #     )
 
-    print("Hidden 2 shape: ",lasagne.layers.get_output_shape(l_hidden_2))
+    # print("Hidden 2 shape: ",lasagne.layers.get_output_shape(l_hidden_2))
 
-    l_hidden_2_dropout = lasagne.layers.DropoutLayer(
-        l_hidden_2,
-        p=p_drop_hidden
-        )
+    # l_hidden_2_dropout = lasagne.layers.DropoutLayer(
+    #     l_hidden_2,
+    #     p=p_drop_hidden
+    #     )
 
-    l_hidden_3 = lasagne.layers.DenseLayer(
-        l_hidden_2_dropout,
-        num_units=num_hidden_units,
-        nonlinearity=lasagne.nonlinearities.rectify,
-        )
+    # l_hidden_3 = lasagne.layers.DenseLayer(
+    #     l_hidden_2_dropout,
+    #     num_units=num_hidden_units,
+    #     nonlinearity=lasagne.nonlinearities.rectify,
+    #     )
 
-    print("Hidden 3 shape: ",lasagne.layers.get_output_shape(l_hidden_3))
+    # print("Hidden 3 shape: ",lasagne.layers.get_output_shape(l_hidden_3))
 
-    l_hidden_3_dropout = lasagne.layers.DropoutLayer(
-        l_hidden_3,
-        p=p_drop_hidden
-        )
+    # l_hidden_3_dropout = lasagne.layers.DropoutLayer(
+    #     l_hidden_3,
+    #     p=p_drop_hidden
+    #     )
   
-    l_out = lasagne.layers.DenseLayer(
-        l_hidden_3_dropout,
-        num_units=output_dim,
-        nonlinearity=lasagne.nonlinearities.softmax,
-        )
+    # l_out = lasagne.layers.DenseLayer(
+    #     l_hidden_3_dropout,
+    #     num_units=output_dim,
+    #     nonlinearity=lasagne.nonlinearities.softmax,
+    #     )
 
     print("Output shape: ",lasagne.layers.get_output_shape(l_out))
 

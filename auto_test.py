@@ -233,7 +233,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
     network = model((None,200),200,num_hidden_units,num_hidden_units_2,num_hidden_units_3,num_code_units)
     print("Done!")
 
-    for tetrode_number in [14,15,16]:
+    for tetrode_number in [9,10,11,12,13,14,15,16]:
 
         print("Loading the model parameters from {}".format(MODEL_FILENAME+str(tetrode_number)))
         f = open(MODEL_FILENAME+str(tetrode_number),'r')
@@ -390,6 +390,10 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
 
         print("Num learned labels: {}".format(num_labels))
 
+        f=open('dbscan_labels/deep/tetrode_{}.npy'.format(tetrode_number),'w')
+        pickle.dump(labels, f)
+        f.close()
+
         plt.title('Estimated number of clusters: {}'.format(np.amax(labels)))
         plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
         plt.savefig('dbscan_labels/deep/dbscan_tsne_{}.png'.format(tetrode_number), bbox_inches='tight')
@@ -415,10 +419,6 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
         plt.scatter(codes_2d[:15000, 0], codes_2d[:15000, 1], c=labels[0:NUM_POINTS][:15000],lw=0)
         plt.savefig('dbscan_labels/deep/dbscan_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
         plt.close()
-
-        f=open('dbscan_labels/deep/tetrode_{}.npy'.format(tetrode_number),'w')
-        pickle.dump(labels, f)
-        f.close()
 
 if __name__ == '__main__':
     main()
