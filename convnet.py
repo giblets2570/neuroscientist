@@ -151,7 +151,7 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
         #     )
 
         l_out = lasagne.layers.DenseLayer(
-            l_hidden_2,
+            l_hidden_1,
             num_units=output_dim,
             nonlinearity=lasagne.nonlinearities.softmax,
             )
