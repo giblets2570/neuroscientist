@@ -398,9 +398,9 @@ def ratemap(activationResult,labelResult):
 		print("Label {}".format(i+1))
 		for j in range(x.shape[0]):
 			r[j] = labelResult[j][i]
-			if labelResult[j][i] < 0.24:
+			if labelResult[j][i] < 0.2:
 				rgba_colors[j][3] = 0.0
-			elif labelResult[j][i] < 0.55:
+			elif labelResult[j][i] < 0.5:
 				rgba_colors[j][1] = 1.0
 			elif labelResult[j][i] < 1.0:
 				rgba_colors[j][0] = 1.0
@@ -486,16 +486,16 @@ def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=Fal
 
 if __name__=="__main__":
 
-	duration, result = organiseTetrodeData(9,learned_labels=True)
+	duration, result = organiseTetrodeData(int(sys.argv[1]),learned_labels=True)
 	print(result[0]['label'].shape)
 	activationResult, labelResult = newDownsampleData(duration,result,1000.0)
 	#going to test the convolution
 	# print(labelResult.shape)
 
-	activationResult = gaussConv(duration*50,activationResult)
+	# activationResult = gaussConv(duration*50,activationResult)
 	labelResult = gaussConv(duration*50,labelResult)
 
-	activationResult = normalizeMatrix(activationResult)
+	# activationResult = normalizeMatrix(activationResult)
 	labelResult = normalizeMatrix(labelResult)
 
 	ratemap(activationResult, labelResult)

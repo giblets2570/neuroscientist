@@ -116,20 +116,20 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         # print("Reshape 1 shape: ",lasagne.layers.get_output_shape(l_reshape_1))
 
-        l_dropout_1 = lasagne.layers.DropoutLayer(
-            l_reshape_1,
-            p=0.8,
-            )
+        # l_dropout_1 = lasagne.layers.DropoutLayer(
+        #     l_reshape_1,
+        #     p=0.8,
+        #     )
 
         l_hidden_1 = lasagne.layers.DenseLayer(
-            l_dropout_1,
+            l_reshape_1,
             num_units=reduced_length,
             nonlinearity=lasagne.nonlinearities.rectify
             )
 
         l_dropout_2 = lasagne.layers.DropoutLayer(
             l_hidden_1,
-            p=0.5,
+            p=0.8,
             )
 
 
@@ -139,14 +139,14 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             nonlinearity=lasagne.nonlinearities.rectify
             )
 
-        l_dropout_2 = lasagne.layers.DropoutLayer(
-            l_hidden_2,
-            p=0.5,
-            )
+        # l_dropout_2 = lasagne.layers.DropoutLayer(
+        #     l_hidden_2,
+        #     p=0.5,
+        #     )
 
         # print("Hidden 1 shape: ",lasagne.layers.get_output_shape(l_hidden_1))
 
-        l_reshape_2 = lasagne.layers.ReshapeLayer(l_dropout_2, (batch_size, length, num_hidden_units))
+        l_reshape_2 = lasagne.layers.ReshapeLayer(l_hidden_2, (batch_size, length, num_hidden_units))
 
         l_recurrent = lasagne.layers.GRULayer(
             l_reshape_2, num_hidden_units, 
