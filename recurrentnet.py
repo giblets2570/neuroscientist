@@ -178,19 +178,8 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         print("Reshape shape: ",lasagne.layers.get_output_shape(l_reshape_3))
 
-        l_dropout_3 = lasagne.layers.DropoutLayer(
-            l_reshape_3,
-            p=0.8
-            )
-
-        l_hidden_3 = lasagne.layers.DenseLayer(
-            l_dropout_3,
-            num_units=reduced_length,
-            nonlinearity=lasagne.nonlinearities.rectify
-            )
-
         l_recurrent_out = lasagne.layers.DenseLayer(
-            l_hidden_3,
+            l_reshape_3,
             num_units=output_dim,
             nonlinearity=None
             )
