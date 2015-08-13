@@ -332,6 +332,7 @@ def main(tetrode_number=TETRODE_NUMBER):
     except KeyboardInterrupt:
         pass
 
+    print(dataset['X_test'].shape)
     print("Begining to test the network...")
     for start, end in zip(range(0, dataset['num_examples_test'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_test'], BATCH_SIZE)):
         prediction = training['predict'](dataset['X_test'][start:end])
@@ -343,7 +344,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     for z in range(10):
         try:
-            c = [math.sqrt((k[0]**2 + k[1]**2)) for k in cost_arrays[z][z]]
+            c = [math.sqrt((k[0]**2 + k[1]**2)) for k in cost_arrays[z][0]]
             plt.plot(c)
             plt.savefig('../position/test/costs_{}_{}.png'.format(i,z), bbox_inches='tight')
             plt.close()
