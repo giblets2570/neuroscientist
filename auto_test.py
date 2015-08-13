@@ -233,7 +233,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
     network = model((None,200),200,num_hidden_units,num_hidden_units_2,num_hidden_units_3,num_code_units)
     print("Done!")
 
-    for tetrode_number in [15,16]:
+    for tetrode_number in [9,10,11,12,13,14]:
 
         print("Loading the model parameters from {}".format(MODEL_FILENAME+str(tetrode_number)))
         f = open(MODEL_FILENAME+str(tetrode_number),'r')
@@ -377,19 +377,19 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
         num_labels = 0
         eps=1.5
         diff = 0.1
-        while(num_labels < 10 or num_labels>25):
-            print("Getting the labels: {}, eps: {}".format(num_labels,eps))
-            db = DBSCAN(eps=eps, min_samples=10).fit(codes_2d)
-            core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
-            core_samples_mask[db.core_sample_indices_] = True
-            labels = db.labels_
-            num_labels = np.amax(labels)
-            if(eps <= 2*diff):
-                diff *= 0.1
-            if(num_labels < 10):
-                eps -= diff
-            if(num_labels > 25):
-                eps += 0.5*diff
+        # while(num_labels < 10 or num_labels>25):
+        print("Getting the labels: {}, eps: {}".format(num_labels,eps))
+        db = DBSCAN(eps=eps, min_samples=10).fit(codes_2d)
+        core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
+        core_samples_mask[db.core_sample_indices_] = True
+        labels = db.labels_
+        num_labels = np.amax(labels)
+            # if(eps <= 2*diff):
+            #     diff *= 0.1
+            # if(num_labels < 10):
+            #     eps -= diff
+            # if(num_labels > 25):
+            #     eps += 0.5*diff
 
         print("Num learned labels: {}".format(num_labels))
 
@@ -403,8 +403,8 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=3
         plt.close()
 
         num_labels = 0
-        eps=1.0
-        diff = 0.1
+        eps=0.1
+        diff = 0.01
         while(num_labels < 10):
             print("Getting the labels: {}, eps: {}".format(num_labels,eps))
             db = DBSCAN(eps=eps, min_samples=10).fit(codes[:15000])

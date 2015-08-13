@@ -33,7 +33,7 @@ else:
         return pickle.load(f, encoding=encoding)
 
 
-BASENAME = "../R2192/20140110_R2192_track1"
+BASENAME = "../R2192-screening/20141001_R2192_screening"
 
 NUM_EPOCHS = 1000000
 BATCH_SIZE = 600
@@ -107,11 +107,11 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
 
     # # print("Hidden drop 1 shape: ",lasagne.layers.get_output_shape(l_hidden_dropout))
 
-    l_hidden_2 = lasagne.layers.DenseLayer(
-        l_hidden,
-        num_units=num_hidden_units,
-        nonlinearity=lasagne.nonlinearities.rectify,
-        )
+    # l_hidden_2 = lasagne.layers.DenseLayer(
+    #     l_hidden,
+    #     num_units=num_hidden_units,
+    #     nonlinearity=lasagne.nonlinearities.rectify,
+    #     )
 
     # print("Hidden 2 shape: ",lasagne.layers.get_output_shape(l_hidden_2))
 
@@ -120,11 +120,11 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
     #     p=p_drop_hidden
     #     )
 
-    l_hidden_3 = lasagne.layers.DenseLayer(
-        l_hidden_2_dropout,
-        num_units=num_hidden_units,
-        nonlinearity=lasagne.nonlinearities.rectify,
-        )
+    # l_hidden_3 = lasagne.layers.DenseLayer(
+    #     l_hidden_2
+    #     num_units=num_hidden_units,
+    #     nonlinearity=lasagne.nonlinearities.rectify,
+    #     )
 
     # print("Hidden 3 shape: ",lasagne.layers.get_output_shape(l_hidden_3))
 
@@ -134,7 +134,7 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
     #     )
   
     l_out = lasagne.layers.DenseLayer(
-        l_hidden_2,
+        l_hidden,
         num_units=output_dim,
         nonlinearity=lasagne.nonlinearities.softmax,
         )
