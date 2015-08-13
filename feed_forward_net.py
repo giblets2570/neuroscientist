@@ -121,7 +121,7 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
     #     )
 
     l_hidden_3 = lasagne.layers.DenseLayer(
-        l_hidden_2
+        l_hidden_2,
         num_units=num_hidden_units,
         nonlinearity=lasagne.nonlinearities.rectify,
         )
