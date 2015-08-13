@@ -139,7 +139,7 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
     #     )
 
     l_out = lasagne.layers.DenseLayer(
-        l_hidden_2_dropout,
+        l_hidden_2,
         num_units=output_dim,
         nonlinearity=lasagne.nonlinearities.softmax,
         )
