@@ -297,14 +297,14 @@ def main(tetrode_number=TETRODE_NUMBER):
     network = model(dataset['input_shape'],dataset['output_dim'])
     print("Done!")
 
-    if(os.path.isfile('recurrent_2_input')):
+    if(os.path.isfile('recurrent_2_learned')):
         print("Loading old model")
-        f=open('recurrent_2_input','r')
+        f=open('recurrent_2_learned','r')
         all_param_values = pickle.load(f)
         f.close()
         lasagne.layers.set_all_param_values(network, all_param_values)
     else:
-        print('recurrent_2_input doesnt exist')
+        print('recurrent_2_learned doesnt exist')
         return 
 
     print("Setting up the testing functions...")
@@ -343,7 +343,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     for z in range(10):
         plt.plot(cost_arrays[0][z])
-        plt.savefig('../position/test/costs_{}_{}.png'.format(i,z), bbox_inches='tight')
+        plt.savefig('../position/learned/costs_{}_{}.png'.format(i,z), bbox_inches='tight')
         plt.close()
 
     print(cost_arrays)
@@ -376,7 +376,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
         fig.tight_layout()
 
-        plt.savefig('../position/test/Position_{}.png'.format(i), bbox_inches='tight')
+        plt.savefig('../position/learned/Position_{}.png'.format(i), bbox_inches='tight')
         plt.close()
         makeVideo(prediction,actual,points_from,i)
         plt.close()
@@ -409,7 +409,7 @@ def makeVideo(prediction, actual, points_from, number):
         return mplfig_to_npimage(fig)
 
     animation = mpy.VideoClip(make_frame, duration = duration)
-    animation.write_gif("../position/test/position_{}.gif".format(number), fps=fps)
+    animation.write_gif("../position/learned/position_{}.gif".format(number), fps=fps)
 
 if __name__ == '__main__':
     

@@ -26,6 +26,9 @@ import math
 import matplotlib.pyplot as plt
 import os.path
 
+# We'll generate an animation with matplotlib and moviepy.
+from moviepy.video.io.bindings import mplfig_to_npimage
+import moviepy.editor as mpy
 
 import warnings
 warnings.filterwarnings('ignore', '.*topo.*')
@@ -47,7 +50,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 100
+NUM_EPOCHS = 20
 
 BATCH_SIZE = 26
 
@@ -70,10 +73,10 @@ def load_data(tetrode_number):
 
     # the data is arranged as (num_sequences_per_batch, sequence_length, num_features_per_timestep)
     # num sequences per batch = batch size
-    # sequence length = number of time steps per example.
+    # sequence length = number of time steps per example. 
     # num_features_per_timestep = 31 i.e labels per tetrode
 
-    X_train, X_valid, X_test, y_train, y_valid, y_test = formatData(sequenceLength=2000,learned_labels=True,inp=True)
+    X_train, X_valid, X_test, y_train, y_valid, y_test = formatData(sequenceLength=2000,learned_labels=True)
 
     return dict(
         X_train=X_train,
@@ -249,13 +252,13 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     # this is the cost of the network when fed throught the noisey network
     train_output = lasagne.layers.get_output(network, X_batch)
-    cost = lasagne.objectives.mse(train_output, y_batch)
-    cost = cost.mean()
+    cost_array = lasagne.objectives.mse(train_output, y_batch)
+    cost = cost_array.mean()
 
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch, deterministic=True)
-    valid_cost = lasagne.objectives.mse(valid_output, y_batch)
-    valid_cost = valid_cost.mean()
+    valid_cost_array = lasagne.objectives.mse(valid_output, y_batch)
+    valid_cost = valid_cost_array.mean()
 
     # test the performance of the netowork without noise
     test = lasagne.layers.get_output(network, X_batch, deterministic=True)
@@ -266,12 +269,14 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     updates = lasagne.updates.adagrad(cost, all_params, l_rate)
     
     train = theano.function(inputs=[X_batch, y_batch, l_rate], outputs=cost, updates=updates, allow_input_downcast=True)
+    cost_array = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost_array, allow_input_downcast=True)
     valid = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
     predict = theano.function(inputs=[X_batch], outputs=test, allow_input_downcast=True)
 
     return dict(
         train=train,
         valid=valid,
+        cost_array=cost_array,
         predict=predict
     )
 
@@ -292,102 +297,120 @@ def main(tetrode_number=TETRODE_NUMBER):
     network = model(dataset['input_shape'],dataset['output_dim'])
     print("Done!")
 
-    if(os.path.isfile('recurrent_2_learned')):
+    if(os.path.isfile('recurrent_2_input')):
         print("Loading old model")
-        f=open('recurrent_2_learned','r')
+        f=open('recurrent_2_input','r')
         all_param_values = pickle.load(f)
         f.close()
         lasagne.layers.set_all_param_values(network, all_param_values)
+    else:
+        print('recurrent_2_input doesnt exist')
+        return 
 
-    print("Setting up the training functions...")
+    print("Setting up the testing functions...")
     training = funcs(dataset,network)
     print("Done!")
 
-    accuracies = []
-    trainvalidation = []
-    learning_rate = LEARNING_RATE
 
     print("Begining to train the network...")
-    epochsDone = 0
-    increasing = 0
+    predictions = []
+    cost_arrays = []
+    actuals = []
     try:
-        meanTrainCost = 1000
+
         for i in range(NUM_EPOCHS):
             costs = []
             valid_costs = []
 
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
-                cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end],learning_rate)
+                cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end],LEARNING_RATE)
                 costs.append(cost)
-                # if(costs[-1] > 1.02*costs[-2]):
-                #     LEARNING_RATE = 0.8*LEARNING_RATE
-                # print(cost)
-            
-            for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
-                cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
-                valid_costs.append(cost)
 
-            if(np.mean(np.asarray(costs,dtype=np.float32)) > 1.00000001*meanTrainCost):
-                increasing += 1
-            else: 
-                increasing = 0
-
-            if increasing == 3:
-                print("Lowering learning rate")
-                learning_rate = 0.9*learning_rate
-                increasing = 0
-            meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
             meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
-            # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
-
-            print("Epoch: {}, Training cost: {}, Validation Cost: {}, learning rate: {}".format(i+1,meanTrainCost,meanValidCost,learning_rate))
-
-            if(np.isnan(meanValidCost)):
-                print("Nan value")
-                break
-
-            trainvalidation.append([meanTrainCost,meanValidCost])
-            # accuracies.append(accuracy)
-
-            epochsDone = epochsDone + 1
+            print("Epoch: {}, Training cost: {}".format(i+1,meanTrainCost))
 
     except KeyboardInterrupt:
         pass
 
-    # plt.plot(trainvalidation)
-    # plt.show()
+    print("Begining to test the network...")
+    for start, end in zip(range(0, dataset['num_examples_test'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_test'], BATCH_SIZE)):
+        prediction = training['predict'](dataset['X_test'][start:end])
+        predictions.append(prediction)
+        cost_array = training['cost_array'](dataset['X_test'][start:end],dataset['y_test'][start:end])
+        cost_arrays.append(cost_array)
+        # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
+        actuals.append(dataset['y_test'][start:end])
 
-    if(LOG_EXPERIMENT):
-        print("Logging the experiment details...")
-        log = dict(
-            NET_TYPE = "Recurent network 1 layer, {} units ".format(NUM_HIDDEN_UNITS),
-            TETRODE_NUMBER = tetrode_number,
-            BASENAME = BASENAME,
-            NUM_EPOCHS = epochsDone,
-            BATCH_SIZE = BATCH_SIZE,
-            TRAIN_VALIDATION = trainvalidation,
-            LEARNING_RATE = LEARNING_RATE,
-            MOMENTUM = MOMENTUM,
-            NUM_HIDDEN_UNITS = NUM_HIDDEN_UNITS,
-            NETWORK_LAYERS = [str(type(layer)) for layer in lasagne.layers.get_all_layers(network)],
-            OUTPUT_DIM = dataset['output_dim'],
-            # NETWORK_PARAMS = lasagne.layers.get_all_params_values(network)
-        )
-        now = datetime.datetime.now()
-        filename = "experiments/rec/{}_{}_{}_NUMLAYERS_{}_OUTPUTDIM_{}".format(now,NUM_EPOCHS,NUM_HIDDEN_UNITS,len(log['NETWORK_LAYERS']),log['OUTPUT_DIM'])
-        filename = re.sub("[^A-Za-z0-9_/ ,-:]", "", filename)
-        with open(filename,"w") as outfile:
-            outfile.write(str(log))
+    for z in range(10):
+        plt.plot(cost_arrays[0][z])
+        plt.savefig('../position/input/costs_{}_{}.png'.format(i,z), bbox_inches='tight')
+        plt.close()
 
-    if(SAVE_MODEL):
-        print("Saving model...")
-        all_param_values = lasagne.layers.get_all_param_values(network)
-        f=open('recurrent_2_learned','w')
-        pickle.dump(all_param_values, f)
-        f.close()
+    print(cost_arrays)
+    points_from = 0
 
+    print("Plotting the predictions")
 
+    for i,(actual,prediction) in enumerate(zip(actuals,predictions)):
+        prediction = np.asarray(prediction)
+        actual = np.asarray(actual)
+
+        print("Actual: {}".format(actual.shape))
+        print("Prediction: {}".format(prediction.shape))
+        dist = np.linalg.norm(actual-prediction)
+        print("Distance: {}".format(dist))
+
+        fig = plt.figure(1)
+
+        sub1 = fig.add_subplot(121)
+        sub2 = fig.add_subplot(122)
+
+        sub1.set_title("Predicted", fontsize=16)
+        sub2.set_title("Actual", fontsize=16)
+        sub1.scatter(prediction[0,points_from:,0],prediction[0,points_from:,1],lw=0.0)
+        sub1.axis([0.0,1.0,0.0,1.0])
+        sub2.scatter(actual[0,points_from:,0],actual[0,points_from:,1],c=(1,0,0,1),lw=0.2)
+        sub2.axis([0.0,1.0,0.0,1.0])
+        sub1.grid(True)
+        sub2.grid(True)
+
+        fig.tight_layout()
+
+        plt.savefig('../position/input/Position_{}.png'.format(i), bbox_inches='tight')
+        plt.close()
+        makeVideo(prediction,actual,points_from,i)
+        plt.close()
+
+def makeVideo(prediction, actual, points_from, number):
+
+    duration = 2000 - points_from
+    fps = 1
+
+    fig = plt.figure(1)
+
+    sub1 = fig.add_subplot(121)
+    sub2 = fig.add_subplot(122)
+
+    def make_frame(t):
+        sub1.clear()
+        sub2.clear()
+        sub1.set_title("Predicted", fontsize=16)
+        sub2.set_title("Actual", fontsize=16)
+
+        sub1.scatter(prediction[0,points_from+t:points_from + 1 + t,0],prediction[0,points_from+t:points_from + 1 + t,1],lw=0.0)
+        sub1.axis([0.0,1.0,0.0,1.0])
+        sub2.scatter(actual[0,points_from+t:points_from + 1 + t,0],actual[0,points_from+t:points_from + 1 + t,1],c=(1,0,0,1),lw=0.2)
+        sub2.axis([0.0,1.0,0.0,1.0])
+        sub1.grid(True)
+        sub2.grid(True)
+
+        fig.tight_layout()
+
+        return mplfig_to_npimage(fig)
+
+    animation = mpy.VideoClip(make_frame, duration = duration)
+    animation.write_gif("../position/input/position_{}.gif".format(number), fps=fps)
 
 if __name__ == '__main__':
-  
+    
     main()
