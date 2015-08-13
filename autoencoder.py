@@ -217,7 +217,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     # test the performance of the netowork without noise
     pred = lasagne.layers.get_output(network, X_batch, deterministic=True)
     # pred = T.argmax(test, axis=1)
-    accuracy = 1 - T.mean(lasagne.objectives.mse(pred, y_batch), dtype=theano.config.floatX)
+    accuracy = T.mean(lasagne.objectives.mse(pred, y_batch), dtype=theano.config.floatX)
 
     all_params = lasagne.layers.get_all_params(network)
     updates = lasagne.updates.nesterov_momentum(cost, all_params, learning_rate, momentum)
@@ -293,9 +293,9 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=300,num_hidden_units_2=2
 
                 meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
                 meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
-                # accuracy = training['accuracy'](dataset['X_test'],dataset['y_test'])
+                accuracy = training['accuracy'](dataset['X_test'],dataset['y_test'])
 
-                print("Epoch: {}, Training cost: {}, validation cost: {}".format(i+1,meanTrainCost,meanValidCost))
+                print("Epoch: {}, Training cost: {}, validation cost: {}, accuracy: {}".format(i+1,meanTrainCost,meanValidCost,accuracy))
 
                 if(np.isnan(meanTrainCost/meanValidCost)):
                     print("Nan value")
