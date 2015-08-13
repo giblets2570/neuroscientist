@@ -394,21 +394,34 @@ def ratemap(activationResult,labelResult):
 	for i in range(labelResult[0].shape[0]):
 		rgba_colors = np.zeros((x.shape[0],4))
 		r = np.zeros(x.shape[0])
-		rgba_colors[:, 3] = 0.2
+		rgba_colors[:, 3] = 0.0
+		rgba_colors[:, 2] = 1.0
+		rgba_colors[:, 1] = 1.0
+		rgba_colors[:, 0] = 1.0
+		ar = sorted(list(set(list(labelResult[:,i]))))
+		# print(ar)
+		# heatmap = plt.pcolor(labelResult[:,i])
+		# print(heatmap)
 		print("Label {}".format(i+1))
 		for j in range(x.shape[0]):
-			r[j] = labelResult[j][i]
-			if labelResult[j][i] < 0.2:
-				rgba_colors[j][3] = 0.0
-			elif labelResult[j][i] < 0.5:
-				rgba_colors[j][1] = 1.0
-			elif labelResult[j][i] < 1.0:
-				rgba_colors[j][0] = 1.0
-				rgba_colors[j][3] = 0.8
-			else:
-				rgba_colors[:, 3] = 1.0
-		print(np.mean(r))
-		plt.scatter(x,y,c=rgba_colors,lw=0)
+			# r[j] = labelResult[j][i]
+
+			# if labelResult[j][i] < 0.24:
+			# 	rgba_colors[j][3] = 0.0
+			# elif labelResult[j][i] < 0.55:
+			# 	rgba_colors[j][1] = 1.0
+			# elif labelResult[j][i] < 1.0:
+			# 	rgba_colors[j][0] = 1.0
+			# 	rgba_colors[j][3] = 0.8
+			# else:
+			# 	rgba_colors[:, 3] = 1.0
+			rgba_colors[j][0] = 1-ar.index(labelResult[j][i])*1.0/len(ar)
+			rgba_colors[j][2] = 1-ar.index(labelResult[j][i])*1.0/len(ar)
+			rgba_colors[j][3] = ar.index(labelResult[j][i])*1.0/len(ar)
+
+		# print(np.mean(r))
+		fig = plt.scatter(x,y,c=rgba_colors,lw=0)
+		plt.axis([0.0,1.0,0.0,1.0])
 		plt.show()
 
 def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=False,learned_labels=False,inp=False):
@@ -486,13 +499,13 @@ def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=Fal
 
 if __name__=="__main__":
 
-	duration, result = organiseTetrodeData(int(sys.argv[1]),learned_labels=True)
+	duration, result = organiseTetrodeData(int(sys.argv[1]),learned_labels=True,inp=True)
 	print(result[0]['label'].shape)
 	activationResult, labelResult = newDownsampleData(duration,result,1000.0)
 	#going to test the convolution
 	# print(labelResult.shape)
 
-	# activationResult = gaussConv(duration*50,activationResult)
+	activationResult = gaussConv(duration*50,activationResult)
 	labelResult = gaussConv(duration*50,labelResult)
 
 	# activationResult = normalizeMatrix(activationResult)
