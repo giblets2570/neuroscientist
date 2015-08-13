@@ -341,10 +341,21 @@ def main(tetrode_number=TETRODE_NUMBER):
         # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
         actuals.append(dataset['y_test'][start:end])
 
+
+
     for z in range(10):
-        plt.plot(cost_arrays[0][z])
-        plt.savefig('../position/learned/costs_{}_{}.png'.format(i,z), bbox_inches='tight')
-        plt.close()
+        try:
+            c = [np.linalg.norm(k) for k in cost_arrays[z][0]]
+            fig = plt.figure(1)
+            sub1 = fig.add_subplot(111)
+            sub1.set_title("Time starting from {}".format(BATCH_SIZE*z*40), fontsize=16)
+            sub1.plot(c)
+            sub1.set_xlabel('Time')
+            sub1.set_ylabel('x,y cost')
+            plt.savefig('../position/learned/costs_{}_{}.png'.format(i,z), bbox_inches='tight')
+            plt.close()
+        except IndexError:
+            break
 
     print(cost_arrays)
     points_from = 0
