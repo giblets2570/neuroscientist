@@ -329,7 +329,7 @@ def organiseTetrodeData(tetrode,learned_labels=False,inp=False):
 
 		for _label in labels:
 			label = np.zeros(dim)
-			label[_label+1] = 1.0
+			label[_label-lower] = 1.0
 			result.append(dict(label=label))
 	else:
 		dim = 0
