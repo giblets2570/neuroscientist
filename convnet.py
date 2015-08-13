@@ -74,9 +74,9 @@ def load_data(tetrode_number):
     X_valid = X_valid.reshape(X_valid.shape[0],1,X_valid.shape[1])
     X_test = X_test.reshape(X_test.shape[0],1,X_test.shape[1])
 
-    y_train = X_train
-    y_valid = X_valid
-    y_test = X_test
+    # y_train = X_train
+    # y_valid = X_valid
+    # y_test = X_test
 
     return dict(
         X_train=X_train,
