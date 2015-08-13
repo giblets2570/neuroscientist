@@ -48,7 +48,7 @@ LOG_EXPERIMENT = True
 
 TETRODE_NUMBER = 9
 
-L2_CONSTANT = 0.0001
+L2_CONSTANT = 0.000
 
 CONV = False
 
@@ -107,11 +107,11 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
 
     # # print("Hidden drop 1 shape: ",lasagne.layers.get_output_shape(l_hidden_dropout))
 
-    l_hidden_2 = lasagne.layers.DenseLayer(
-        l_hidden,
-        num_units=num_hidden_units,
-        nonlinearity=lasagne.nonlinearities.rectify,
-        )
+    # l_hidden_2 = lasagne.layers.DenseLayer(
+    #     l_hidden,
+    #     num_units=num_hidden_units,
+    #     nonlinearity=lasagne.nonlinearities.rectify,
+    #     )
 
     # print("Hidden 2 shape: ",lasagne.layers.get_output_shape(l_hidden_2))
 
@@ -134,7 +134,7 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
     #     )
   
     l_out = lasagne.layers.DenseLayer(
-        l_hidden_2,
+        l_hidden,
         num_units=output_dim,
         nonlinearity=lasagne.nonlinearities.softmax,
         )
