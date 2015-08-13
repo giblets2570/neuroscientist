@@ -343,8 +343,8 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     for z in range(10):
         try:
-            c = [math.sqrt((i[0]**2 + i[1]**2)) for i in cost_arrays[z][z]]
-            plt.plot(cost_arrays[z][z])
+            c = [math.sqrt((k[0]**2 + k[1]**2)) for k in cost_arrays[z][z]]
+            plt.plot(c)
             plt.savefig('../position/test/costs_{}_{}.png'.format(i,z), bbox_inches='tight')
             plt.close()
         except IndexError:
