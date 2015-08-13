@@ -92,28 +92,28 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
 
     print("Input shape: ",lasagne.layers.get_output_shape(l_in))
 
-    l_in_dropout = lasagne.layers.DropoutLayer(
-        l_in,
-        p=p_drop_input
-        )
+    # l_in_dropout = lasagne.layers.DropoutLayer(
+    #     l_in,
+    #     p=p_drop_input
+    #     )
 
     l_hidden = lasagne.layers.DenseLayer(
-        l_in_dropout,
+        l_in,
         num_units=num_hidden_units,
         nonlinearity=lasagne.nonlinearities.rectify,
         )
 
     print("Hidden 1 shape: ",lasagne.layers.get_output_shape(l_hidden))
 
-    # l_hidden_dropout = lasagne.layers.DropoutLayer(
-    #     l_hidden,
-    #     p=p_drop_hidden
-    #     )
+    l_hidden_dropout = lasagne.layers.DropoutLayer(
+        l_hidden,
+        p=p_drop_hidden
+        )
 
     # # print("Hidden drop 1 shape: ",lasagne.layers.get_output_shape(l_hidden_dropout))
 
     l_hidden_2 = lasagne.layers.DenseLayer(
-        l_hidden,
+        l_hidden_dropout,
         num_units=num_hidden_units,
         nonlinearity=lasagne.nonlinearities.rectify,
         )
