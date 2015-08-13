@@ -74,10 +74,6 @@ def load_data(tetrode_number):
     X_valid = X_valid.reshape(X_valid.shape[0],1,X_valid.shape[1])
     X_test = X_test.reshape(X_test.shape[0],1,X_test.shape[1])
 
-    y_train = X_train
-    y_valid = X_valid
-    y_test = X_test
-
     return dict(
         X_train=X_train,
         y_train=y_train,
@@ -106,42 +102,51 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
         print(shape)
         l_in = lasagne.layers.InputLayer(shape=shape)
 
+        print("Input shape: ",lasagne.layers.get_output_shape(l_in))
+
         l_conv1D_1 = lasagne.layers.Conv1DLayer(
             l_in,
-            num_filters=32,
+            num_filters=8,
             filter_size=(5,),
             stride=1,
             nonlinearity=lasagne.nonlinearities.rectify,
         )
+
+        print("Conv 1D shape: ",lasagne.layers.get_output_shape(l_conv1D_1))
 
         # l_pool1D_1 = lasagne.layers.FeaturePoolLayer(
         #     l_conv1D_1,
         #     pool_size=2,
         # )
 
-        l_conv1D_2 = lasagne.layers.Conv1DLayer(
-            l_conv1D_1,
-            num_filters=64,
-            filter_size=(5,),
-            stride=1,
-            nonlinearity=lasagne.nonlinearities.rectify,
-        )
-
-        # l_pool1D_2 = lasagne.layers.FeaturePoolLayer(
-        #     l_conv1D_2,
-        #     pool_size=2,
-        # )
-
         l_hidden_1 = lasagne.layers.DenseLayer(
+            l_conv1D_1,
+            num_units=num_hidden_units,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
+
+        l_code = lasagne.layers.DenseLayer(
             l_conv1D_2,
             num_units=num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
+        l_hidden_2 = lasagne.layers.DenseLayer(
+            l_code,
+            num_units=num_hidden_units,
+            nonlinearity=lasagne.nonlinearities.rectify,
+            )
 
+        l_conv1D_2 = lasagne.layers.Conv1DLayer(
+            l_hidden_2,
+            num_filters=1,
+            filter_size=(5,),
+            stride=1,
+            nonlinearity=lasagne.nonlinearities.rectify,
+        )
 
         l_out = lasagne.layers.DenseLayer(
-            l_hidden_1,
+            l_conv1D_2,
             num_units=output_dim,
             nonlinearity=lasagne.nonlinearities.softmax,
             )
@@ -157,7 +162,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     # symbolic variables
     X_batch = T.tensor3()
-    y_batch = T.matrix()
+    y_batch = T.tensor3()
 
 
     # this is the cost of the network when fed throught the noisey network

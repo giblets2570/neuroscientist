@@ -344,7 +344,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     for z in range(10):
         try:
-            c = [math.sqrt((k[0]**2 + k[1]**2)) for k in cost_arrays[z][0]]
+            c = [np.linalg.norm(k) for k in cost_arrays[z][0]]
             plt.plot(c)
             plt.savefig('../position/test/costs_{}_{}.png'.format(i,z), bbox_inches='tight')
             plt.close()
