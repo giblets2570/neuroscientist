@@ -107,11 +107,11 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
 
     # # print("Hidden drop 1 shape: ",lasagne.layers.get_output_shape(l_hidden_dropout))
 
-    # l_hidden_2 = lasagne.layers.DenseLayer(
-    #     l_hidden,
-    #     num_units=num_hidden_units,
-    #     nonlinearity=lasagne.nonlinearities.rectify,
-    #     )
+    l_hidden_2 = lasagne.layers.DenseLayer(
+        l_hidden,
+        num_units=num_hidden_units,
+        nonlinearity=lasagne.nonlinearities.rectify,
+        )
 
     # print("Hidden 2 shape: ",lasagne.layers.get_output_shape(l_hidden_2))
 
@@ -134,7 +134,7 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
     #     )
   
     l_out = lasagne.layers.DenseLayer(
-        l_hidden,
+        l_hidden_2,
         num_units=output_dim,
         nonlinearity=lasagne.nonlinearities.softmax,
         )
@@ -235,7 +235,7 @@ def main(tetrode_number=TETRODE_NUMBER):
                         print('Early stopping causing training to finish at epoch {}'.format(i))
                         break
                     del accuracies[0]
-                    accuracies.append(accuracy)
+            accuracies.append(accuracy)
 
     except KeyboardInterrupt:
         pass
