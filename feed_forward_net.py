@@ -137,7 +137,7 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
     #     l_hidden_3,
     #     p=p_drop_hidden
     #     )
-  
+
     l_out = lasagne.layers.DenseLayer(
         l_hidden_2_dropout,
         num_units=output_dim,
@@ -151,12 +151,12 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
 def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, alpha=L2_CONSTANT):
 
     """
-        Method the returns the theano functions that are used in 
+        Method the returns the theano functions that are used in
         training and testing. These are the train and predict functions.
         The predict function returns out output of the network.
     """
 
-    # symbolic variables 
+    # symbolic variables
     X_batch = T.matrix()
     y_batch = T.matrix()
 
@@ -173,7 +173,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     all_params = lasagne.layers.get_all_params(network)
     updates = lasagne.updates.nesterov_momentum(cost, all_params, learning_rate, momentum)
-    
+
     train = theano.function(inputs=[X_batch, y_batch], outputs=cost, updates=updates, allow_input_downcast=True)
     valid = theano.function(inputs=[X_batch, y_batch], outputs=cost, allow_input_downcast=True)
     predict = theano.function(inputs=[X_batch], outputs=pred, allow_input_downcast=True)

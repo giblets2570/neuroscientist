@@ -68,7 +68,7 @@ SAVE_MODEL = True
 
 NUM_POINTS = 1000
 
-L2_CONSTANT = 0.0001
+L2_CONSTANT = 0.00001
 
 MODEL_FILENAME = "auto_models/deep/auto_network_"
 
