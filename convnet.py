@@ -110,26 +110,26 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
             nonlinearity=lasagne.nonlinearities.rectify,
         )
 
-        l_pool1D_1 = lasagne.layers.FeaturePoolLayer(
-            l_conv1D_1,
-            pool_size=2,
-        )
+        # l_pool1D_1 = lasagne.layers.FeaturePoolLayer(
+        #     l_conv1D_1,
+        #     pool_size=2,
+        # )
 
         l_conv1D_2 = lasagne.layers.Conv1DLayer(
-            l_pool1D_1,
+            l_conv1D_1,
             num_filters=8,
             filter_size=(5,),
             stride=1,
             nonlinearity=lasagne.nonlinearities.rectify,
         )
 
-        l_pool1D_2 = lasagne.layers.FeaturePoolLayer(
-            l_conv1D_2,
-            pool_size=2,
-        )
+        # l_pool1D_2 = lasagne.layers.FeaturePoolLayer(
+        #     l_conv1D_2,
+        #     pool_size=2,
+        # )
 
         l_hidden_1 = lasagne.layers.DenseLayer(
-            l_pool1D_2,
+            l_conv1D_2,
             num_units=num_hidden_units,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
@@ -247,7 +247,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
             trainvalidation.append([meanTrainCost,meanValidCost])
 
-    	accuracies.append(accuracy)
+            accuracies.append(accuracy)
 
 
         epochsDone = epochsDone + 1
