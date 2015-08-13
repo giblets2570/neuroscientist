@@ -345,7 +345,12 @@ def main(tetrode_number=TETRODE_NUMBER):
     for z in range(10):
         try:
             c = [np.linalg.norm(k) for k in cost_arrays[z][0]]
-            plt.plot(c)
+            fig = plt.figure(1)
+            sub1 = fig.add_subplot(111)
+            sub1.set_title("Time starting from {}".format(BATCH_SIZE*z*40), fontsize=16)
+            sub1.plot(c)
+            sub1.set_xlabel('Time')
+            sub1.set_ylabel('x,y cost')
             plt.savefig('../position/test/costs_{}_{}.png'.format(i,z), bbox_inches='tight')
             plt.close()
         except IndexError:
@@ -383,8 +388,8 @@ def main(tetrode_number=TETRODE_NUMBER):
 
         plt.savefig('../position/test/Position_{}.png'.format(i), bbox_inches='tight')
         plt.close()
-        makeVideo(prediction,actual,points_from,i)
-        plt.close()
+        # makeVideo(prediction,actual,points_from,i)
+        # plt.close()
 
 def makeVideo(prediction, actual, points_from, number):
 
