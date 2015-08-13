@@ -195,7 +195,7 @@ def main(tetrode_number=TETRODE_NUMBER):
     print(dataset['input_shape'])
 
     print("Making the model...")
-    network = model(dataset['input_shape'],dataset['output_dim'],NUM_HIDDEN_UNITS,0.8,0.5)
+    network = model(dataset['input_shape'],dataset['output_dim'],NUM_HIDDEN_UNITS,0.8,0.8)
     print("Done!")
 
     print("Setting up the training functions...")
