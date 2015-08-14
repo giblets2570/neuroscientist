@@ -281,8 +281,8 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
                 accuracies.append(accuracy)
 
 
-                this is the test to see if the autoencoder is learning how to 
-                get the same labels as caswells
+                # this is the test to see if the autoencoder is learning how to 
+                # get the same labels as caswells
                 if (i+1)%20==0:
                     acs = []
                     for j in range(dataset['caswells_dim']):
