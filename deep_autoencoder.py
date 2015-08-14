@@ -187,11 +187,11 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     rho_hat = T.mean(code_output,axis=1)
     # L = T.sum(sparsity * T.log(sparsity/rho_hat) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat)))
 
-    # reg = 0.0001*lasagne.regularization.l2(network)
+
     # this is the cost of the network when fed throught the noisey network
     train_output = lasagne.layers.get_output(network, X_batch)
     cost = lasagne.objectives.mse(train_output, y_batch) 
-    cost = cost.mean() + beta * L
+    cost = cost.mean() # + beta * L
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch)
     valid_cost = lasagne.objectives.mse(valid_output, y_batch) 
@@ -226,7 +226,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         This is the main method that sets up the experiment
     """
 
-    for tetrode_number in [9, 10, 11, 12, 13, 14, 15, 16]:
+    for tetrode_number in [9]:
 
         print("Loading the data...")
         dataset = load_data(tetrode_number)
@@ -239,7 +239,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
 
         # print("Caswell's dims: ", dataset['caswells_dim'])
         # print("Labeled test: {}".format(dataset['labeled_test']))
-        
+
         print("Making the model...")
         network = model(dataset['input_shape'],dataset['output_dim'],num_hidden_units,num_hidden_units_2,num_hidden_units_3,num_code_units)
         print("Done!")
@@ -386,7 +386,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
 
                         # plt.plot(var2)
                         # fig.tight_layout()
-                        plt.savefig('../logs/auto/fig{}_{}.png'.format(i,j), bbox_inches='tight')
+                        plt.savefig('../logs/auto/fig{}_{}.png'.format(i+1,j), bbox_inches='tight')
                         plt.close()
                         
                         ran += 1
@@ -400,7 +400,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
                     # print(dataset['y_train'].shape)
                     plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:NUM_POINTS],alpha=0.8,lw=0)
 
-                    plt.savefig('../logs/auto/tsne_{}.png'.format(i), bbox_inches='tight')
+                    plt.savefig('../logs/auto/tsne_{}.png'.format(i+1), bbox_inches='tight')
                     plt.close()
 
 
@@ -438,7 +438,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
                         plt.plot(cluster_center[0], cluster_center[1], 'o', markerfacecolor=col,
                                  markeredgecolor='k', markersize=14)
                     plt.title('Estimated number of clusters: %d' % n_clusters_)
-                    plt.savefig('../logs/auto/meanshift_{}.png'.format(i), bbox_inches='tight')
+                    plt.savefig('../logs/auto/meanshift_{}.png'.format(i+1), bbox_inches='tight')
                     plt.close()
 
                     # DBSCAN
@@ -491,7 +491,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
                                  markeredgecolor='k', markersize=4)
 
                     plt.title('Estimated number of clusters: %d' % n_clusters_)
-                    plt.savefig('../logs/auto/dbscan_{}.png'.format(i), bbox_inches='tight')
+                    plt.savefig('../logs/auto/dbscan_{}.png'.format(i+1), bbox_inches='tight')
                     plt.close()
 
                 epochsDone = epochsDone + 1
