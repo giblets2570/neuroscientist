@@ -69,6 +69,8 @@ SAVE_MODEL = False
 CONV = False
 NUM_POINTS = 100000
 
+L2_CONSTANT = 0.00001
+
 MODEL_FILENAME = "auto_models/deep/auto_network_"
 
 def load_data(tetrode_number=TETRODE_NUMBER):
@@ -141,7 +143,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2,num_hidde
 
     return l_out
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.02, beta=0.1, momentum=MOMENTUM):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.02, beta=0.1, momentum=MOMENTUM, alpha=L2_CONSTANT):
 
     """
         Method the returns the theano functions that are used in
@@ -175,7 +177,8 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     # this is the cost of the network when fed throught the noisey network
     train_output = lasagne.layers.get_output(network, X_batch)
     cost = lasagne.objectives.mse(train_output, y_batch) 
-    cost = cost.mean() + beta * L
+    l2 = lasagne.regularization.l2(X_batch)
+    cost = cost.mean() + beta * L + alpha * l2
 
     all_params = lasagne.layers.get_all_params(network)
     updates = lasagne.updates.nesterov_momentum(cost, all_params, learning_rate, momentum)
