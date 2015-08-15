@@ -296,7 +296,7 @@ def test():
 
 
 
-def organiseTetrodeData(tetrode,learned_labels=False,inp=False):
+def organiseTetrodeData(tetrode,learned_labels=False,inp=False,arg=False):
 
 	tetfilename = BASENAME+"."+str(tetrode)
 	tetheader, tetdata = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
@@ -314,6 +314,10 @@ def organiseTetrodeData(tetrode,learned_labels=False,inp=False):
 		labels=None
 		if(inp):
 			f=open('dbscan_labels/input/tetrode_{}.npy'.format(tetrode),'r')
+			labels=pickle.load(f)
+			f.close()
+		elif(arg):
+			f=open('dbscan_labels/deep/arg_tetrode_{}.npy'.format(tetrode),'r')
 			labels=pickle.load(f)
 			f.close()
 		else:
@@ -428,14 +432,14 @@ def ratemap(activationResult,labelResult):
 		plt.axis([0.0,1.0,0.0,1.0])
 		plt.show()
 
-def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=False,learned_labels=False,inp=False):
+def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=False,learned_labels=False,inp=False,arg=False):
 
 	# k = 69700
 	k = None
 	# this has to work
 	totalLabel = None
 	for n,tetrode in enumerate(tetrodes):
-		duration, result = organiseTetrodeData(tetrode,learned_labels,inp)
+		duration, result = organiseTetrodeData(tetrode,learned_labels,inp,arg)
 		k = 50*duration
 		activationResult, labelResult = newDownsampleData(duration,result,1000.0)
 		# activationResult = gaussConv(k,activationResult)
@@ -503,7 +507,7 @@ def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=Fal
 
 if __name__=="__main__":
 
-	duration, result = organiseTetrodeData(int(sys.argv[1]),learned_labels=True,inp=True)
+	duration, result = organiseTetrodeData(int(sys.argv[1]),learned_labels=True,arg=True)
 	print(result[0]['label'].shape)
 	activationResult, labelResult = newDownsampleData(duration,result,1000.0)
 	#going to test the convolution
