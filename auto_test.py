@@ -54,7 +54,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 5
+NUM_EPOCHS = 50
 BATCH_SIZE = 400
 NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
@@ -268,7 +268,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
                 n+=1
             argmax_labels.append(already[c])
 
-        print(argmax_labels)
+        print(len(already))
 
         f=open('dbscan_labels/deep/arg_tetrode_{}.npy'.format(tetrode_number),'w')
         pickle.dump(col, f)
