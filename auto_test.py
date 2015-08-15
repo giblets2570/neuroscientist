@@ -272,7 +272,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         print(len(already))
 
         f=open('dbscan_labels/deep/arg_tetrode_{}.npy'.format(tetrode_number),'w')
-        pickle.dump(col, f)
+        pickle.dump(argmax_labels, f)
         f.close()
 
         # y = set(list(d.predict(dataset['data'][0:NUM_POINTS])))
