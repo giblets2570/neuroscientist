@@ -415,8 +415,12 @@ def ratemap(activationResult,labelResult):
 			# 	rgba_colors[j][3] = 0.8
 			# else:
 			# 	rgba_colors[:, 3] = 1.0
-			rgba_colors[j][0] = 1-ar.index(labelResult[j][i])*1.0/len(ar)
-			rgba_colors[j][2] = 1-ar.index(labelResult[j][i])*1.0/len(ar)
+			if ar.index(labelResult[j][i])*1.0/len(ar) > 0.5 and ar.index(labelResult[j][i])*1.0/len(ar) < 0.8:
+				rgba_colors[j][0] = 1-ar.index(labelResult[j][i])*1.0/len(ar)
+				rgba_colors[j][2] = 1-ar.index(labelResult[j][i])*1.0/len(ar)
+			else:
+				rgba_colors[j][1] = 1-ar.index(labelResult[j][i])*1.0/len(ar)
+				rgba_colors[j][2] = 1-ar.index(labelResult[j][i])*1.0/len(ar)
 			rgba_colors[j][3] = ar.index(labelResult[j][i])*1.0/len(ar)
 
 		# print(np.mean(r))
