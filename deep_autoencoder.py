@@ -66,7 +66,7 @@ CONV = False
 
 SAVE_MODEL = True
 
-NUM_POINTS = 10000
+NUM_POINTS = 5000
 
 L2_CONSTANT = 0.00001
 
@@ -194,6 +194,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     train_output = lasagne.layers.get_output(network, X_batch)
     cost = lasagne.objectives.mse(train_output, y_batch) 
     l2 = lasagne.regularization.l2(X_batch)
+    cost = cost.mean() + beta * L #+ alpha * l2
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch)
     valid_cost = lasagne.objectives.mse(valid_output, y_batch) 
