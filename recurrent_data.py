@@ -324,7 +324,7 @@ def organiseTetrodeData(tetrode,learned_labels=False,inp=False,arg=False):
 			f=open('dbscan_labels/deep/tetrode_{}.npy'.format(tetrode),'r')
 			labels=pickle.load(f)
 			f.close()
-		print(labels)
+		print(list(set(labels)))
 		labels = np.asarray(labels)
 		upper=np.amax(labels)
 		lower=np.amin(labels)

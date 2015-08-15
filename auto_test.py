@@ -265,6 +265,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         for c in col:
             if not c in already:
                 already[c] = n
+                print(already[c])
                 n+=1
             argmax_labels.append(already[c])
 
