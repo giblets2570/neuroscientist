@@ -66,7 +66,9 @@ CONV = False
 
 SAVE_MODEL = True
 
-NUM_POINTS = 5000
+NUM_POINTS = 10000
+
+L2_CONSTANT = 0.00001
 
 def load_data(tetrode_number=TETRODE_NUMBER):
     """
@@ -158,7 +160,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2,num_hidde
 
         return l_out
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.01, beta=0.0003, momentum=MOMENTUM):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.01, beta=0.00025, momentum=MOMENTUM, alpha=L2_CONSTANT):
 
     """
         Method the returns the theano functions that are used in 
@@ -191,7 +193,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     # this is the cost of the network when fed throught the noisey network
     train_output = lasagne.layers.get_output(network, X_batch)
     cost = lasagne.objectives.mse(train_output, y_batch) 
-    cost = cost.mean()  + beta * L
+    l2 = lasagne.regularization.l2(X_batch)
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch)
     valid_cost = lasagne.objectives.mse(valid_output, y_batch) 
