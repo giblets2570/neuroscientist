@@ -196,7 +196,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     train_output = lasagne.layers.get_output(network, X_batch)
     cost = lasagne.objectives.mse(train_output, y_batch)
     l2 = lasagne.regularization.l2(X_batch)
-    cost = cost.mean() + beta * L + alpha * l2
+    cost = cost.mean() + beta * L #+ alpha * l2
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch)
     valid_cost = lasagne.objectives.mse(valid_output, y_batch) 
@@ -517,7 +517,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=2
         if(LOG_EXPERIMENT):
             print("Logging the experiment details...")
             log = dict(
-                NET_TYPE = "Auto encoder 2 hidden 1 code 300 200 100",
+                NET_TYPE = "Auto encoder 1 hidden 1 code 100 50",
                 TETRODE_NUMBER = tetrode_number,
                 BASENAME = BASENAME,
                 NUM_EPOCHS = epochsDone,
