@@ -162,15 +162,15 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
 
         return l_out
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.01, beta=0.0002, momentum=MOMENTUM, alpha=L2_CONSTANT):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.01, beta=0.00015, momentum=MOMENTUM, alpha=L2_CONSTANT):
 
     """
-        Method the returns the theano functions that are used in 
+        Method the returns the theano functions that are used in
         training and testing. These are the train and predict functions.
         The predict function returns out output of the network.
     """
 
-    # symbolic variables 
+    # symbolic variables
     X_batch = T.matrix()
     y_batch = T.matrix()
 
@@ -180,7 +180,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     code_layer = layers[num_layers/2]
 
-    # code output 
+    # code output
     code_output = lasagne.layers.get_output(code_layer, X_batch, deterministic=True)
 
     # l = T.sub(1,code_output)
@@ -199,8 +199,8 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     cost = cost.mean() + beta * L #+ alpha * l2
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch)
-    valid_cost = lasagne.objectives.mse(valid_output, y_batch) 
-    valid_cost = valid_cost.mean() 
+    valid_cost = lasagne.objectives.mse(valid_output, y_batch)
+    valid_cost = valid_cost.mean()
 
     # test the performance of the netowork without noise
     pred = lasagne.layers.get_output(network, X_batch, deterministic=True)
@@ -273,7 +273,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=2
                 for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
                     cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
                     costs.append(cost)
-                
+
                 for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
                     cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
                     valid_costs.append(cost)

@@ -160,7 +160,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2,num_hidde
 
         return l_out
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.01, beta=0.00025, momentum=MOMENTUM, alpha=L2_CONSTANT):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.01, beta=0.0002, momentum=MOMENTUM, alpha=L2_CONSTANT):
 
     """
         Method the returns the theano functions that are used in 
@@ -178,7 +178,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     code_layer = layers[num_layers/2]
 
-    # code output 
+    # code outputs
     code_output = lasagne.layers.get_output(code_layer, X_batch, deterministic=True)
 
     # l = T.sub(1,code_output)
@@ -192,13 +192,13 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     # this is the cost of the network when fed throught the noisey network
     train_output = lasagne.layers.get_output(network, X_batch)
-    cost = lasagne.objectives.mse(train_output, y_batch) 
+    cost = lasagne.objectives.mse(train_output, y_batch)
     l2 = lasagne.regularization.l2(X_batch)
     cost = cost.mean() + beta * L #+ alpha * l2
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch)
-    valid_cost = lasagne.objectives.mse(valid_output, y_batch) 
-    valid_cost = valid_cost.mean() 
+    valid_cost = lasagne.objectives.mse(valid_output, y_batch)
+    valid_cost = valid_cost.mean()
 
     # test the performance of the netowork without noise
     pred = lasagne.layers.get_output(network, X_batch, deterministic=True)
