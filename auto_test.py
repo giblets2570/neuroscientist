@@ -215,7 +215,7 @@ def makeVideo(X_2d,dataset):
     animation = mpy.VideoClip(make_frame, duration = duration)
     animation.write_gif("code_tnse.gif", fps=fps)
 
-def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=500,num_hidden_units_2=300,num_hidden_units_3=200,num_code_units=50):
+def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=300,num_hidden_units_3=200,num_code_units=50):
     """
         This is the main method that sets up the experiment
     """
