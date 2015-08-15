@@ -408,6 +408,7 @@ def ratemap(activationResult,labelResult):
 		# heatmap = plt.pcolor(labelResult[:,i])
 		# print(heatmap)
 		print("Label {}".format(i+1))
+		ps = []
 		for j in range(x.shape[0]):
 			# r[j] = labelResult[j][i]
 
@@ -420,14 +421,18 @@ def ratemap(activationResult,labelResult):
 			# 	rgba_colors[j][3] = 0.8
 			# else:
 			# 	rgba_colors[:, 3] = 1.0
-			if ar.index(labelResult[j][i])*1.0/len(ar) > 0.5 and ar.index(labelResult[j][i])*1.0/len(ar) < 0.8:
-				rgba_colors[j][0] = 1-ar.index(labelResult[j][i])*1.0/len(ar)
-				rgba_colors[j][2] = 1-ar.index(labelResult[j][i])*1.0/len(ar)
-			else:
-				rgba_colors[j][1] = 1-ar.index(labelResult[j][i])*1.0/len(ar)
-				rgba_colors[j][2] = 1-ar.index(labelResult[j][i])*1.0/len(ar)
-			rgba_colors[j][3] = ar.index(labelResult[j][i])*1.0/len(ar)
-
+			p = ar.index(labelResult[j][i])*1.0/(len(ar)-1)
+			# ps.append(p)
+			if p > 0.6 and p < 0.9:
+				rgba_colors[j][0] = 1-p
+				rgba_colors[j][2] = 1-p
+				rgba_colors[j][3] = p
+			elif p>=0.9:
+				rgba_colors[j][1] = 1-p
+				rgba_colors[j][2] = 1-p
+				rgba_colors[j][3] = p
+			# print("p: {}, color: {}".format(p,rgba_colors[j]))
+		# print(max(ps))
 		# print(np.mean(r))
 		fig = plt.scatter(x,y,c=rgba_colors,lw=0)
 		plt.axis([0.0,1.0,0.0,1.0])
