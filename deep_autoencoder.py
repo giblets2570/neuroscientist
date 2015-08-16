@@ -194,7 +194,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     train_output = lasagne.layers.get_output(network, X_batch)
     cost = lasagne.objectives.mse(train_output, y_batch)
     l2 = lasagne.regularization.l2(X_batch)
-    cost = cost.mean() + beta * L #+ alpha * l2
+    cost = cost.mean() #+ beta * L #+ alpha * l2
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch)
     valid_cost = lasagne.objectives.mse(valid_output, y_batch)
@@ -481,7 +481,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
 
                     ##############################################################################
                     # Compute DBSCAN
-                    db = DBSCAN(eps=1.5, min_samples=40).fit(codes_2d)
+                    db = DBSCAN(eps=1.5, min_samples=NUM_POINTS/100).fit(codes_2d)
                     core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
                     core_samples_mask[db.core_sample_indices_] = True
                     labels = db.labels_
