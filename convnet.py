@@ -108,10 +108,10 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
 
         l_conv1D_1 = lasagne.layers.Conv1DLayer(
             l_in,
-            num_filters=32,
+            num_filters=64,
             filter_size=(5,),
             stride=1,
-            nonlinearity=lasagne.nonlinearities.sigmoid,
+            nonlinearity=lasagne.nonlinearities.rectify,
         )
 
         # l_pool1D_1 = lasagne.layers.FeaturePoolLayer(
