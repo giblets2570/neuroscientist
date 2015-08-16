@@ -113,7 +113,7 @@ def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_s
 
         l_conv2D_1 = lasagne.layers.Conv2DLayer(
             l_in, 
-            num_filters=16,
+            num_filters=32,
             filter_size=filter_size, 
             stride=(1, 1), 
             border_mode="valid", 
@@ -121,36 +121,36 @@ def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_s
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        l_pool2D_1 = lasagne.layers.MaxPool2DLayer(
-            l_conv2D_1, 
-            pool_size=pool_size, 
-            stride=None, 
-            pad=0, 
-            ignore_border=False,
-        )
-
-        # l_pool2D_1 = lasagne.layers.FeaturePoolLayer(
+        # l_pool2D_1 = lasagne.layers.MaxPool2DLayer(
         #     l_conv2D_1, 
         #     pool_size=pool_size, 
+        #     stride=None, 
+        #     pad=0, 
+        #     ignore_border=False,
         # )
 
-        l_conv2D_2 = lasagne.layers.Conv2DLayer(
-            l_pool2D_1, 
-            num_filters=32,
-            filter_size=filter_size_2, 
-            stride=(1, 1), 
-            border_mode="valid", 
-            untie_biases=False, 
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # # l_pool2D_1 = lasagne.layers.FeaturePoolLayer(
+        # #     l_conv2D_1, 
+        # #     pool_size=pool_size, 
+        # # )
 
-        l_pool2D_2 = lasagne.layers.MaxPool2DLayer(
-            l_conv2D_2, 
-            pool_size=pool_size_2, 
-            stride=None, 
-            pad=0, 
-            ignore_border=False,
-        )
+        # l_conv2D_2 = lasagne.layers.Conv2DLayer(
+        #     l_pool2D_1, 
+        #     num_filters=32,
+        #     filter_size=filter_size_2, 
+        #     stride=(1, 1), 
+        #     border_mode="valid", 
+        #     untie_biases=False, 
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
+
+        # l_pool2D_2 = lasagne.layers.MaxPool2DLayer(
+        #     l_conv2D_2, 
+        #     pool_size=pool_size_2, 
+        #     stride=None, 
+        #     pad=0, 
+        #     ignore_border=False,
+        # )
 
         # # l_pool2D_2 = lasagne.layers.FeaturePoolLayer(
         # #     l_conv2D_2, 
@@ -158,8 +158,8 @@ def model(input_shape, output_dim, filter_size, pool_size, filter_size_2, pool_s
         # # )
 
         l_hidden_1 = lasagne.layers.DenseLayer(
-            l_pool2D_2,
-            num_units=num_hidden_units_5,
+            l_conv2D_1,
+            num_units=num_hidden_units_1,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
@@ -404,11 +404,11 @@ if __name__ == '__main__':
     # filter_sizes = [(4,1),(4,3),(4,5),(4,7)]
 
     # pool_sizes = [(1,2),(1,4),(1,8)]
-    filter_size = (3,1)
+    filter_size = (4,1)
     pool_size = (2,1)
     filter_size_2 = (1,5)
     pool_size_2 = (1,2)
-    num_hidden_units_1 = 800
+    num_hidden_units_1 = 100
     num_hidden_units_2 = 500
     num_hidden_units_3 = 300
     num_hidden_units_4 = 200
