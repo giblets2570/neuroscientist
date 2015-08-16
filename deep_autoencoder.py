@@ -66,7 +66,7 @@ CONV = False
 
 SAVE_MODEL = True
 
-NUM_POINTS = 5000
+NUM_POINTS = 10000
 
 L2_CONSTANT = 0.00001
 
@@ -481,13 +481,14 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
 
                     ##############################################################################
                     # Compute DBSCAN
-                    db = DBSCAN(eps=1.5, min_samples=5).fit(codes_2d)
+                    db = DBSCAN(eps=1.5, min_samples=40).fit(codes_2d)
                     core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
                     core_samples_mask[db.core_sample_indices_] = True
                     labels = db.labels_
 
                     # Number of clusters in labels, ignoring noise if present.
                     n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+
 
                     print('Estimated number of clusters: %d' % n_clusters_)
                     print("Homogeneity: %0.3f" % metrics.homogeneity_score(dataset['y_train_labels'][:NUM_POINTS], labels))
@@ -507,20 +508,22 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
                     # Black removed and is used for noise instead.
                     unique_labels = set(labels)
                     colors = plt.cm.Spectral(np.linspace(0, 1, len(unique_labels)))
-                    for k, col in zip(unique_labels, colors):
-                        if k == -1:
-                            # Black used for noise.
-                            col = 'k'
+                    # for k, col in zip(unique_labels, colors):
+                    #     if k == -1:
+                    #         # Black used for noise.
+                    #         col = 'k'
 
-                        class_member_mask = (labels == k)
+                    #     class_member_mask = (labels == k)
 
-                        xy = X[class_member_mask & core_samples_mask]
-                        plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=col,
-                                 markeredgecolor='k', markersize=7)
+                    #     xy = X[class_member_mask & core_samples_mask]
+                    #     plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=col,
+                    #              markeredgecolor='k', markersize=7)
 
-                        xy = X[class_member_mask & ~core_samples_mask]
-                        plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=col,
-                                 markeredgecolor='k', markersize=4)
+                    #     xy = X[class_member_mask & ~core_samples_mask]
+                    #     plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=col,
+                    #              markeredgecolor='k', markersize=4)
+                    
+                    plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
 
                     plt.title('Estimated number of clusters: %d' % n_clusters_)
                     plt.savefig('../logs/auto/dbscan_{}.png'.format(i+1), bbox_inches='tight')
