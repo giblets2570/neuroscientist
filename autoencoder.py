@@ -68,7 +68,7 @@ SAVE_MODEL = True
 
 NUM_POINTS = 10000
 
-L2_CONSTANT = 0.00001
+L2_CONSTANT = 0.0000
 
 MODEL_FILENAME = "auto_models/deep/auto_network_"
 
@@ -162,7 +162,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2, num_code
 
         return l_out
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.01, beta=0.0002, momentum=MOMENTUM, alpha=L2_CONSTANT):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.01, beta=0.00005, momentum=MOMENTUM, alpha=L2_CONSTANT):
 
     """
         Method the returns the theano functions that are used in

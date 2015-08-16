@@ -279,11 +279,11 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
 
         # print(y)
 
-        # activations_1 = training['activations_1'](dataset['data'][0:NUM_POINTS])
-        # activations_2 = training['activations_2'](dataset['data'][0:NUM_POINTS])
-        # codes = training['code'](dataset['data'][0:NUM_POINTS])
-        # # print(codes.shape)
-        # # codes_2d = bh_sne(codes)
+        activations_1 = training['activations_1'](dataset['data'][0:NUM_POINTS])
+        activations_2 = training['activations_2'](dataset['data'][0:NUM_POINTS])
+        codes = training['code'](dataset['data'][0:NUM_POINTS])
+        # print(codes.shape)
+        # codes_2d = bh_sne(codes)
 
         # for k in range(3):
         #     print(k)
@@ -343,79 +343,81 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         #     # pickle.dump(labels, f)
         #     # f.close()
 
-        # codes_2d = bh_sne(np.asarray(codes,dtype=np.float64))
+        codes_2d = bh_sne(np.asarray(codes,dtype=np.float64))
 
+        plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=col, alpha=0.8,lw=0)
+        plt.savefig('dbscan_labels/deep/argmax_{}.png'.format(tetrode_number), bbox_inches='tight')
+        plt.close()
 
-        # plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=col, alpha=0.8,lw=0)
-        # plt.savefig('dbscan_labels/deep/argmax_{}.png'.format(tetrode_number), bbox_inches='tight')
-        # plt.close()
+        # d = DPGMM(n_components=10, covariance_type='full')
+        d = DPGMM(n_components=15)
 
-        # # d = DPGMM(n_components=10, covariance_type='full')
-        # d = DPGMM(n_components=15)
+        d.fit(codes_2d)
 
-        # d.fit(codes_2d)
+        hdp = d.predict_proba(codes_2d)
 
-        # hdp = d.predict_proba(codes_2d)
+        hdp_1d = [np.argmax(z) for z in hdp]
 
-        # hdp_1d = [np.argmax(z) for z in hdp]
+        print(set(list(hdp_1d)))
 
-        # print(set(list(hdp_1d)))
+        plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=hdp_1d, alpha=0.8,lw=0)
+        plt.savefig('dbscan_labels/deep/hdp_{}.png'.format(tetrode_number), bbox_inches='tight')
+        plt.close()
 
-        # plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=hdp_1d, alpha=0.8,lw=0)
-        # plt.savefig('dbscan_labels/deep/hdp_{}.png'.format(tetrode_number), bbox_inches='tight')
-        # plt.close()
+        # m = TSNE(n_components=2, random_state=0)
 
-        # # m = TSNE(n_components=2, random_state=0)
+        # codes_2d = m.fit_transform(codes[:NUM_POINTS])
+        # activations_1_2d = bh_sne(activations_1)
+        # activations_2_2d = bh_sne(activations_2)
 
-        # # codes_2d = m.fit_transform(codes[:NUM_POINTS])
-        # # activations_1_2d = bh_sne(activations_1)
-        # # activations_2_2d = bh_sne(activations_2)
+        plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
+        plt.savefig('dbscan_labels/deep/tsne_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
+        plt.close()
 
-        # plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
-        # plt.savefig('dbscan_labels/deep/tsne_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
-        # plt.close()
+        # This is where the code for the video will go
+        ##############################################################################
+        # Compute DBSCAN
+        db = None
+        core_samples_mask = None
+        labels = None
 
-        # # This is where the code for the video will go
-        # ##############################################################################
-        # # Compute DBSCAN
-        # db = None
-        # core_samples_mask = None
-        # labels = None
+        num_labels = 0
+        eps=1.5
+        diff = 0.1
+        min_samples = 2*codes_2d.shape[0]/1000
+        print("Min samples: {}".format(min_samples))
+        # while(num_labels < 10 or num_labels>25):
+        print("Getting the labels: {}, eps: {}".format(num_labels,eps))
+        db = DBSCAN(eps=eps, min_samples=min_samples).fit(codes_2d)
+        # db = DBSCAN().fit(codes_2d)
+        core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
+        core_samples_mask[db.core_sample_indices_] = True
+        labels = db.labels_
+        num_labels = np.amax(labels)
+            # if(eps <= 2*diff):
+            #     diff *= 0.1
+            # if(num_labels < 10):
+            #     eps -= diff
+            # if(num_labels > 25):
+            #     eps += 0.5*diff
 
-        # num_labels = 0
-        # eps=1.0
-        # diff = 0.1
-        # # while(num_labels < 10 or num_labels>25):
-        # print("Getting the labels: {}, eps: {}".format(num_labels,eps))
-        # db = DBSCAN(eps=eps, min_samples=15).fit(codes_2d)
-        # core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
-        # core_samples_mask[db.core_sample_indices_] = True
-        # labels = db.labels_
-        # num_labels = np.amax(labels)
-        #     # if(eps <= 2*diff):
-        #     #     diff *= 0.1
-        #     # if(num_labels < 10):
-        #     #     eps -= diff
-        #     # if(num_labels > 25):
-        #     #     eps += 0.5*diff
+        print("Num learned labels: {}".format(num_labels))
 
-        # print("Num learned labels: {}".format(num_labels))
+        f=open('dbscan_labels/deep/tetrode_{}.npy'.format(tetrode_number),'w')
+        pickle.dump(labels, f)
+        f.close()
 
-        # f=open('dbscan_labels/deep/tetrode_{}.npy'.format(tetrode_number),'w')
-        # pickle.dump(labels, f)
-        # f.close()
-
-        # plt.title('Estimated number of clusters: {}'.format(np.amax(labels)+1))
-        # plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
-        # plt.savefig('dbscan_labels/deep/dbscan_tsne_{}.png'.format(tetrode_number), bbox_inches='tight')
-        # plt.close()
+        plt.title('Estimated number of clusters: {}'.format(np.amax(labels)+1))
+        plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
+        plt.savefig('dbscan_labels/deep/dbscan_tsne_{}.png'.format(tetrode_number), bbox_inches='tight')
+        plt.close()
 
         # num_labels = 0
         # eps=0.1
         # diff = 0.01
         # while(num_labels < 10):
         #     print("Getting the labels: {}, eps: {}".format(num_labels,eps))
-        #     db = DBSCAN(eps=eps, min_samples=10).fit(codes[:15000])
+        #     db = DBSCAN(eps=eps, min_samples=40).fit(codes[:15000])
         #     core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
         #     core_samples_mask[db.core_sample_indices_] = True
         #     labels = db.labels_
