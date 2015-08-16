@@ -395,14 +395,39 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
                         # fig.tight_layout()
                         plt.savefig('../logs/auto/fig{}_{}.png'.format(i+1,j), bbox_inches='tight')
                         plt.close()
-                        
+
                         ran += 1
                     # break
 
                 if (i+1)%100==0:
                     codes = training['code'](dataset['X_train'][0:NUM_POINTS])
                     print(codes.shape)
+
+                    col = [np.argmax(code) for code in codes]
+                    num_col = len(list(set(col)))
+                    already = {}
+                    argmax_labels = []
+                    n = 0
+                    for c in col:
+                        if not c in already:
+                            already[c] = n
+                            print(already[c])
+                            n+=1
+                        argmax_labels.append(already[c])
+
+                    print(len(already))
+
+                    # f=open('dbscan_labels/deep/arg_tetrode_{}.npy'.format(tetrode_number),'w')
+                    # pickle.dump(argmax_labels, f)
+                    # f.close()
+
+                    
                     codes_2d = bh_sne(np.asarray(codes, dtype=np.float64))
+
+                    plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=col[0:NUM_POINTS],alpha=0.8,lw=0)
+
+                    plt.savefig('../logs/auto/argmax_{}.png'.format(i+1), bbox_inches='tight')
+                    plt.close()
 
                     # print(dataset['y_train'].shape)
                     plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['y_train_labels'][0:NUM_POINTS],alpha=0.8,lw=0)
