@@ -108,7 +108,7 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
 
         l_conv1D_1 = lasagne.layers.Conv1DLayer(
             l_in,
-            num_filters=64,
+            num_filters=32,
             filter_size=(5,),
             stride=1,
             nonlinearity=lasagne.nonlinearities.rectify,
@@ -121,7 +121,7 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
 
         l_conv1D_2 = lasagne.layers.Conv1DLayer(
             l_conv1D_1,
-            num_filters=64,
+            num_filters=32,
             filter_size=(5,),
             stride=1,
             nonlinearity=lasagne.nonlinearities.rectify,
