@@ -37,7 +37,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 100
+NUM_EPOCHS = 1000000
 BATCH_SIZE = 400
 NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
@@ -273,5 +273,5 @@ def main(tetrode_number=TETRODE_NUMBER):
 
 
 if __name__ == '__main__':
-    for i in range(8,16):
-        main(i+1)
+    
+    main(9)
