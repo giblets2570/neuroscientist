@@ -111,7 +111,7 @@ def model(input_shape, output_dim, num_hidden_units,batch_size=BATCH_SIZE):
             num_filters=32,
             filter_size=(5,),
             stride=1,
-            nonlinearity=lasagne.nonlinearities.rectify,
+            nonlinearity=lasagne.nonlinearities.sigmoid,
         )
 
         # l_pool1D_1 = lasagne.layers.FeaturePoolLayer(
