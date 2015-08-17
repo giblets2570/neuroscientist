@@ -85,7 +85,15 @@ def formatData(tetrodeNumber,basename,twoD=False,timed=False):
 
 
 if __name__=="__main__":
-	trX, tvX, teX, trY, tvY, teY = formatData(9,BASENAME)
+	trX, tvX, teX, trY, tvY, teY = formatData(10,BASENAME)
+
+	datapoint = teX[0]
+
+	plt.plot(datapoint)
+	plt.title("Example of neural spike")
+	plt.axis([0,200,-1,1])
+	plt.grid(True)
+	plt.show()
 
 	# print(trX.shape)
 	# print(trX[1])

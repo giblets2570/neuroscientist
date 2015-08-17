@@ -5,7 +5,7 @@
 from __future__ import print_function
 
 import matplotlib
-matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab!
+# matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab!
 from random import randint
 import gzip
 import itertools
@@ -83,12 +83,29 @@ def load_data(tetrode_number=TETRODE_NUMBER):
     x, y = getXY()
     print("Done!")
 
+    r={}
+    for x,y in zip(data,labels):
+        # print("x: {}".format(x))
+        # print("y: {}".format(y))
+        _y = list(y)
+        if int(_y.index(1.0)) not in r:
+            r[int(_y.index(1.0))]=[x]
+        else:
+            r[int(_y.index(1.0))].append(x)
+
+    for key in r:
+        r[key] = np.asarray(r[key])
+
+
+    labels = np.asarray([np.argmax(y) for y in labels])
     return dict(
         data=data,
-        labels=[np.argmax(y) for y in labels],
+        labels=labels,
         timed_activations=timed_activations,
         x=x,
         y=y,
+        r=r,
+        caswells_dim=labels.shape[-1],
         freq=50.0
     )
 
@@ -265,15 +282,15 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         for c in col:
             if not c in already:
                 already[c] = n
-                print(already[c])
+                # print(already[c])
                 n+=1
             argmax_labels.append(already[c])
 
-        print(len(already))
+        # print(len(already))
 
-        f=open('dbscan_labels/deep/arg_tetrode_{}.npy'.format(tetrode_number),'w')
-        pickle.dump(argmax_labels, f)
-        f.close()
+        # f=open('dbscan_labels/test/arg_tetrode_{}.npy'.format(tetrode_number),'w')
+        # pickle.dump(argmax_labels, f)
+        # f.close()
 
         # y = set(list(d.predict(dataset['data'][0:NUM_POINTS])))
 
@@ -302,7 +319,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         #     print(set(list(hdp_1d)))
 
         #     plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=hdp_1d, alpha=0.8,lw=0)
-        #     plt.savefig('dbscan_labels/deep/hdp_{}_{}.png'.format(tetrode_number,k), bbox_inches='tight')
+        #     plt.savefig('dbscan_labels/test/hdp_{}_{}.png'.format(tetrode_number,k), bbox_inches='tight')
         #     plt.close()
 
         #     # m = TSNE(n_components=2, random_state=0)
@@ -312,7 +329,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         #     # activations_2_2d = bh_sne(activations_2)
 
         #     plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS][:(k+1)*12000],alpha=0.8,lw=0)
-        #     plt.savefig('dbscan_labels/deep/tsne_codes_{}_{}.png'.format(tetrode_number,k), bbox_inches='tight')
+        #     plt.savefig('dbscan_labels/test/tsne_codes_{}_{}.png'.format(tetrode_number,k), bbox_inches='tight')
         #     plt.close()
 
         #     # This is where the code for the video will go
@@ -336,17 +353,17 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
 
         #     plt.title('Estimated number of clusters: {}'.format(np.amax(labels)))
         #     plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS][:(k+1)*12000],lw=0)
-        #     plt.savefig('dbscan_labels/deep/dbscan_codes_{}_{}.png'.format(tetrode_number,k), bbox_inches='tight')
+        #     plt.savefig('dbscan_labels/test/dbscan_codes_{}_{}.png'.format(tetrode_number,k), bbox_inches='tight')
         #     plt.close()
 
-        #     # f=open('dbscan_labels/deep/tetrode_{}.npy'.format(tetrode_number),'w')
+        #     # f=open('dbscan_labels/test/tetrode_{}.npy'.format(tetrode_number),'w')
         #     # pickle.dump(labels, f)
         #     # f.close()
 
         codes_2d = bh_sne(np.asarray(codes,dtype=np.float64))
 
         plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=col, alpha=0.8,lw=0)
-        plt.savefig('dbscan_labels/deep/argmax_{}.png'.format(tetrode_number), bbox_inches='tight')
+        plt.savefig('dbscan_labels/test/argmax_{}.png'.format(tetrode_number), bbox_inches='tight')
         plt.close()
 
         # d = DPGMM(n_components=10, covariance_type='full')
@@ -361,7 +378,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         print(set(list(hdp_1d)))
 
         plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=hdp_1d, alpha=0.8,lw=0)
-        plt.savefig('dbscan_labels/deep/hdp_{}.png'.format(tetrode_number), bbox_inches='tight')
+        plt.savefig('dbscan_labels/test/hdp_{}.png'.format(tetrode_number), bbox_inches='tight')
         plt.close()
 
         # m = TSNE(n_components=2, random_state=0)
@@ -371,7 +388,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         # activations_2_2d = bh_sne(activations_2)
 
         plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
-        plt.savefig('dbscan_labels/deep/tsne_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
+        plt.savefig('dbscan_labels/test/tsne_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
         plt.close()
 
         # This is where the code for the video will go
@@ -383,17 +400,31 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
 
         num_labels = 0
         eps=1.5
-        diff = 0.1
+        diff = 1
         min_samples = 2*codes_2d.shape[0]/1000
-        print("Min samples: {}".format(min_samples))
-        # while(num_labels < 10 or num_labels>25):
-        print("Getting the labels: {}, eps: {}".format(num_labels,eps))
-        db = DBSCAN(eps=eps, min_samples=min_samples).fit(codes_2d)
-        # db = DBSCAN().fit(codes_2d)
-        core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
-        core_samples_mask[db.core_sample_indices_] = True
-        labels = db.labels_
-        num_labels = np.amax(labels)
+
+        while diff != 0:
+
+            print("Min samples: {}".format(min_samples))
+            # while(num_labels < 10 or num_labels>25):
+            print("Getting the labels: {}, eps: {}".format(num_labels,eps))
+            db = DBSCAN(eps=eps, min_samples=min_samples).fit(codes_2d)
+            # db = DBSCAN().fit(codes_2d)
+            core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
+            core_samples_mask[db.core_sample_indices_] = True
+            labels = db.labels_
+            num_labels = np.amax(labels)
+
+            plt.title('Estimated number of clusters: {}'.format(np.amax(labels)+1))
+            plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
+            plt.show()
+            try:
+                diff = input("Input the change in min samples: ")
+                min_samples = min_samples+diff
+            except SyntaxError:
+                break
+
+
             # if(eps <= 2*diff):
             #     diff *= 0.1
             # if(num_labels < 10):
@@ -401,16 +432,16 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
             # if(num_labels > 25):
             #     eps += 0.5*diff
 
-        print("Num learned labels: {}".format(num_labels))
+        # print("Num learned labels: {}".format(num_labels))
 
-        f=open('dbscan_labels/deep/tetrode_{}.npy'.format(tetrode_number),'w')
-        pickle.dump(labels, f)
-        f.close()
+        # f=open('dbscan_labels/test/tetrode_{}.npy'.format(tetrode_number),'w')
+        # pickle.dump(labels, f)
+        # f.close()
 
-        plt.title('Estimated number of clusters: {}'.format(np.amax(labels)+1))
-        plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
-        plt.savefig('dbscan_labels/deep/dbscan_tsne_{}.png'.format(tetrode_number), bbox_inches='tight')
-        plt.close()
+        # plt.title('Estimated number of clusters: {}'.format(np.amax(labels)+1))
+        # plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
+        # plt.savefig('dbscan_labels/test/dbscan_tsne_{}.png'.format(tetrode_number), bbox_inches='tight')
+        # plt.close()
 
         # num_labels = 0
         # eps=0.1
@@ -430,7 +461,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
 
         # plt.title('Estimated number of clusters: {}'.format(np.amax(labels)))
         # plt.scatter(codes_2d[:15000, 0], codes_2d[:15000, 1], c=labels[0:NUM_POINTS][:15000],lw=0)
-        # plt.savefig('dbscan_labels/deep/dbscan_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
+        # plt.savefig('dbscan_labels/test/dbscan_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
         # plt.close()
 
 if __name__ == '__main__':
