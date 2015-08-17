@@ -134,26 +134,26 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2,num_hidde
         print(shape)
         l_in = lasagne.layers.InputLayer(shape=shape)
 
-        l_hidden_1 = lasagne.layers.DenseLayer(
-            l_in,
-            num_units=num_hidden_units,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_1 = lasagne.layers.DenseLayer(
+        #     l_in,
+        #     num_units=num_hidden_units,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
         l_code_layer = lasagne.layers.DenseLayer(
-            l_hidden_1,
+            l_in,
             num_units=num_code_units,
             nonlinearity=None,
             )
 
-        l_hidden_6 = lasagne.layers.DenseLayer(
-            l_code_layer,
-            num_units=num_hidden_units,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            )
+        # l_hidden_6 = lasagne.layers.DenseLayer(
+        #     l_code_layer,
+        #     num_units=num_hidden_units,
+        #     nonlinearity=lasagne.nonlinearities.rectify,
+        #     )
 
         l_out = lasagne.layers.DenseLayer(
-            l_hidden_6,
+            l_code_layer,
             num_units=output_dim,
             nonlinearity=None,
             )
@@ -224,7 +224,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
         L_penalty=L_penalty
     )
 
-def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=300,num_hidden_units_3=200,num_code_units=50):
+def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=300,num_hidden_units_3=200,num_code_units=2):
     """
         This is the main method that sets up the experiment
     """
@@ -545,7 +545,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         if(LOG_EXPERIMENT):
             print("Logging the experiment details...")
             log = dict(
-                NET_TYPE = "Auto encoder 2 hidden 1 code 300 200 100",
+                NET_TYPE = "Afdsafsaf",
                 TETRODE_NUMBER = tetrode_number,
                 BASENAME = BASENAME,
                 NUM_EPOCHS = epochsDone,
