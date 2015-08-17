@@ -321,7 +321,7 @@ def organiseTetrodeData(tetrode,learned_labels=False,inp=False,arg=False):
 			labels=pickle.load(f)
 			f.close()
 		else:
-			f=open('dbscan_labels/deep/tetrode_{}.npy'.format(tetrode),'r')
+			f=open('dbscan_labels/test/tetrode_{}.npy'.format(tetrode),'r')
 			labels=pickle.load(f)
 			f.close()
 		print(list(set(labels)))
@@ -391,7 +391,7 @@ def mapPosToActivations(activationResult,labelResult):
 		result.append(dict(pos=[x[n],y[n]],activation=activationResult[n],label=labelResult[n]))
 	return result
 
-def ratemap(activationResult,labelResult):
+def ratemap(activationResult,labelResult,tetrode):
 	x,y = getXY()
 	print(activationResult.shape)
 	print(labelResult.shape)
@@ -436,7 +436,9 @@ def ratemap(activationResult,labelResult):
 		# print(np.mean(r))
 		fig = plt.scatter(x,y,c=rgba_colors,lw=0)
 		plt.axis([0.0,1.0,0.0,1.0])
-		plt.show()
+		plt.savefig('ratemaps/tetrode_{}_dbscan_{}.png'.format(tetrode,i), bbox_inches='tight')
+		plt.close()
+		# plt.show()
 
 def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=False,learned_labels=False,inp=False,arg=False):
 
@@ -512,8 +514,9 @@ def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=Fal
 	return trX, tvX, teX, trY, tvY, teY
 
 if __name__=="__main__":
-
-	duration, result = organiseTetrodeData(int(sys.argv[1]),learned_labels=True,arg=True)
+	tetrode = int(sys.argv[1])
+	# duration, result = organiseTetrodeData(int(sys.argv[1]),learned_labels=True,arg=True)
+	duration, result = organiseTetrodeData(tetrode, learned_labels=True)
 	print(result[0]['label'].shape)
 	activationResult, labelResult = newDownsampleData(duration,result,1000.0)
 	#going to test the convolution
@@ -525,7 +528,7 @@ if __name__=="__main__":
 	# activationResult = normalizeMatrix(activationResult)
 	labelResult = normalizeMatrix(labelResult)
 
-	ratemap(activationResult, labelResult)
+	ratemap(activationResult, labelResult, tetrode)
 
 	# trX, tvX, teX, trY, tvY, teY = formatData()
 

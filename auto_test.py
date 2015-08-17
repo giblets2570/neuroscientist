@@ -104,7 +104,7 @@ def load_data(tetrode_number=TETRODE_NUMBER):
         timed_activations=timed_activations,
         x=x,
         y=y,
-        r=r,
+        labeled_test=r,
         caswells_dim=labels.shape[-1],
         freq=50.0
     )
@@ -148,7 +148,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2,num_hidde
 
     return l_out
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.02, beta=0.1, momentum=MOMENTUM, alpha=L2_CONSTANT):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.01, beta=0.0001, momentum=MOMENTUM, alpha=L2_CONSTANT):
 
     """
         Method the returns the theano functions that are used in
@@ -241,7 +241,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
     network = model((None,200),200,num_hidden_units,num_hidden_units_2,num_hidden_units_3,num_code_units)
     print("Done!")
 
-    for tetrode_number in [9,10,11,12,13,14,15,16]:
+    for tetrode_number in [11,12,13,14,15,16]:
 
         print("Loading the model parameters from {}".format(MODEL_FILENAME+str(tetrode_number)))
         f = open(MODEL_FILENAME+str(tetrode_number),'r')
@@ -407,13 +407,13 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
 
             print("Min samples: {}".format(min_samples))
             # while(num_labels < 10 or num_labels>25):
-            print("Getting the labels: {}, eps: {}".format(num_labels,eps))
             db = DBSCAN(eps=eps, min_samples=min_samples).fit(codes_2d)
             # db = DBSCAN().fit(codes_2d)
             core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
             core_samples_mask[db.core_sample_indices_] = True
             labels = db.labels_
             num_labels = np.amax(labels)
+            print("Getting the labels: {}, eps: {}".format(num_labels,eps))
 
             plt.title('Estimated number of clusters: {}'.format(np.amax(labels)+1))
             plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
@@ -423,6 +423,44 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
                 min_samples = min_samples+diff
             except SyntaxError:
                 break
+
+        acs = []
+        nums = []
+        for j in range(dataset['caswells_dim']):
+            # print(dataset['labeled_test'][j].shape)
+            try:
+                codes = training['code'](dataset['labeled_test'][j])
+                format_codes = []
+                for code in codes:
+                    format_codes.append(np.argmax(code))
+
+                prev = sorted(format_codes)[0]
+                # print(sorted(format_codes))
+                k = 0
+                same = [1]
+                for code in sorted(format_codes)[1:]:
+                    if(code == prev):
+                        same[k] = same[k] + 1
+                    else:
+                        k+=1
+                        same.append(1)
+                        prev = code
+
+                same = np.asarray(same)
+                # print(same,np.argmax(same),same[np.argmax(same)],np.sum(same))
+                label_acc = same[np.argmax(same)]*1.0/np.sum(same)
+                acs.append(label_acc)
+                nums.append(dataset['labeled_test'][j].shape[0])
+                print("Label: {}, Num examples: {}, Same label with autoencoder: {} ".format(j,dataset['labeled_test'][j].shape[0],label_acc))
+            except KeyError:
+                continue
+        acs = np.asarray(acs)
+        nums = np.asarray(nums)
+        total = sum(nums)
+        average = 0.0
+        for a, n in zip(acs,nums):
+            average += a*n*1.0/total
+        print("Average agreement: {}".format(average))
 
 
             # if(eps <= 2*diff):
@@ -434,14 +472,14 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
 
         # print("Num learned labels: {}".format(num_labels))
 
-        # f=open('dbscan_labels/test/tetrode_{}.npy'.format(tetrode_number),'w')
-        # pickle.dump(labels, f)
-        # f.close()
+        f=open('dbscan_labels/test/tetrode_{}.npy'.format(tetrode_number),'w')
+        pickle.dump(labels, f)
+        f.close()
 
-        # plt.title('Estimated number of clusters: {}'.format(np.amax(labels)+1))
-        # plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
-        # plt.savefig('dbscan_labels/test/dbscan_tsne_{}.png'.format(tetrode_number), bbox_inches='tight')
-        # plt.close()
+        plt.title('Estimated number of clusters: {}'.format(np.amax(labels)+1))
+        plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
+        plt.savefig('dbscan_labels/test/dbscan_tsne_{}.png'.format(tetrode_number), bbox_inches='tight')
+        plt.close()
 
         # num_labels = 0
         # eps=0.1

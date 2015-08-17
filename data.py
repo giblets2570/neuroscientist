@@ -89,10 +89,61 @@ if __name__=="__main__":
 
 	datapoint = teX[0]
 
-	plt.plot(datapoint)
-	plt.title("Example of neural spike")
-	plt.axis([0,200,-1,1])
-	plt.grid(True)
+	# plt.plot(datapoint)
+	# plt.axis([0,200,-1,1])
+	# plt.grid(True)
+	# plt.show()
+
+	fig = plt.figure(1)
+	sub1 = fig.add_subplot(411)
+	sub2 = fig.add_subplot(412)
+	sub3 = fig.add_subplot(413)
+	sub4 = fig.add_subplot(414)
+
+	# add titles
+	sub1.set_title("Example of neural spike")
+
+	# adding x labels
+
+	# sub1.set_xlabel('Time')
+	# sub2.set_xlabel('Time')
+	# sub3.set_xlabel('Time')
+	# sub4.set_xlabel('Time')
+
+
+	# adding y labels
+
+	sub1.set_ylabel('Channel 1')
+	sub2.set_ylabel('Channel 2')
+	sub3.set_ylabel('Channel 3')
+	sub4.set_ylabel('Channel 4')
+
+	# Plotting data
+
+	# print(testing[0][0])
+	# inp = []
+	# for z in range(4):
+	#     inp += list(testing[0][0][z])
+
+
+	sub1.plot(datapoint[:50])
+	sub1.grid(True)
+	sub1.axis([0,50,-0.8,1])
+
+	sub2.plot(datapoint[50:100])
+	sub2.grid(True)
+	sub2.axis([0,50,-0.8,1])
+
+	sub3.plot(datapoint[100:150])
+	sub3.grid(True)
+	sub3.axis([0,50,-0.8,1])
+
+	sub4.plot(datapoint[150:200])
+	sub4.grid(True)
+	sub4.axis([0,50,-0.8,1])
+
+	fig.tight_layout()
+
 	plt.show()
 
 	# print(trX.shape)
