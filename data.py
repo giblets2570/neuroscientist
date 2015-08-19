@@ -14,8 +14,15 @@ def formatData(tetrodeNumber,basename,twoD=False,timed=False):
 	def concatanateChannels():
 		header, data = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
 		print(header)
+
 		timebase = float(re.sub("[^0-9]", "", header['timebase']))
 		print(timebase)
+
+		duration = int(re.sub("[^0-9]", "", header['duration']))
+		print(duration)
+		freq = 50.0
+		time_step = 1.0/freq
+
 		timesData = []
 		inputData = []
 		for i in range(0,len(data),4):
@@ -40,9 +47,33 @@ def formatData(tetrodeNumber,basename,twoD=False,timed=False):
 			timesData.append(entry)
 			inputData.append(conData)
 
-		print(int(timesData[-1]['time']))
+		# print(int(timesData[-1]['time']))
 
-		return np.asarray(inputData),timesData
+		downsampled = []
+		j = 0
+		print(time_step)
+		down = np.zeros(timesData[-1]['data'].shape[0])
+		print(down)
+
+		for i in range(int(duration*freq)):
+			while True:
+				try:
+					timesData[j]
+				except IndexError:
+					break
+
+				if timesData[j]['time'] < i * time_step:
+					down += timesData[j]['data']
+					j+=1
+				else:
+					break
+			downsampled.append(down)
+			down = np.zeros(timesData[-1]['data'].shape[0])
+			j+=1
+
+		downsampled = np.asarray(downsampled)
+		print(downsampled.shape)
+		return np.asarray(inputData), downsampled #timesData
 
 	def formatCut():
 		numclusters = 0
@@ -57,10 +88,9 @@ def formatData(tetrodeNumber,basename,twoD=False,timed=False):
 			datapoint = np.zeros(numclusters)
 			datapoint[i-1] = 1
 			output.append(datapoint)
-		
+
 		return np.asarray(output)
 
-	
 	def getTrainingTest():
 		inp, td = concatanateChannels()
 		out = formatCut()
@@ -85,38 +115,38 @@ def formatData(tetrodeNumber,basename,twoD=False,timed=False):
 
 
 if __name__=="__main__":
-	trX, tvX, teX, trY, tvY, teY = formatData(10,BASENAME)
+	a, f, t = formatData(10,BASENAME,timed=True)
 
-	datapoint = teX[0]
+	# datapoint = teX[0]
 
-	# plt.plot(datapoint)
-	# plt.axis([0,200,-1,1])
-	# plt.grid(True)
-	# plt.show()
+	# # plt.plot(datapoint)
+	# # plt.axis([0,200,-1,1])
+	# # plt.grid(True)
+	# # plt.show()
 
-	fig = plt.figure(1)
-	sub1 = fig.add_subplot(411)
-	sub2 = fig.add_subplot(412)
-	sub3 = fig.add_subplot(413)
-	sub4 = fig.add_subplot(414)
+	# fig = plt.figure(1)
+	# sub1 = fig.add_subplot(411)
+	# sub2 = fig.add_subplot(412)
+	# sub3 = fig.add_subplot(413)
+	# sub4 = fig.add_subplot(414)
 
-	# add titles
-	sub1.set_title("Example of neural spike")
+	# # add titles
+	# sub1.set_title("Example of neural spike")
 
-	# adding x labels
+	# # adding x labels
 
-	# sub1.set_xlabel('Time')
-	# sub2.set_xlabel('Time')
-	# sub3.set_xlabel('Time')
-	# sub4.set_xlabel('Time')
+	# # sub1.set_xlabel('Time')
+	# # sub2.set_xlabel('Time')
+	# # sub3.set_xlabel('Time')
+	# # sub4.set_xlabel('Time')
 
 
-	# adding y labels
+	# # adding y labels
 
-	sub1.set_ylabel('Channel 1')
-	sub2.set_ylabel('Channel 2')
-	sub3.set_ylabel('Channel 3')
-	sub4.set_ylabel('Channel 4')
+	# sub1.set_ylabel('Channel 1')
+	# sub2.set_ylabel('Channel 2')
+	# sub3.set_ylabel('Channel 3')
+	# sub4.set_ylabel('Channel 4')
 
 	# Plotting data
 
@@ -126,25 +156,25 @@ if __name__=="__main__":
 	#     inp += list(testing[0][0][z])
 
 
-	sub1.plot(datapoint[:50])
-	sub1.grid(True)
-	sub1.axis([0,50,-0.8,1])
+	# sub1.plot(datapoint[:50])
+	# sub1.grid(True)
+	# sub1.axis([0,50,-0.8,1])
 
-	sub2.plot(datapoint[50:100])
-	sub2.grid(True)
-	sub2.axis([0,50,-0.8,1])
+	# sub2.plot(datapoint[50:100])
+	# sub2.grid(True)
+	# sub2.axis([0,50,-0.8,1])
 
-	sub3.plot(datapoint[100:150])
-	sub3.grid(True)
-	sub3.axis([0,50,-0.8,1])
+	# sub3.plot(datapoint[100:150])
+	# sub3.grid(True)
+	# sub3.axis([0,50,-0.8,1])
 
-	sub4.plot(datapoint[150:200])
-	sub4.grid(True)
-	sub4.axis([0,50,-0.8,1])
+	# sub4.plot(datapoint[150:200])
+	# sub4.grid(True)
+	# sub4.axis([0,50,-0.8,1])
 
-	fig.tight_layout()
+	# fig.tight_layout()
 
-	plt.show()
+	# plt.show()
 
 	# print(trX.shape)
 	# print(trX[1])
