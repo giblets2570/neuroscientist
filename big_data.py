@@ -7,69 +7,43 @@ import pickle
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-def getData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16]):
-	output_labels_dims = []
-	for tetrodeNumber in range(9,17):
-		cutfilename = basename + ".clu." + str(tetrodeNumber)
-		for n, i in enumerate(open(cutfilename,'r')):
-			output_labels_dims.append(int(re.sub("[^0-9]", "", i)))
-			if n == 0:
-				break
-	print(output_labels_dims)
+def getData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16],freq=50.0):
 
-	total_num_labels = sum(output_labels_dims)
-	print(total_num_labels)
+	header, _ = readfile(basename+".1",[('ts','>i'),('waveform','50b')])
+	print(header)
 
-	labels = []
-	for tetrodeNumber in tetrodeRange:
-		cutfilename = basename + ".clu." + str(tetrodeNumber)
-		base = tetrodeNumber - 9
-		for n, i in enumerate(open(cutfilename,'r')):
-			output_labels_dims.append(int(re.sub("[^0-9]", "", i)))
-			if n == 0:
-				continue
-			datapoint = np.zeros(total_num_labels)
+	timebase = float(re.sub("[^0-9]", "", header['timebase']))
+	print(timebase)
 
-			datapoint[output_labels_dims[base] + int(i) - 1] = 1.0
-			labels.append(datapoint)
+	duration = int(re.sub("[^0-9]", "", header['duration']))
+	print(duration)
 
-	labels = np.asarray(labels)
-	print(labels.shape)
+	num_points=int(duration*freq)
+	array_size = len(tetrodeRange)*200
+	output = np.zeros((num_points,array_size))
 
-	activations = []
 	for tetrodeNumber in tetrodeRange:
 		tetfilename = basename + "." + str(tetrodeNumber)
 		print("On tetrode {}".format(tetrodeNumber))
 		base = 200*(tetrodeNumber-9)
 		header, data = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
-		for i in range(0,len(data),4):
-			if i+3 > len(data):
-				break
-			m = 0
-			for j in range(4):
-				for k in range(50):
-					val = abs(data[i+j][1][k])
-					if(val > m):
-						m = val
-			
-			con = list(np.asarray(data[i][1],dtype=np.float16)/m)+list(np.asarray(data[i+1][1],dtype=np.float16)/m)+list(np.asarray(data[i+2][1],dtype=np.float16)/m)+list(np.asarray(data[i+3][1],dtype=np.float16)/m)
-			# entry = np.zeros(1600)
-			# for i in range(base,base+200):
-			# 	entry[i] = con[i-base]
-			entry = np.asarray(con)
-			activations.append(entry)
+		j = 0
+		for i in range(num_points):
 
-	activations = np.asarray(activations)
+			try:
+				while data[j][0] / timebase < (i / freq):
+					ind = j%4
+					ind = 50*ind
+					for k in range(50):
+						output[ind+base+k] += data[j][1][k]
+					j+=1
+			except IndexError:
+				pass
+			if(i%10000==0):
+				print("Done: {}".format(i))
 
-	print("Shuffling the data")
-
-	rng_state = np.random.get_state()
-	np.random.shuffle(activations)
-	np.random.set_state(rng_state)
-	np.random.shuffle(labels)
-	print("Done Shuffling")
-
-	return activations, labels
+	print(output.shape)
+	return output
 
 def formatData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16]):
 
@@ -94,7 +68,7 @@ def formatData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16]):
 if __name__=="__main__":
 	# activations, labels = getData(BASENAME,[9])
 
-	trX, tvX, teX, trY, tvY, teY = formatData(BASENAME,[9])
+	out = getData()
 
 	print("Saving the models")
 
@@ -107,13 +81,3 @@ if __name__=="__main__":
 	# f=open('activations.npy','w')
 	# pickle.dump(activations, f)
 	# f.close()
-
-	print("Done 2")
-
-	print(trX.shape) 
-	print(tvX.shape) 
-	print(teX.shape) 
-	print(trY.shape) 
-	print(tvY.shape) 
-	print(teY.shape)
-	

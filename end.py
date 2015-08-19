@@ -253,7 +253,7 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
         The predict function returns out output of the network.
     """
 
-    # symbolic variables 
+    # symbolic variables
     X_batch = T.tensor3()
     y_batch = T.tensor3()
     l_rate = T.scalar()
@@ -323,6 +323,20 @@ def main(tetrode_number=TETRODE_NUMBER):
     print("Setting up the training functions...")
     training = funcs(dataset,rec_network, auto_network)
     print("Done!")
+
+    if(os.path.isfile('end_network_auto_{}'.format(tetrode_number))):
+        print("Loading old model")
+        f=open('end_network_auto_{}'.format(tetrode_number),'r')
+        all_param_values = pickle.load(f)
+        f.close()
+        lasagne.layers.set_all_param_values(auto_network, all_param_values)
+
+    if(os.path.isfile('end_network_recurrent_{}'.format(tetrode_number))):
+        print("Loading old model")
+        f=open('end_network_recurrent_{}'.format(tetrode_number),'r')
+        all_param_values = pickle.load(f)
+        f.close()
+        lasagne.layers.set_all_param_values(rec_network, all_param_values)
 
     accuracies = []
     trainvalidation = []
