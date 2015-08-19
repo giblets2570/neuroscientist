@@ -335,35 +335,34 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         codes_2d = bh_sne(codes)
 
 
-        for u in range(2):
-            fig = plt.figure(1)
-            sub1 = fig.add_subplot(121)
-            sub2 = fig.add_subplot(122)
+        # for u in range(2):
+        #     fig = plt.figure(1)
+        #     sub1 = fig.add_subplot(121)
+        #     sub2 = fig.add_subplot(122)
 
-            c = np.zeros((codes.shape[0],3))
+        #     c = np.zeros((codes.shape[0],3))
 
-            sub1.scatter(codes_2d[:,0],codes_2d[:,1],alpha=0.1,lw=0,c=dataset['labels'][:c.shape[0]])
+        #     sub1.scatter(codes_2d[:,0],codes_2d[:,1],alpha=0.1,lw=0,c=dataset['labels'][:c.shape[0]])
 
-            r = np.random.randint(0,1000)
+        #     r = np.random.randint(0,1000)
 
-            sub1.scatter(codes_2d[r:r+10,0],codes_2d[r:r+10,1],alpha=1,lw=0.4,c=c)
+        #     sub1.scatter(codes_2d[r:r+10,0],codes_2d[r:r+10,1],alpha=1,lw=0.4,c=c)
 
-            sub1.set_title("Neurons activated")
-            sub2.set_title("Rat position")
+        #     sub1.set_title("Neurons activated")
+        #     sub2.set_title("Rat position")
 
-            sub2.axis([0.0,1.0,0.0,1.0])
-            sub2.grid(True)
-            sub2.scatter(np.random.rand(1),np.random.rand(1))
+        #     sub2.axis([0.0,1.0,0.0,1.0])
+        #     sub2.grid(True)
+        #     sub2.scatter(np.random.rand(1),np.random.rand(1))
 
-            plt.savefig("pos_act_{}.png".format(u))
+        #     plt.savefig("pos_act_{}.png".format(u))
 
-            plt.close()
+        #     plt.close()
 
         # for k in range(3):
         #     print(k)
 
         #     codes_2d = bh_sne(np.asarray(codes[:(k+1)*12000],dtype=np.float64))
-0.45
         #     # d = DPGMM(n_components=10, covariance_type='full')
         #     d = DPGMM(n_components=15, covariance_type='full')
 
@@ -444,9 +443,23 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         # # activations_1_2d = bh_sne(activations_1)
         # # activations_2_2d = bh_sne(activations_2)
 
-        # plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
-        # plt.savefig('dbscan_labels/test/tsne_codes_{}.png'.format(tetrode_number), bbox_inches='tight')
-        # plt.close()
+        labels = list(set(dataset['labels'][:NUM_POINTS]))
+        num_labels = np.zeros(len(labels))
+        xys = np.zeros((len(labels),2))
+        for xy, point in zip(codes_2d,dataset['labels'][:NUM_POINTS]):
+            num_labels[point] += 1.0
+            xys[point] += xy
+
+        for i in range(xys.shape[0]):
+            xys[i] /= num_labels[i]
+
+
+        plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
+        for xy, label in zip(xys,labels):
+            plt.annotate(str(label),xytext=(xy[0],xy[1]))
+
+        plt.savefig('dbscan_labels/test/tsne_codes_{}_labeled.png'.format(tetrode_number), bbox_inches='tight')
+        plt.close()
 
         # # This is where the code for the video will go
         # ##############################################################################

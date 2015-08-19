@@ -335,13 +335,12 @@ def main(tetrode_number=TETRODE_NUMBER):
     print(dataset['X_test'].shape)
     print("Begining to test the network...")
     for start, end in zip(range(0, dataset['num_examples_test'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_test'], BATCH_SIZE)):
-        prediction = training['predict'](dataset['X_test'][start:end])
+        prediction = training['predict'](dataset['X_train'][start:end])
         predictions.append(prediction)
-        cost_array = training['cost_array'](dataset['X_test'][start:end],dataset['y_test'][start:end])
+        cost_array = training['cost_array'](dataset['X_train'][start:end],dataset['y_train'][start:end])
         cost_arrays.append(cost_array)
-        # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
-        actuals.append(dataset['y_test'][start:end])
-
+        # accuracy = np.mean(np.argmax(dataset['y_train'], axis=1) == np.argmax(training['predict'](dataset['X_train']), axis=1))
+        actuals.append(dataset['y_train'][start:end])
     for z in range(10):
         try:
             c = [np.linalg.norm(k) for k in cost_arrays[z][0]]
