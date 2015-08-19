@@ -70,6 +70,8 @@ if __name__=="__main__":
 
 	out = getData()
 
+	print(out[:20])
+
 	print("Saving the models")
 
 	# f=open('labels.npy','w')
