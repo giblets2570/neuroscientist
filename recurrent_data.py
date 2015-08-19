@@ -321,7 +321,7 @@ def organiseTetrodeData(tetrode,learned_labels=False,inp=False,arg=False):
 			labels=pickle.load(f)
 			f.close()
 		else:
-			f=open('dbscan_labels/test/tetrode_{}.npy'.format(tetrode),'r')
+			f=open('dbscan_labels/deep/tetrode_{}.npy'.format(tetrode),'r')
 			labels=pickle.load(f)
 			f.close()
 		print(list(set(labels)))
