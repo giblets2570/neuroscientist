@@ -273,7 +273,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
             # accuracy = training['accuracy'](dataset['X_test'],dataset['y_test'])
 
             print("Epoch: {}, Training cost: {}".format(i+1,meanTrainCost))
-        NUM_POINTS = 5000
+        # NUM_POINTS = 5000
         codes = training['code'](dataset['data'][0:NUM_POINTS])
 
         # col = [np.argmax(code) for code in codes]
@@ -456,7 +456,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
 
         plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'][0:NUM_POINTS],alpha=0.8,lw=0)
         for xy, label in zip(xys,labels):
-            plt.annotate(str(label),xytext=(xy[0],xy[1]))
+            plt.annotate(str(label),xy=(3, 2),xytext=(xy[0],xy[1]))
 
         plt.savefig('dbscan_labels/test/tsne_codes_{}_labeled.png'.format(tetrode_number), bbox_inches='tight')
         plt.close()
