@@ -265,7 +265,7 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
     auto_layers = lasagne.layers.get_all_layers(auto_network)
     num_auto_layers = len(auto_layers)
 
-    code_layer = auto_layers[num_layers/2]
+    code_layer = auto_layers[num_auto_layers/2]
     # code outputs
     code_output = lasagne.layers.get_output(code_layer, X_batch, deterministic=True)
 
