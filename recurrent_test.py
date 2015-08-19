@@ -267,7 +267,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     all_params = lasagne.layers.get_all_params(network)
     updates = lasagne.updates.adagrad(cost, all_params, l_rate)
-    
+
     train = theano.function(inputs=[X_batch, y_batch, l_rate], outputs=cost, updates=updates, allow_input_downcast=True)
     cost_array = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost_array, allow_input_downcast=True)
     valid = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
@@ -357,7 +357,7 @@ def main(tetrode_number=TETRODE_NUMBER):
             break
 
     print(cost_arrays)
-    points_from = 0
+    points_from = 1900
 
     print("Plotting the predictions")
 

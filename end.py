@@ -20,7 +20,7 @@ import theano.tensor as T
 import time
 import datetime
 from data import formatData as auto_data
-from recurrent_data import formatData as rec_data
+from end_data import formatData as rec_data
 import json
 import re
 import math
@@ -71,19 +71,20 @@ def load_data(tetrode_number):
 
     # the data is arranged as (num_sequences_per_batch, sequence_length, num_features_per_timestep)
     # num sequences per batch = batch size
-    # sequence length = number of time steps per example. 
+    # sequence length = number of time steps per example.
     # num_features_per_timestep = 31 i.e labels per tetrode
     sequenceLength=2000
-    X_train, X_valid, X_test, y_train, y_valid, y_test = rec_data(sequenceLength=sequenceLength)
+
+    _,_,_, y_train, y_valid, y_test = rec_data(sequenceLength=sequenceLength)
 
     _,_time,_ = auto_data(tetrode_number,BASENAME,timed=True)
 
     time = []
     i = 0
-    num_skip = 40
+    num_skip = 200
     print(_time.shape)
     while(i + sequenceLength < _time.shape[0]):
-        time.append(time[i:i+sequenceLength])
+        time.append(_time[i:i+sequenceLength])
         # i+=25
         i+=num_skip
     time = np.asarray(time)
@@ -91,6 +92,19 @@ def load_data(tetrode_number):
 
     n = int(len(time)*0.8)
     m = int(len(time)*0.9)
+
+
+    X_train = time[:n]
+    X_valid = time[n:m]
+    X_test = time[m:]
+
+    # X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1])
+    # X_valid = X_valid.reshape(X_valid.shape[0],1,X_valid.shape[1])
+    # X_test = X_test.reshape(X_test.shape[0],1,X_test.shape[1])
+
+    print("X_TRAIN: {}".format(X_train.shape))
+
+    print("y_TRAIN: {}".format(y_train.shape))
 
     return dict(
         X_train=time[:n],
@@ -115,18 +129,20 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             `batch_size`.
             A theano expression which represents such a network is returned.
 
-            Need to create a dense layer that converts the input to a 
+            Need to create a dense layer that converts the input to a
 
         """
         # length = input_shape[1]
-        # reduced_length = num_hidden_units
+        reduced_length = num_hidden_units
 
         # shape = tuple([batch_size]+list(input_shape[1:]))
         # print("Shape ",shape)
 
-        shape = tuple([None]+list(input_shape[1:]))
+        shape = tuple([batch_size]+list(input_shape[1:]))
         print(shape)
         l_in_1 = lasagne.layers.InputLayer(shape=shape)
+
+        print("In 1 shape: ",lasagne.layers.get_output_shape(l_in_1))
 
         l_hidden_1_1 = lasagne.layers.DenseLayer(
             l_in_1,
@@ -134,11 +150,15 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
+        print("Hidden 1 1 shape: ",lasagne.layers.get_output_shape(l_hidden_1_1))
+
         l_code_layer_1 = lasagne.layers.DenseLayer(
             l_hidden_1_1,
             num_units=50,
             nonlinearity=lasagne.nonlinearities.sigmoid,
             )
+
+        print("code 1 1 shape: ",lasagne.layers.get_output_shape(l_code_1_1))
 
         l_hidden_6_1 = lasagne.layers.DenseLayer(
             l_code_layer_1,
@@ -146,11 +166,15 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
+        print("Hidden 6 1 shape: ",lasagne.layers.get_output_shape(l_hidden_6_1))
+
         l_out_1 = lasagne.layers.DenseLayer(
             l_hidden_6_1,
             num_units=output_dim,
             nonlinearity=None,
             )
+
+        print("Out 1 1 shape: ",lasagne.layers.get_output_shape(l_out_1_1))
 
         # return l_out
 
@@ -169,6 +193,8 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             nonlinearity=lasagne.nonlinearities.rectify
             )
 
+        print("Hidden 1 shape: ",lasagne.layers.get_output_shape(l_hidden_1))
+
         l_dropout = lasagne.layers.DropoutLayer(
             l_hidden_1,
             p=0.8,
@@ -181,9 +207,11 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             nonlinearity=lasagne.nonlinearities.rectify
             )
 
-        # print("Hidden 1 shape: ",lasagne.layers.get_output_shape(l_hidden_1))
+        print("Hidden 2 shape: ",lasagne.layers.get_output_shape(l_hidden_2))
 
         l_reshape_2 = lasagne.layers.ReshapeLayer(l_hidden_2, (batch_size, length, num_hidden_units))
+
+        print("Reshape_2 shape: ",lasagne.layers.get_output_shape(l_reshape_2))
 
         l_recurrent = lasagne.layers.GRULayer(
             l_reshape_2, num_hidden_units, 
@@ -200,7 +228,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         l_reshape_3 = lasagne.layers.ReshapeLayer(l_recurrent, (batch_size*length, num_hidden_units))
 
-        print("Reshape shape: ",lasagne.layers.get_output_shape(l_reshape_3))
+        print("Reshape 3 shape: ",lasagne.layers.get_output_shape(l_reshape_3))
 
         l_recurrent_out = lasagne.layers.DenseLayer(
             l_reshape_3,
@@ -215,10 +243,10 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         print("Output shape: ",lasagne.layers.get_output_shape(l_out))
 
-        return l_out
+        return l_out, l_out_1
 
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM):
+def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM):
 
     """
         Method the returns the theano functions that are used in 
@@ -231,26 +259,31 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     y_batch = T.tensor3()
     l_rate = T.scalar()
 
-    layers = lasagne.layers.get_all_layers(network)
-    num_layers = len(layers)
-    print(layers)
+    rec_layers = lasagne.layers.get_all_layers(rec_network)
+    num_rec_layers = len(rec_layers)
+    print(rec_layers)
+
+    auto_layers = lasagne.layers.get_all_layers(auto_network)
+    num_auto_layers = len(auto_layers)
+    print(auto_layers)
 
     # this is the cost of the network when fed throught the noisey network
-    train_output = lasagne.layers.get_output(network, X_batch)
-    cost = lasagne.objectives.mse(train_output, y_batch)
-    cost = cost.mean()
+    auto_train_output = lasagne.layers.get_output(auto_network, X_batch)
+    rec_train_output = lasagne.layers.get_output(rec_network, X_batch)
+    auto_cost = lasagne.objectives.mse(auto_train_output, X_batch)
+    rec_cost = lasagne.objectives.mse(rec_train_output, y_batch)
+
+    cost = auto_cost.mean() + rec_cost.mean()
 
     # validation cost
-    valid_output = lasagne.layers.get_output(network, X_batch, deterministic=True)
+    valid_output = lasagne.layers.get_output(rec_network, X_batch, deterministic=True)
     valid_cost = lasagne.objectives.mse(valid_output, y_batch)
     valid_cost = valid_cost.mean()
 
     # test the performance of the netowork without noise
-    test = lasagne.layers.get_output(network, X_batch, deterministic=True)
-    pred = T.argmax(test, axis=1)
-    accuracy = T.mean(lasagne.objectives.mse(pred, y_batch), dtype=theano.config.floatX)
+    test = lasagne.layers.get_output(rec_network, X_batch, deterministic=True)
 
-    all_params = lasagne.layers.get_all_params(network)
+    all_params = lasagne.layers.get_all_params(rec_network) + lasagne.layers.get_all_params(auto_network)[2:]
     updates = lasagne.updates.adagrad(cost, all_params, l_rate)
     
     train = theano.function(inputs=[X_batch, y_batch, l_rate], outputs=cost, updates=updates, allow_input_downcast=True)
@@ -275,20 +308,13 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     print("Input shape: {}".format(dataset['X_train'].shape))
     print("Output shape: {}".format(dataset['y_train'].shape))
-    
+
     print("Making the model...")
-    network = model(dataset['input_shape'],dataset['output_dim'])
+    rec_network, auto_network = model(dataset['input_shape'],dataset['output_dim'])
     print("Done!")
 
-    if(os.path.isfile('recurrent_2_input')):
-        print("Loading old model")
-        f=open('recurrent_2_input','r')
-        all_param_values = pickle.load(f)
-        f.close()
-        lasagne.layers.set_all_param_values(network, all_param_values)
-
     print("Setting up the training functions...")
-    training = funcs(dataset,network)
+    training = funcs(dataset,rec_network, auto_network)
     print("Done!")
 
     accuracies = []
@@ -366,13 +392,6 @@ def main(tetrode_number=TETRODE_NUMBER):
         filename = re.sub("[^A-Za-z0-9_/ ,-:]", "", filename)
         with open(filename,"w") as outfile:
             outfile.write(str(log))
-
-    if(SAVE_MODEL):
-        print("Saving model...")
-        all_param_values = lasagne.layers.get_all_param_values(network)
-        f=open('recurrent_2_input','w')
-        pickle.dump(all_param_values, f)
-        f.close()
 
 
 

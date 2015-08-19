@@ -273,8 +273,8 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
             # accuracy = training['accuracy'](dataset['X_test'],dataset['y_test'])
 
             print("Epoch: {}, Training cost: {}".format(i+1,meanTrainCost))
-        # NUM_POINTS = 5000
-        # codes = training['code'](dataset['data'][0:NUM_POINTS])
+        NUM_POINTS = 5000
+        codes = training['code'](dataset['data'][0:NUM_POINTS])
 
         # col = [np.argmax(code) for code in codes]
         # num_col = len(list(set(col)))
@@ -304,20 +304,20 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
 
 
 
-        combined = dataset['data'][0]+dataset['data'][44]
+        # combined = dataset['data'][0]+dataset['data'][44]
 
-        code_0 = training['code']([dataset['data'][0]])
-        code_1 = training['code']([dataset['data'][44]])
-        code_c = training['code']([combined])
+        # code_0 = training['code']([dataset['data'][0]])
+        # code_1 = training['code']([dataset['data'][44]])
+        # code_c = training['code']([combined])
 
-        predict_0 = training['predict']([dataset['data'][0]])[0]
-        predict_1 = training['predict']([dataset['data'][44]])[0]
-        predict_c = training['predict']([combined])[0]
+        # predict_0 = training['predict']([dataset['data'][0]])[0]
+        # predict_1 = training['predict']([dataset['data'][44]])[0]
+        # predict_c = training['predict']([combined])[0]
 
-        fig = plt.figure(1)
-        sub1 = fig.add_subplot(311)
-        sub2 = fig.add_subplot(312)
-        sub3 = fig.add_subplot(313)
+        # fig = plt.figure(1)
+        # sub1 = fig.add_subplot(311)
+        # sub2 = fig.add_subplot(312)
+        # sub3 = fig.add_subplot(313)
 
         # x_axis = list(np.arange(len(code_c[0])))
 
@@ -325,20 +325,45 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         # sub2.bar(x_axis, code_1[0], width=1)
         # sub3.bar(x_axis, code_c[0], width=1)
 
-        sub1.plot(combined)
-        sub2.plot(predict_1)
-        sub3.plot(predict_c)
+        # sub1.plot(combined)
+        # sub2.plot(predict_1)
+        # sub3.plot(predict_c)
 
-        plt.show()
+        # plt.show()
 
-        # print(codes.shape)
-        # codes_2d = bh_sne(codes)
+        print(codes.shape)
+        codes_2d = bh_sne(codes)
+
+
+        for u in range(2):
+            fig = plt.figure(1)
+            sub1 = fig.add_subplot(121)
+            sub2 = fig.add_subplot(122)
+
+            c = np.zeros((codes.shape[0],3))
+
+            sub1.scatter(codes_2d[:,0],codes_2d[:,1],alpha=0.1,lw=0,c=dataset['labels'][:c.shape[0]])
+
+            r = np.random.randint(0,1000)
+
+            sub1.scatter(codes_2d[r:r+10,0],codes_2d[r:r+10,1],alpha=1,lw=0.4,c=c)
+
+            sub1.set_title("Neurons activated")
+            sub2.set_title("Rat position")
+
+            sub2.axis([0.0,1.0,0.0,1.0])
+            sub2.grid(True)
+            sub2.scatter(np.random.rand(1),np.random.rand(1))
+
+            plt.savefig("pos_act_{}.png".format(u))
+
+            plt.close()
 
         # for k in range(3):
         #     print(k)
 
         #     codes_2d = bh_sne(np.asarray(codes[:(k+1)*12000],dtype=np.float64))
-
+0.45
         #     # d = DPGMM(n_components=10, covariance_type='full')
         #     d = DPGMM(n_components=15, covariance_type='full')
 

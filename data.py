@@ -115,7 +115,9 @@ def formatData(tetrodeNumber,basename,twoD=False,timed=False):
 
 
 if __name__=="__main__":
-	a, f, t = formatData(10,BASENAME,timed=True)
+	a, t, f = formatData(10,BASENAME,timed=True)
+
+	print(f)
 
 	# datapoint = teX[0]
 
