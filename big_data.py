@@ -34,7 +34,8 @@ def getData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16],freq=50.0):
 					ind = j%4
 					ind = 50*ind
 					for k in range(50):
-						output[i] += data[j][1][k]
+						# print(data[j][1][k])
+						output[i][ind+k+base] += data[j][1][k]
 					j+=1
 			except IndexError:
 				pass
@@ -50,15 +51,7 @@ def getData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16],freq=50.0):
 
 def formatData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16]):
 
-	# f = open("activations.npy",'r')
-	# activations = pickle.load(f)
-	# f.close()
-
-	# f = open("labels.npy",'r')
-	# labels = pickle.load(f)
-	# f.close()
-
-	activations, labels = getData(basename,tetrodeRange)
+	activations = getData(basename,tetrodeRange)
 
 	num_entries = activations.shape[0]
 	n = int(num_entries*0.8)
@@ -66,7 +59,7 @@ def formatData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16]):
 
 	print("Got the data yo")
 
-	return activations[:n],activations[n:m],activations[m:],labels[:n],labels[n:m],labels[m:]
+	return activations[:n],activations[n:m],activations[m:]
 
 if __name__=="__main__":
 	# activations, labels = getData(BASENAME,[9])
@@ -75,11 +68,14 @@ if __name__=="__main__":
 
 	print(out[:20])
 
+	plt.plot(out[1])
+	plt.show()
+
 	print("Saving the models")
 
-	# f=open('labels.npy','w')
-	# pickle.dump(labels, f)
-	# f.close()
+	f=open('big_input.npy','w')
+	pickle.dump(out, f)
+	f.close()
 
 	# print("Done 1")
 

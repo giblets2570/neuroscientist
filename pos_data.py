@@ -99,8 +99,9 @@ def makeVideo(X, Y):
 
 if __name__=="__main__":
 	x, y = getXY()
-	clip = makeVideo(x,y)
-	myclip = mpy.VideoFileClip(VIDEO_NAME)
+	print(x.shape)
+	# clip = makeVideo(x,y)
+	# myclip = mpy.VideoFileClip(VIDEO_NAME)
 	# print(myclip.fps)
 	# myclip.preview()
 	# print(data['pos'][1000:1030])

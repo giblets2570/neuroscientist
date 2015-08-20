@@ -394,7 +394,7 @@ def main(tetrode_number=TETRODE_NUMBER):
     predictions = []
     cost_arrays = []
     actuals = []
-    for start, end in zip(range(0, dataset['num_examples_test'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_test'], BATCH_SIZE)):
+    for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
         prediction = training['predict'](dataset['X_train'][start:end])
         predictions.append(prediction)
         # accuracy = np.mean(np.argmax(dataset['y_train'], axis=1) == np.argmax(training['predict'](dataset['X_train']), axis=1))
