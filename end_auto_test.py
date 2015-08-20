@@ -277,7 +277,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         codes = training['code'](dataset['data'][0:NUM_POINTS])
 
 
-        ran = np.random.randint(dataset['num_examples_test'],size=10)
+        ran = np.random.randint(dataset['X_train'].shape[0],size=10)
         for j in ran:
             testing = [dataset['X_train'][j]]
             # print(testing[0].shape)
