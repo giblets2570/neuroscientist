@@ -75,6 +75,10 @@ def load_data(tetrode_number):
     y_valid = np.asarray([x[m:n],y[m:n]])
     y_test = np.asarray([x[n:],y[n:]])
 
+    y_train = y_train.transpose()
+    y_valid = y_valid.transpose()
+    y_test = y_test.transpose()
+
     print(y_train.shape)
 
     X_train, X_valid, X_test= formatData(BASENAME)
@@ -183,8 +187,8 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     # this is the cost of the network when fed throught the noisey network
     l2 = lasagne.regularization.l2(X_batch)
     train_output = lasagne.layers.get_output(network, X_batch)
-    cost = lasagne.objectives.categorical_crossentropy(train_output, y_batch)
-    cost = cost.mean() + alpha*l2
+    cost = lasagne.objectives.mse(train_output, y_batch)
+    cost = cost.mean() #+ alpha*l2
 
     # test the performance of the netowork without noise
     test = lasagne.layers.get_output(network, X_batch, deterministic=True)
@@ -234,10 +238,16 @@ def main(tetrode_number=TETRODE_NUMBER):
 
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
                 cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end])
-                costs.append(cost)
+                if (np.isnan(cost)):
+                    print(":)")
+                else:
+                    costs.append(cost)
             for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
                 cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
-                valid_costs.append(cost)
+                if (np.isnan(cost)):
+                    print(":o")
+                else:
+                    valid_costs.append(cost)
 
             accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test']))
 
