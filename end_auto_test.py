@@ -394,8 +394,8 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
 
         # plt.show()
 
-        print(codes.shape)
-        codes_2d = bh_sne(codes)
+        # print(codes.shape)
+        # codes_2d = bh_sne(codes)
 
 
         # for u in range(2):
