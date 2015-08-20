@@ -29,18 +29,19 @@ def getData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16],freq=50.0):
 		header, data = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
 		j = 0
 		for i in range(num_points):
-
 			try:
 				while data[j][0] / timebase < (i / freq):
 					ind = j%4
 					ind = 50*ind
 					for k in range(50):
-						output[ind+base+k] += data[j][1][k]
+						output[i] += data[j][1][k]
 					j+=1
 			except IndexError:
 				pass
+			print(np.amax(output[i]))
 			if(i%10000==0):
 				print("Done: {}".format(i))
+				# print(list(output[i]))
 
 	print(output.shape)
 	return output

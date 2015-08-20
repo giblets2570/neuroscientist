@@ -385,12 +385,48 @@ def main(tetrode_number=TETRODE_NUMBER):
             # accuracies.append(accuracy)
 
             epochsDone = epochsDone + 1
-
     except KeyboardInterrupt:
         pass
 
     # plt.plot(trainvalidation)
     # plt.show()
+
+    predictions = []
+    cost_arrays = []
+    actuals = []
+    for start, end in zip(range(0, dataset['num_examples_test'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_test'], BATCH_SIZE)):
+        prediction = training['predict'](dataset['X_train'][start:end])
+        predictions.append(prediction)
+        # accuracy = np.mean(np.argmax(dataset['y_train'], axis=1) == np.argmax(training['predict'](dataset['X_train']), axis=1))
+        actuals.append(dataset['y_train'][start:end])
+
+    for i,(actual,prediction) in enumerate(zip(actuals,predictions)):
+        prediction = np.asarray(prediction)
+        actual = np.asarray(actual)
+
+        print("Actual: {}".format(actual.shape))
+        print("Prediction: {}".format(prediction.shape))
+        dist = np.linalg.norm(actual-prediction)
+        print("Distance: {}".format(dist))
+
+        fig = plt.figure(1)
+
+        sub1 = fig.add_subplot(121)
+        sub2 = fig.add_subplot(122)
+
+        sub1.set_title("Predicted", fontsize=16)
+        sub2.set_title("Actual", fontsize=16)
+        sub1.scatter(prediction[0,points_from:,0],prediction[0,points_from:,1],lw=0.0)
+        sub1.axis([0.0,1.0,0.0,1.0])
+        sub2.scatter(actual[0,points_from:,0],actual[0,points_from:,1],c=(1,0,0,1),lw=0.2)
+        sub2.axis([0.0,1.0,0.0,1.0])
+        sub1.grid(True)
+        sub2.grid(True)
+
+        fig.tight_layout()
+
+        plt.savefig('../position/test/End_Position_{}.png'.format(i), bbox_inches='tight')
+        plt.close()
 
     if(SAVE_MODEL):
         print("Saving model...")
