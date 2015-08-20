@@ -5,7 +5,7 @@
 from __future__ import print_function
 
 import matplotlib
-# matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab!
+matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab!
 from random import randint
 import gzip
 import itertools
