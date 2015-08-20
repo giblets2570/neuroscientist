@@ -249,28 +249,28 @@ def main(tetrode_number=TETRODE_NUMBER):
                 else:
                     valid_costs.append(cost)
 
-            accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test']))
+            # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test']))
 
             meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32)
             meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
 
             # print("Epoch: {}, Accuracy: {}".format(i+1,accuracy))
-            print("Epoch: {}, Accuracy: {}, Training cost: {}, validation cost: {}".format(i+1,accuracy,meanTrainCost,meanValidCost))
+            print("Epoch: {}, Training cost: {}, validation cost: {}".format(i+1,meanTrainCost,meanValidCost))
 
             if(np.isnan(meanValidCost)):
                 print("Nan value")
                 break
 
-            if(EARLY_STOPPING):
-                if(len(accuracies) < STOPPING_RANGE):
-                    accuracies.append(accuracy)
-                else:
-                    test = [k for k in accuracies if k < accuracy]
-                    if not test:
-                        print('Early stopping causing training to finish at epoch {}'.format(i))
-                        break
-                    del accuracies[0]
-            accuracies.append(accuracy)
+            # if(EARLY_STOPPING):
+            #     if(len(accuracies) < STOPPING_RANGE):
+            #         accuracies.append(accuracy)
+            #     else:
+            #         test = [k for k in accuracies if k < accuracy]
+            #         if not test:
+            #             print('Early stopping causing training to finish at epoch {}'.format(i))
+            #             break
+            #         del accuracies[0]
+            # accuracies.append(accuracy)
 
     except KeyboardInterrupt:
         pass
