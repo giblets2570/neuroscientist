@@ -20,7 +20,7 @@ import theano.tensor as T
 import time
 import datetime
 from data import formatData as auto_data
-from end_data import formatData as rec_data
+from pos_data import getXY as rec_data
 import json
 import re
 import math
@@ -75,7 +75,7 @@ def load_data(tetrode_number):
     # num_features_per_timestep = 31 i.e labels per tetrode
     sequenceLength=500
 
-    _,_,_, y_train, y_valid, y_test = rec_data(sequenceLength=sequenceLength)
+    y_train, y_valid, y_test = rec_data(sequenceLength=sequenceLength)
 
     _,_time,_ = auto_data(tetrode_number,BASENAME,timed=True)
 

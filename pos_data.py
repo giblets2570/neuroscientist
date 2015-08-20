@@ -18,7 +18,7 @@ FILENAME = "../R2192-screening/20141001_R2192_screening.pos"
 
 VIDEO_NAME = "mouse_moving.gif"
 
-def getXY(filename=FILENAME):
+def getXY(filename=FILENAME,sequenceLength=None,num_skip=40):
 	header, data = readfile(filename,[('ts','>i'),('pos','>8h')])
 	x = [x for x,_,_,_,_,_,_,_ in data['pos']]
 	y = [y for _,y,_,_,_,_,_,_ in data['pos']]
@@ -71,8 +71,28 @@ def getXY(filename=FILENAME):
 	# for i in range(len(y)):
 	# 	y[i] = y[i]*2.0
 	# 	y[i] = y[i] - 1
+	if sequenceLength == None:
+		return x, y
+	Z = np.asarray([x,y])
+	Z = Z.transpose()
+	X = []
+	i = 0
+	print(Z.shape)
+	while(i + sequenceLength < Z.shape[0]):
+		X.append(Z[i:i+sequenceLength])
+		i+=num_skip
+	X = np.asarray(X)
+	print(X.shape)
 
-	return x, y
+	m = int(len(X)*0.8)
+	n = int(len(X)*0.9)
+
+	y_train = np.asarray(X[:m])
+	y_valid = np.asarray(X[m:n])
+	y_test = np.asarray(X[n:])
+
+	return y_train, y_valid, y_test
+
 
 def makeVideo(X, Y):
 
@@ -98,7 +118,7 @@ def makeVideo(X, Y):
 	animation.write_gif(VIDEO_NAME, fps=fps)
 
 if __name__=="__main__":
-	x, y = getXY()
+	x, y, z = getXY(sequenceLength=500)
 	print(x.shape)
 	# clip = makeVideo(x,y)
 	# myclip = mpy.VideoFileClip(VIDEO_NAME)
