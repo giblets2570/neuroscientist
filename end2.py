@@ -141,12 +141,24 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         print(shape)
 
 
-        l_in_1 = lasagne.layers.InputLayer(shape=shape)
+        l_in= lasagne.layers.InputLayer(shape=shape)
 
         print("In 1 shape: ",lasagne.layers.get_output_shape(l_in_1))
 
-        l_reshape= lasagne.layers.ReshapeLayer(
-            l_in_1,
+        l_slice_1 = lasagne.layers.SliceLayer(
+            l_in,
+            indices=slice(0, 200),
+            axis=-1
+        )
+
+        l_slice_2 = lasagne.layers.SliceLayer(
+            l_in,
+            indices=slice(200, None),
+            axis=-1
+        )
+
+        l_reshape_1= lasagne.layers.ReshapeLayer(
+            l_slice_1,
             (batch_size*length,200)
             )
 
@@ -166,7 +178,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         print("code 1 1 shape: ",lasagne.layers.get_output_shape(l_code_layer_1))
 
-        l_hidden_6_1 = lasagne.layers.DenseLayer(
+        l_hidden_1_2 = lasagne.layers.DenseLayer(
             l_code_layer_1,
             num_units=100,
             nonlinearity=lasagne.nonlinearities.rectify,
@@ -174,31 +186,26 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         print("Hidden 6 1 shape: ",lasagne.layers.get_output_shape(l_hidden_6_1))
 
-        l_almost = lasagne.layers.DenseLayer(
-            l_hidden_6_1,
+        l_almost_1 = lasagne.layers.DenseLayer(
+            l_hidden_1_2,
             num_units=200,
             nonlinearity=None,
             )
 
         l_out_1 = lasagne.layers.ReshapeLayer(
-            l_almost,
+            l_almost_1,
             (batch_size,length,200)
             )
 
         print("Out 1 1 shape: ",lasagne.layers.get_output_shape(l_out_1))
 
-
-        l_in_2 = lasagne.layers.InputLayer(shape=shape)
-
-        print("In 2 shape: ",lasagne.layers.get_output_shape(l_in_2))
-
-        l_reshape2= lasagne.layers.ReshapeLayer(
-            l_in_2,
+        l_reshape_2= lasagne.layers.ReshapeLayer(
+            l_slice_2,
             (batch_size*length,200)
             )
 
-        l_hidden_1_2 = lasagne.layers.DenseLayer(
-            l_reshape2,
+        l_hidden_2_1 = lasagne.layers.DenseLayer(
+            l_reshape_2,
             num_units=100,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
@@ -206,14 +213,14 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         print("Hidden 1 2 shape: ",lasagne.layers.get_output_shape(l_hidden_1_2))
 
         l_code_layer_2 = lasagne.layers.DenseLayer(
-            l_hidden_1_2,
+            l_hidden_2_1,
             num_units=50,
             nonlinearity=lasagne.nonlinearities.sigmoid,
             )
 
         print("code 1 2 shape: ",lasagne.layers.get_output_shape(l_code_layer_2))
 
-        l_hidden_6_2 = lasagne.layers.DenseLayer(
+        l_hidden_2_2 = lasagne.layers.DenseLayer(
             l_code_layer_2,
             num_units=100,
             nonlinearity=lasagne.nonlinearities.rectify,
@@ -221,30 +228,28 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         print("Hidden 6 2 shape: ",lasagne.layers.get_output_shape(l_hidden_6_2))
 
-        l_almost2 = lasagne.layers.DenseLayer(
-            l_hidden_6_2,
+        l_almost_2 = lasagne.layers.DenseLayer(
+            l_hidden_2_2,
             num_units=200,
             nonlinearity=None,
             )
 
         l_out_2 = lasagne.layers.ReshapeLayer(
-            l_almost2,
+            l_almost_2,
             (batch_size,length,200)
             )
 
         print("Out 1 2 shape: ",lasagne.layers.get_output_shape(l_out_2))
 
-
-
         l_concat = lasagne.layers.ConcatLayer(
             [l_code_layer_1,l_code_layer_2],
-            axis=2
+            axis=-1
             )
 
         print("concat shape: ",lasagne.layers.get_output_shape(l_concat))
 
-        l_hidden_1 = lasagne.layers.DenseLayer(
-            l_code_layer_1,
+        l_hidden_3_1 = lasagne.layers.DenseLayer(
+            l_concat,
             num_units=reduced_length,
             nonlinearity=lasagne.nonlinearities.rectify
             )
@@ -252,12 +257,12 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         print("Hidden 1 shape: ",lasagne.layers.get_output_shape(l_hidden_1))
 
         l_dropout = lasagne.layers.DropoutLayer(
-            l_hidden_1,
+            l_hidden_3_1,
             p=0.8,
             )
 
 
-        l_hidden_2 = lasagne.layers.DenseLayer(
+        l_hidden_3_2 = lasagne.layers.DenseLayer(
             l_dropout,
             num_units=reduced_length,
             nonlinearity=lasagne.nonlinearities.rectify
@@ -265,12 +270,13 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         print("Hidden 2 shape: ",lasagne.layers.get_output_shape(l_hidden_2))
 
-        l_reshape_2 = lasagne.layers.ReshapeLayer(l_hidden_2, (batch_size, length, num_hidden_units))
+        l_reshape_3_1 = lasagne.layers.ReshapeLayer(l_hidden_2, (batch_size, length, num_hidden_units))
 
         print("Reshape_2 shape: ",lasagne.layers.get_output_shape(l_reshape_2))
 
         l_recurrent = lasagne.layers.GRULayer(
-            l_reshape_2, num_hidden_units,
+            l_reshape_3_1,
+            num_hidden_units,
             grad_clipping=GRAD_CLIP,
             gradient_steps=500,
             # W_in_to_hid=lasagne.init.HeUniform(),
@@ -280,14 +286,15 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         print("Recurrent shape: ",lasagne.layers.get_output_shape(l_recurrent))
 
-
-
-        l_reshape_3 = lasagne.layers.ReshapeLayer(l_recurrent, (batch_size*length, num_hidden_units))
+        l_reshape_3_2 = lasagne.layers.ReshapeLayer(
+            l_recurrent,
+            (batch_size*length, num_hidden_units)
+            )
 
         print("Reshape 3 shape: ",lasagne.layers.get_output_shape(l_reshape_3))
 
         l_recurrent_out = lasagne.layers.DenseLayer(
-            l_reshape_3,
+            l_reshape_3_2,
             num_units=output_dim,
             nonlinearity=None
             )
@@ -299,7 +306,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         print("Output shape: ",lasagne.layers.get_output_shape(l_out))
 
-        return l_out, l_out_1
+        return l_out, l_out_1, l_out_2
 
 
 def funcs(dataset, rec_network, auto_network1,auto_network2, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, alpha=L2_CONSTANT, sparsity=0.01,beta=0.001):
@@ -313,7 +320,7 @@ def funcs(dataset, rec_network, auto_network1,auto_network2, batch_size=BATCH_SI
     # symbolic variables
     X1_batch = T.tensor3()
     X2_batch = T.tensor3()
-    Xrec_batch = T.tensor3()
+   = T.tensor3()
     y_batch = T.tensor3()
     l_rate = T.scalar()
 
@@ -337,7 +344,7 @@ def funcs(dataset, rec_network, auto_network1,auto_network2, batch_size=BATCH_SI
     # this is the cost of the network when fed throught the noisey network
     auto1_train_output = lasagne.layers.get_output(auto_network1, X1_batch)
     auto2_train_output = lasagne.layers.get_output(auto_network2, X2_batch)
-    rec_train_output = lasagne.layers.get_output(rec_network, Xrec_batch)
+    rec_train_output = lasagne.layers.get_output(rec_network,[X1_])
     auto1_cost = lasagne.objectives.mse(auto1_train_output, X1_batch)
     auto2_cost = lasagne.objectives.mse(auto2_train_output, X2_batch)
     rec_cost = lasagne.objectives.mse(rec_train_output, y_batch)
@@ -349,7 +356,7 @@ def funcs(dataset, rec_network, auto_network1,auto_network2, batch_size=BATCH_SI
     cost = auto_cost.mean() + rec_cost.mean() + beta * sparsity + alpha * l2
 
     # validation cost
-    valid_output = lasagne.layers.get_output(rec_network, Xrec_batch, deterministic=True)
+    valid_output = lasagne.layers.get_output(rec_network, deterministic=True)
     valid_cost = lasagne.objectives.mse(valid_output, y_batch)
     valid_cost = valid_cost.mean()
 

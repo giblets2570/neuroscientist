@@ -258,7 +258,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch, deterministic=True)
     valid_cost = lasagne.objectives.mse(valid_output, y_batch)
-    valid_cost = valid_cost.mean()
+    valid_cost = valid_cost.mean() 
 
     # test the performance of the netowork without noise
     test = lasagne.layers.get_output(network, X_batch, deterministic=True)
