@@ -213,7 +213,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         print("Reshape_2 shape: ",lasagne.layers.get_output_shape(l_reshape_2))
 
         l_recurrent = lasagne.layers.GRULayer(
-            l_reshape_2, num_hidden_units, 
+            l_reshape_2, num_hidden_units,
             grad_clipping=GRAD_CLIP,
             gradient_steps=500,
             # W_in_to_hid=lasagne.init.HeUniform(),
@@ -245,7 +245,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         return l_out, l_out_1
 
 
-def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, sparsity=0.01,beta=0.0005):
+def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, sparsity=0.01,beta=0.001):
 
     """
         Method the returns the theano functions that are used in 
