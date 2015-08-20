@@ -21,7 +21,7 @@ def getData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16],freq=50.0):
 	num_points=int(duration*freq)
 	array_size = len(tetrodeRange)*200
 	output = np.zeros((num_points,array_size))
-
+	m = 0.0
 	for tetrodeNumber in tetrodeRange:
 		tetfilename = basename + "." + str(tetrodeNumber)
 		print("On tetrode {}".format(tetrodeNumber))
@@ -38,12 +38,14 @@ def getData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16],freq=50.0):
 					j+=1
 			except IndexError:
 				pass
-			print(np.amax(output[i]))
+			if(np.amax(output[i]) > m):
+				m = np.amax(output[i])
 			if(i%10000==0):
 				print("Done: {}".format(i))
 				# print(list(output[i]))
 
 	print(output.shape)
+	output /= m
 	return output
 
 def formatData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16]):

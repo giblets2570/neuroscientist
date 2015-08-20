@@ -399,7 +399,7 @@ def main(tetrode_number=TETRODE_NUMBER):
         predictions.append(prediction)
         # accuracy = np.mean(np.argmax(dataset['y_train'], axis=1) == np.argmax(training['predict'](dataset['X_train']), axis=1))
         actuals.append(dataset['y_train'][start:end])
-
+    points_from = 300
     for i,(actual,prediction) in enumerate(zip(actuals,predictions)):
         prediction = np.asarray(prediction)
         actual = np.asarray(actual)
