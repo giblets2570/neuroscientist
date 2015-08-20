@@ -281,7 +281,7 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
     rho_hat = T.mean(code_output,axis=1)
     L = T.sum(sparsity * T.log(sparsity/rho_hat) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat)))
 
-    l2 = lasagne.regularization.regularize_network_params(network,lasagne.regularization.l2)
+    l2 = lasagne.regularization.regularize_network_params(rec_network,lasagne.regularization.l2)
 
     cost = auto_cost.mean() + rec_cost.mean() + beta * sparsity + alpha * l2
 

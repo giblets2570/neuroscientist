@@ -250,7 +250,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     l_rate = T.scalar()
 
     # this is the cost of the network when fed throught the noisey network
-    l2 = lasagne.regularization.l2(X_batch)
+    l2 = lasagne.regularization.regularize_network_params(network,lasagne.regularization.l2)
     train_output = lasagne.layers.get_output(network, X_batch)
     cost = lasagne.objectives.mse(train_output, y_batch)
     cost = cost.mean() + alpha*l2
