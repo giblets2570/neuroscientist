@@ -81,7 +81,7 @@ def load_data(tetrode_number):
 
     time = []
     i = 0
-    num_skip = 100
+    num_skip = 40
     print(_time.shape)
     while(i + sequenceLength < _time.shape[0]):
         time.append(_time[i:i+sequenceLength])
