@@ -54,7 +54,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 5
+NUM_EPOCHS = 1
 BATCH_SIZE = 400
 NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
@@ -148,7 +148,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2,num_hidde
 
     return l_out
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.01, beta=0.0001, momentum=MOMENTUM, alpha=L2_CONSTANT):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.01, beta=0.0002, momentum=MOMENTUM, alpha=L2_CONSTANT):
 
     """
         Method the returns the theano functions that are used in
@@ -183,7 +183,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     train_output = lasagne.layers.get_output(network, X_batch)
     cost = lasagne.objectives.mse(train_output, y_batch) 
     l2 = lasagne.regularization.l2(X_batch)
-    cost = cost.mean() + beta * L + alpha * l2
+    cost = cost.mean() + beta * L #+ alpha * l2
 
     all_params = lasagne.layers.get_all_params(network)
     updates = lasagne.updates.nesterov_momentum(cost, all_params, learning_rate, momentum)
@@ -338,7 +338,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
 
             # plt.plot(var2)
             # fig.tight_layout()
-            plt.savefig('auto_models/deep/end_fig{}.png'.format(tetrode_number), bbox_inches='tight')
+            plt.savefig('auto_models/deep/end_fig{}_{}.png'.format(j,tetrode_number), bbox_inches='tight')
             plt.close()
 
         # col = [np.argmax(code) for code in codes]
