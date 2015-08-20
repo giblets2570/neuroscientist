@@ -394,11 +394,11 @@ def main(tetrode_number=TETRODE_NUMBER):
     predictions = []
     cost_arrays = []
     actuals = []
-    for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
-        prediction = training['predict'](dataset['X_train'][start:end])
+    for start, end in zip(range(0, dataset['num_examples_test'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_test'], BATCH_SIZE)):
+        prediction = training['predict'](dataset['X_test'][start:end])
         predictions.append(prediction)
-        # accuracy = np.mean(np.argmax(dataset['y_train'], axis=1) == np.argmax(training['predict'](dataset['X_train']), axis=1))
-        actuals.append(dataset['y_train'][start:end])
+        # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
+        actuals.append(dataset['y_test'][start:end])
     points_from = 300
     for i,(actual,prediction) in enumerate(zip(actuals,predictions)):
         prediction = np.asarray(prediction)
@@ -425,7 +425,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
         fig.tight_layout()
 
-        plt.savefig('../position/test/End_Position_{}.png'.format(i), bbox_inches='tight')
+        plt.savefig('../position/test/End_Position_test_{}.png'.format(i), bbox_inches='tight')
         plt.close()
 
     if(SAVE_MODEL):
