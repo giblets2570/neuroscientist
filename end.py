@@ -64,7 +64,7 @@ TETRODE_NUMBER = 11
 
 SAVE_MODEL = True
 
-L2_CONSTANT = 0.0001
+L2_CONSTANT = 0.00001
 
 def load_data(tetrode_number):
     """
@@ -250,7 +250,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, sparsity=0.01,beta=0.005,alpha=L2_CONSTANT):
 
     """
-        Method the returns the theano functions that are used in 
+        Method the returns the theano functions that are used in
         training and testing. These are the train and predict functions.
         The predict function returns out output of the network.
     """
