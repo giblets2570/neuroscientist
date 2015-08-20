@@ -161,18 +161,19 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     y_batch = T.matrix()
 
     # this is the cost of the network when fed throught the noisey network
-    l2 = lasagne.regularization.l2(X_batch)
+    all_params = lasagne.layers.get_all_params(network)
+
+    l2 = lasagne.regularization.regularize_network_params(network,lasagne.regularization.l2)
     train_output = lasagne.layers.get_output(network, X_batch)
     cost = lasagne.objectives.categorical_crossentropy(train_output, y_batch)
     cost = cost.mean() + alpha*l2
+
+    updates = lasagne.updates.nesterov_momentum(cost, all_params, learning_rate, momentum)
 
     # test the performance of the netowork without noise
     test = lasagne.layers.get_output(network, X_batch, deterministic=True)
     pred = T.argmax(test, axis=1)
     accuracy = T.mean(T.eq(pred, y_batch), dtype=theano.config.floatX)
-
-    all_params = lasagne.layers.get_all_params(network)
-    updates = lasagne.updates.nesterov_momentum(cost, all_params, learning_rate, momentum)
 
     train = theano.function(inputs=[X_batch, y_batch], outputs=cost, updates=updates, allow_input_downcast=True)
     valid = theano.function(inputs=[X_batch, y_batch], outputs=cost, allow_input_downcast=True)
