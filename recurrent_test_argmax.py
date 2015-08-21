@@ -76,7 +76,7 @@ def load_data(tetrode_number):
     # sequence length = number of time steps per example. 
     # num_features_per_timestep = 31 i.e labels per tetrode
 
-    X_train, X_valid, X_test, y_train, y_valid, y_test = formatData(sequenceLength=2000,learned_labels=True)
+    X_train, X_valid, X_test, y_train, y_valid, y_test = formatData(sequenceLength=2000,learned_labels=True,arg=True)
 
     return dict(
         X_train=X_train,
