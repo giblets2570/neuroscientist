@@ -22,10 +22,10 @@ def getData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16],freq=50.0):
 	array_size = len(tetrodeRange)*200
 	output = np.zeros((num_points,array_size))
 	m = 0.0
-	for tetrodeNumber in tetrodeRange:
+	for n,tetrodeNumber in enumerate(tetrodeRange):
 		tetfilename = basename + "." + str(tetrodeNumber)
 		print("On tetrode {}".format(tetrodeNumber))
-		base = 200*(tetrodeNumber-9)
+		base = 200*n
 		header, data = readfile(tetfilename,[('ts','>i'),('waveform','50b')])
 		j = 0
 		for i in range(num_points):
@@ -49,17 +49,26 @@ def getData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16],freq=50.0):
 	output /= m
 	return output
 
-def formatData(basename=BASENAME,tetrodeRange=[9,10,11,12,13,14,15,16]):
+def formatData(basename=BASENAME,sequenceLength=2000,tetrodeRange=[9,10,11,12,13,14,15,16],num_skip=40):
 
 	activations = getData(basename,tetrodeRange)
 
-	num_entries = activations.shape[0]
+	time = []
+	i = 0
+	print(activations.shape)
+	while(i + sequenceLength < activations.shape[0]):
+		time.append(activations[i:i+sequenceLength])
+		i+=num_skip
+	time = np.asarray(time)
+	print(time.shape)
+
+	num_entries = time.shape[0]
 	n = int(num_entries*0.8)
 	m = int(num_entries*0.9)
 
 	print("Got the data yo")
 
-	return activations[:n],activations[n:m],activations[m:]
+	return time[:n],time[n:m],time[m:]
 
 if __name__=="__main__":
 	# activations, labels = getData(BASENAME,[9])

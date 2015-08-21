@@ -19,7 +19,7 @@ import theano
 import theano.tensor as T
 import time
 import datetime
-from data import formatData as auto_data
+from big_data import formatData as auto_data
 from pos_data import getXY as rec_data
 import json
 import re
@@ -79,26 +79,28 @@ def load_data(tetrode_number):
 
     y_train, y_valid, y_test = rec_data(sequenceLength=sequenceLength)
 
-    _,_time,_ = auto_data(tetrode_number,BASENAME,timed=True)
+    # _,_time,_ = auto_data(tetrode_number,BASENAME,timed=True)
 
-    time = []
-    i = 0
-    num_skip = 40
-    print(_time.shape)
-    while(i + sequenceLength < _time.shape[0]):
-        time.append(_time[i:i+sequenceLength])
-        # i+=25
-        i+=num_skip
-    time = np.asarray(time)
-    print(time.shape)
+    # time = []
+    # i = 0
+    # num_skip = 40
+    # print(_time.shape)
+    # while(i + sequenceLength < _time.shape[0]):
+    #     time.append(_time[i:i+sequenceLength])
+    #     # i+=25
+    #     i+=num_skip
+    # time = np.asarray(time)
+    # print(time.shape)
 
-    n = int(len(time)*0.8)
-    m = int(len(time)*0.9)
+    # n = int(len(time)*0.8)
+    # m = int(len(time)*0.9)
 
 
-    X_train = time[:n]
-    X_valid = time[n:m]
-    X_test = time[m:]
+    # X_train = time[:n]
+    # X_valid = time[n:m]
+    # X_test = time[m:]
+
+    X_train, X_valid, X_test = auto_data(sequenceLength=sequenceLength,tetrodeRange=[11,12],num_skip=40)
 
     # X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1])
     # X_valid = X_valid.reshape(X_valid.shape[0],1,X_valid.shape[1])
@@ -320,7 +322,6 @@ def funcs(dataset, rec_network, auto_network1,auto_network2, batch_size=BATCH_SI
     # symbolic variables
     X1_batch = T.tensor3()
     X2_batch = T.tensor3()
-   = T.tensor3()
     y_batch = T.tensor3()
     l_rate = T.scalar()
 
@@ -344,7 +345,8 @@ def funcs(dataset, rec_network, auto_network1,auto_network2, batch_size=BATCH_SI
     # this is the cost of the network when fed throught the noisey network
     auto1_train_output = lasagne.layers.get_output(auto_network1, X1_batch)
     auto2_train_output = lasagne.layers.get_output(auto_network2, X2_batch)
-    rec_train_output = lasagne.layers.get_output(rec_network,[X1_])
+    rec_train_output = lasagne.layers.get_output(rec_network,[X1_batch, X2_batch])
+
     auto1_cost = lasagne.objectives.mse(auto1_train_output, X1_batch)
     auto2_cost = lasagne.objectives.mse(auto2_train_output, X2_batch)
     rec_cost = lasagne.objectives.mse(rec_train_output, y_batch)
@@ -356,19 +358,18 @@ def funcs(dataset, rec_network, auto_network1,auto_network2, batch_size=BATCH_SI
     cost = auto_cost.mean() + rec_cost.mean() + beta * sparsity + alpha * l2
 
     # validation cost
-    valid_output = lasagne.layers.get_output(rec_network, deterministic=True)
+    valid_output = lasagne.layers.get_output(rec_network, [X1_batch, X2_batch], deterministic=True)
     valid_cost = lasagne.objectives.mse(valid_output, y_batch)
     valid_cost = valid_cost.mean()
 
     # test the performance of the netowork without noise
-    test = lasagne.layers.get_output(rec_network, Xrec_batch, deterministic=True)
+    test = lasagne.layers.get_output(rec_network, [X1_batch, X2_batch], deterministic=True)
 
     all_params = lasagne.layers.get_all_params(rec_network) + lasagne.layers.get_all_params(auto_network1)[2:] + lasagne.layers.get_all_params(auto_network2)[2:]
     updates = lasagne.updates.adagrad(cost, all_params, l_rate)
-    
-    train = theano.function(inputs=[X1_batch,X2_batch,Xrec_batch, y_batch, l_rate], outputs=cost, updates=updates, allow_input_downcast=True)
-    valid = theano.function(inputs=[X1_batch,X2_batch,Xrec_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
-    predict = theano.function(inputs=[X1_batch,X2_batch,Xrec_batch], outputs=test, allow_input_downcast=True)
+    train = theano.function(inputs=[X1_batch, X2_batch, y_batch, l_rate], outputs=cost, updates=updates, allow_input_downcast=True)
+    valid = theano.function(inputs=[X1_batch, X2_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
+    predict = theano.function(inputs=[X1_batch,X2_batch], outputs=test, allow_input_downcast=True)
 
     return dict(
         train=train,
@@ -425,19 +426,18 @@ def main(tetrode_number=TETRODE_NUMBER):
             valid_costs = []
 
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
-                cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end],learning_rate)
+                d = np.split(dataset['X_train'][start:end],2,axis=-1)
+                cost = training['train'](d[0],d[1],dataset['y_train'][start:end],learning_rate)
                 costs.append(cost)
-                # if(costs[-1] > 1.02*costs[-2]):
-                #     LEARNING_RATE = 0.8*LEARNING_RATE
-                # print(cost)
-            
+
             for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
-                cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
+                d = np.split(dataset['X_valid'][start:end],2,axis=-1)
+                cost = training['valid'](d[0],d[1],dataset['y_valid'][start:end])
                 valid_costs.append(cost)
 
             if(np.mean(np.asarray(costs,dtype=np.float32)) > 1.00000001*meanTrainCost):
                 increasing += 1
-            else: 
+            else:
                 increasing = 0
 
             if increasing == 3:
