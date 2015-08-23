@@ -106,9 +106,13 @@ def load_data(tetrode_number):
     # X_valid = X_valid.reshape(X_valid.shape[0],1,X_valid.shape[1])
     # X_test = X_test.reshape(X_test.shape[0],1,X_test.shape[1])
 
-    print("X_TRAIN: {}".format(X_train.shape))
+    print("X_train: {}".format(X_train.shape))
+    print("X_valid: {}".format(X_valid.shape))
+    print("X_test: {}".format(X_test.shape))
 
-    print("y_TRAIN: {}".format(y_train.shape))
+    print("y_train: {}".format(y_train.shape))
+    print("y_valid: {}".format(y_valid.shape))
+    print("y_test: {}".format(y_test.shape))
 
     return dict(
         X_train=X_train,
@@ -149,7 +153,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         # shape = tuple(list(batch_size,input_shape[1],200))
         print(shape)
 
-        l_in= lasagne.layers.InputLayer(shape=shape)
+        l_in = lasagne.layers.InputLayer(shape=shape)
 
         print("In 1 shape: ",lasagne.layers.get_output_shape(l_in))
 

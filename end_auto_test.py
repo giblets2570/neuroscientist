@@ -204,8 +204,6 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     return dict(
         train=train,
         code=code,
-        activations_1=activations_1,
-        activations_2=activations_2,
         predict=predict
     )
 

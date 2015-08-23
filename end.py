@@ -247,7 +247,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         return l_out, l_out_1
 
 
-def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, sparsity=0.01,beta=0.00005,alpha=L2_CONSTANT,auto_frac=0.5):
+def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, sparsity=0.01,beta=0.00005,alpha=L2_CONSTANT,auto_frac=0.1):
 
     """
         Method the returns the theano functions that are used in
@@ -286,7 +286,7 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
     auto_cost = auto_cost.mean()
     rec_cost = rec_cost.mean()
 
-    cost = auto_frac * auto_cost + rec_cost + beta * L + alpha * l2
+    cost = auto_frac * (beta * L + auto_cost) + rec_cost + alpha * l2
 
 
     # validation cost
