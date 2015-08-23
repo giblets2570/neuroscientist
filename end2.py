@@ -365,7 +365,7 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
     L1 = T.sum(sparsity * T.log(sparsity/rho_hat1) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat1)))
     L2 = T.sum(sparsity * T.log(sparsity/rho_hat2) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat2)))
 
-    cost = auto_cost.mean() + rec_cost.mean() + beta * L2 #+ alpha * l2
+    cost = auto_cost.mean() + rec_cost.mean() + beta * (L1 + L2) #+ alpha * l2
 
     # validation cost
     valid_output = lasagne.layers.get_output(rec_network, X1_batch, deterministic=True)
