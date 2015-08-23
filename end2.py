@@ -343,7 +343,7 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
 
     print(auto_layers)
     print(len(auto_layers))
-    print([i.get_output_shape() for i in auto_layers][11])
+    print([lasagne.layers.get_output_shape(i) for i in auto_layers][11])
     # num_auto_layers1 = len(auto_layers1)
 
     code_layer1 = auto_layers[4]
