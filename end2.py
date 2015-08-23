@@ -357,8 +357,8 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
     auto_train_output = lasagne.layers.get_output(auto_network, X1_batch)
     rec_train_output = lasagne.layers.get_output(rec_network, X1_batch)
 
-    auto_cost = lasagne.objectives.mse(auto_train_output, X1_batch)
-    rec_cost = lasagne.objectives.mse(rec_train_output, y_batch)
+    auto_cost = lasagne.objectives.squared_error(auto_train_output, X1_batch)
+    rec_cost = lasagne.objectives.squared_error(rec_train_output, y_batch)
 
     rho_hat1 = T.mean(code_output1,axis=1)
     rho_hat2 = T.mean(code_output2,axis=1)
@@ -369,7 +369,7 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
 
     # validation cost
     valid_output = lasagne.layers.get_output(rec_network, X1_batch)
-    valid_cost = lasagne.objectives.mse(valid_output, y_batch)
+    valid_cost = lasagne.objectives.squared_error(valid_output, y_batch)
     valid_cost = valid_cost.mean()
 
     # test the performance of the netowork without noise
