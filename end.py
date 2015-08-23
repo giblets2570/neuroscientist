@@ -283,7 +283,7 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
 
     l2 = lasagne.regularization.regularize_network_params(rec_network,lasagne.regularization.l2)
 
-    cost = auto_cost.mean() + rec_cost.mean() + beta * sparsity + alpha * l2
+    cost = auto_cost.mean() + rec_cost.mean() + beta * L + alpha * l2
 
     # validation cost
     valid_output = lasagne.layers.get_output(rec_network, X_batch, deterministic=True)

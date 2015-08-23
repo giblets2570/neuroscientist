@@ -111,11 +111,11 @@ def load_data(tetrode_number):
     print("y_TRAIN: {}".format(y_train.shape))
 
     return dict(
-        X_train=time[:n],
+        X_train=X_train,
         y_train=y_train,
-        X_valid=time[n:m],
+        X_valid=X_valid,
         y_valid=y_valid,
-        X_test=time[m:],
+        X_test=X_test,
         y_test=y_test,
         num_examples_train=X_train.shape[0],
         num_examples_valid=X_valid.shape[0],
@@ -138,14 +138,20 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         """
         length = input_shape[1]
         reduced_length = num_hidden_units
+        print("BATCH_SIZE: {}".format(batch_size))
+        print("input_shape[1]: {}".format(input_shape[1]))
+        print("200: {}".format(200))
 
-        shape = tuple([batch_size]+list(input_shape[1]+[200]))
+        shape = [batch_size,input_shape[1],400]
+        print("Shape: {}".format(shape))
+        shape = tuple(shape)
+
+        # shape = tuple(list(batch_size,input_shape[1],200))
         print(shape)
-
 
         l_in= lasagne.layers.InputLayer(shape=shape)
 
-        print("In 1 shape: ",lasagne.layers.get_output_shape(l_in_1))
+        print("In 1 shape: ",lasagne.layers.get_output_shape(l_in))
 
         l_slice_1 = lasagne.layers.SliceLayer(
             l_in,
@@ -165,7 +171,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             )
 
         l_hidden_1_1 = lasagne.layers.DenseLayer(
-            l_reshape,
+            l_reshape_1,
             num_units=100,
             nonlinearity=lasagne.nonlinearities.rectify,
             )
@@ -186,7 +192,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        print("Hidden 6 1 shape: ",lasagne.layers.get_output_shape(l_hidden_6_1))
+        print("Hidden 6 1 shape: ",lasagne.layers.get_output_shape(l_hidden_1_2))
 
         l_almost_1 = lasagne.layers.DenseLayer(
             l_hidden_1_2,
@@ -212,7 +218,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        print("Hidden 1 2 shape: ",lasagne.layers.get_output_shape(l_hidden_1_2))
+        print("Hidden 1 2 shape: ",lasagne.layers.get_output_shape(l_hidden_2_1))
 
         l_code_layer_2 = lasagne.layers.DenseLayer(
             l_hidden_2_1,
@@ -228,7 +234,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             nonlinearity=lasagne.nonlinearities.rectify,
             )
 
-        print("Hidden 6 2 shape: ",lasagne.layers.get_output_shape(l_hidden_6_2))
+        print("Hidden 6 2 shape: ",lasagne.layers.get_output_shape(l_hidden_2_2))
 
         l_almost_2 = lasagne.layers.DenseLayer(
             l_hidden_2_2,
@@ -239,6 +245,11 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         l_out_2 = lasagne.layers.ReshapeLayer(
             l_almost_2,
             (batch_size,length,200)
+            )
+
+        l_out_auto = lasagne.layers.ConcatLayer(
+            [l_out_1,l_out_2],
+            axis=-1
             )
 
         print("Out 1 2 shape: ",lasagne.layers.get_output_shape(l_out_2))
@@ -256,7 +267,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             nonlinearity=lasagne.nonlinearities.rectify
             )
 
-        print("Hidden 1 shape: ",lasagne.layers.get_output_shape(l_hidden_1))
+        print("Hidden 1 shape: ",lasagne.layers.get_output_shape(l_hidden_3_1))
 
         l_dropout = lasagne.layers.DropoutLayer(
             l_hidden_3_1,
@@ -270,11 +281,11 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             nonlinearity=lasagne.nonlinearities.rectify
             )
 
-        print("Hidden 2 shape: ",lasagne.layers.get_output_shape(l_hidden_2))
+        print("Hidden 2 shape: ",lasagne.layers.get_output_shape(l_hidden_3_2))
 
-        l_reshape_3_1 = lasagne.layers.ReshapeLayer(l_hidden_2, (batch_size, length, num_hidden_units))
+        l_reshape_3_1 = lasagne.layers.ReshapeLayer(l_hidden_3_2, (batch_size, length, num_hidden_units))
 
-        print("Reshape_2 shape: ",lasagne.layers.get_output_shape(l_reshape_2))
+        print("Reshape_2 shape: ",lasagne.layers.get_output_shape(l_reshape_3_1))
 
         l_recurrent = lasagne.layers.GRULayer(
             l_reshape_3_1,
@@ -293,7 +304,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             (batch_size*length, num_hidden_units)
             )
 
-        print("Reshape 3 shape: ",lasagne.layers.get_output_shape(l_reshape_3))
+        print("Reshape 3 shape: ",lasagne.layers.get_output_shape(l_reshape_3_2))
 
         l_recurrent_out = lasagne.layers.DenseLayer(
             l_reshape_3_2,
@@ -308,10 +319,10 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         print("Output shape: ",lasagne.layers.get_output_shape(l_out))
 
-        return l_out, l_out_1, l_out_2
+        return l_out, l_out_auto
 
 
-def funcs(dataset, rec_network, auto_network1,auto_network2, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, alpha=L2_CONSTANT, sparsity=0.01,beta=0.001):
+def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, alpha=L2_CONSTANT, sparsity=0.01,beta=0.001):
 
     """
         Method the returns the theano functions that are used in 
@@ -321,7 +332,6 @@ def funcs(dataset, rec_network, auto_network1,auto_network2, batch_size=BATCH_SI
 
     # symbolic variables
     X1_batch = T.tensor3()
-    X2_batch = T.tensor3()
     y_batch = T.tensor3()
     l_rate = T.scalar()
 
@@ -329,47 +339,47 @@ def funcs(dataset, rec_network, auto_network1,auto_network2, batch_size=BATCH_SI
     num_rec_layers = len(rec_layers)
     # print(rec_layers)
 
-    auto_layers1 = lasagne.layers.get_all_layers(auto_network1)
-    num_auto_layers1 = len(auto_layers1)
+    auto_layers = lasagne.layers.get_all_layers(auto_network)
 
-    auto_layers2 = lasagne.layers.get_all_layers(auto_network2)
-    num_auto_layers2 = len(auto_layers2)
+    print(auto_layers)
+    print(len(auto_layers))
+    print([i.get_output_shape() for i in auto_layers][11])
+    # num_auto_layers1 = len(auto_layers1)
 
-    code_layer1 = auto_layers1[num_auto_layers1/2]
-    code_layer2 = auto_layers1[num_auto_layers2/2]
+    code_layer1 = auto_layers[4]
+    code_layer2 = auto_layers[11]
     # code outputs
-    code_output1 = lasagne.layers.get_output(code_layer1, X1_batch, deterministic=True)
-    code_output2 = lasagne.layers.get_output(code_layer2, X2_batch, deterministic=True)
+    code_output1 = lasagne.layers.get_output(code_layer1, X1_batch)
+    code_output2 = lasagne.layers.get_output(code_layer2, X1_batch) 
 
     # print(auto_layers1)
     # this is the cost of the network when fed throught the noisey network
-    auto1_train_output = lasagne.layers.get_output(auto_network1, X1_batch)
-    auto2_train_output = lasagne.layers.get_output(auto_network2, X2_batch)
-    rec_train_output = lasagne.layers.get_output(rec_network,[X1_batch, X2_batch])
+    auto_train_output = lasagne.layers.get_output(auto_network, X1_batch)
+    rec_train_output = lasagne.layers.get_output(rec_network, X1_batch)
 
-    auto1_cost = lasagne.objectives.mse(auto1_train_output, X1_batch)
-    auto2_cost = lasagne.objectives.mse(auto2_train_output, X2_batch)
+    auto_cost = lasagne.objectives.mse(auto_train_output, X1_batch)
     rec_cost = lasagne.objectives.mse(rec_train_output, y_batch)
 
-    rho_hat = T.mean(code_output,axis=1)
-    L = T.sum(sparsity * T.log(sparsity/rho_hat) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat)))
+    rho_hat1 = T.mean(code_output1,axis=1)
+    rho_hat2 = T.mean(code_output2,axis=1)
+    L1 = T.sum(sparsity * T.log(sparsity/rho_hat1) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat1)))
+    L2 = T.sum(sparsity * T.log(sparsity/rho_hat2) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat2)))
 
-
-    cost = auto_cost.mean() + rec_cost.mean() + beta * sparsity + alpha * l2
+    cost = auto_cost.mean() + rec_cost.mean() + beta * L2 #+ alpha * l2
 
     # validation cost
-    valid_output = lasagne.layers.get_output(rec_network, [X1_batch, X2_batch], deterministic=True)
+    valid_output = lasagne.layers.get_output(rec_network, X1_batch, deterministic=True)
     valid_cost = lasagne.objectives.mse(valid_output, y_batch)
     valid_cost = valid_cost.mean()
 
     # test the performance of the netowork without noise
-    test = lasagne.layers.get_output(rec_network, [X1_batch, X2_batch], deterministic=True)
+    test = lasagne.layers.get_output(rec_network, X1_batch, deterministic=True)
 
     all_params = lasagne.layers.get_all_params(rec_network) + lasagne.layers.get_all_params(auto_network1)[2:] + lasagne.layers.get_all_params(auto_network2)[2:]
     updates = lasagne.updates.adagrad(cost, all_params, l_rate)
-    train = theano.function(inputs=[X1_batch, X2_batch, y_batch, l_rate], outputs=cost, updates=updates, allow_input_downcast=True)
-    valid = theano.function(inputs=[X1_batch, X2_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
-    predict = theano.function(inputs=[X1_batch,X2_batch], outputs=test, allow_input_downcast=True)
+    train = theano.function(inputs=[X1_batch, y_batch, l_rate], outputs=cost, updates=updates, allow_input_downcast=True)
+    valid = theano.function(inputs=[X1_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
+    predict = theano.function(inputs=[X1_batch], outputs=test, allow_input_downcast=True)
 
     return dict(
         train=train,
