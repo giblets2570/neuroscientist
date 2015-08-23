@@ -436,12 +436,11 @@ def main(tetrode_number=TETRODE_NUMBER):
             valid_costs = []
 
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
-                # d = np.split(dataset['X_train'][start:end],2,axis=-1)
+                print(dataset['X_train'][start:end].shape)
                 cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end],learning_rate)
                 costs.append(cost)
 
             for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
-                # d = np.split(dataset['X_valid'][start:end],2,axis=-1)
                 cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
                 valid_costs.append(cost)
 
