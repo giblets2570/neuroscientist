@@ -247,7 +247,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         return l_out, l_out_1
 
 
-def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, sparsity=0.01,beta=0.00005,alpha=L2_CONSTANT):
+def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, sparsity=0.01,beta=0.00005,alpha=L2_CONSTANT,auto_frac=0.5):
 
     """
         Method the returns the theano functions that are used in
@@ -283,7 +283,11 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
 
     l2 = lasagne.regularization.regularize_network_params(rec_network,lasagne.regularization.l2)
 
-    cost = auto_cost.mean() + rec_cost.mean() + beta * L + alpha * l2
+    auto_cost = auto_cost.mean()
+    rec_cost = rec_cost.mean()
+
+    cost = auto_frac * auto_cost + rec_cost + beta * L + alpha * l2
+
 
     # validation cost
     valid_output = lasagne.layers.get_output(rec_network, X_batch, deterministic=True)
@@ -298,11 +302,15 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
     train = theano.function(inputs=[X_batch, y_batch, l_rate], outputs=cost, updates=updates, allow_input_downcast=True)
     valid = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
     predict = theano.function(inputs=[X_batch], outputs=test, allow_input_downcast=True)
+    auto_cost = theano.function(inputs=[X_batch], outputs=auto_cost, allow_input_downcast=True)
+    rec_cost = theano.function(inputs=[X_batch, y_batch], outputs=rec_cost, allow_input_downcast=True)
 
     return dict(
         train=train,
         valid=valid,
-        predict=predict
+        predict=predict,
+        rec_cost=rec_cost,
+        auto_cost=auto_cost
     )
 
 def main(tetrode_number=TETRODE_NUMBER):
@@ -352,6 +360,8 @@ def main(tetrode_number=TETRODE_NUMBER):
         for i in range(NUM_EPOCHS):
             costs = []
             valid_costs = []
+            auto_costs = []
+            rec_costs = []
 
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
                 cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end],learning_rate)
@@ -359,10 +369,16 @@ def main(tetrode_number=TETRODE_NUMBER):
                 # if(costs[-1] > 1.02*costs[-2]):
                 #     LEARNING_RATE = 0.8*LEARNING_RATE
                 # print(cost)
-            
+
+
+
             for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
                 cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
+                auto_cost = training['auto_cost'](dataset['X_valid'][start:end])
+                rec_cost = training['rec_cost'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
                 valid_costs.append(cost)
+                auto_costs.append(auto_cost)
+                rec_costs.append(rec_cost)
 
             if(np.mean(np.asarray(costs,dtype=np.float32)) > 1.00000001*meanTrainCost):
                 increasing += 1
@@ -373,11 +389,14 @@ def main(tetrode_number=TETRODE_NUMBER):
                 print("Lowering learning rate")
                 learning_rate = 0.9*learning_rate
                 increasing = 0
-            meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
-            meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
+            meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32)
+            meanTrainCost = np.mean(np.asarray(costs),dtype=np.float32)
+            meanAutoCost = np.mean(np.asarray(auto_costs),dtype=np.float32)
+            meanRecCost = np.mean(np.asarray(rec_costs),dtype=np.float32)
             # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
 
             print("Epoch: {}, Training cost: {}, Validation Cost: {}, learning rate: {}".format(i+1,meanTrainCost,meanValidCost,learning_rate))
+            print("Rec cost: {}, Auto cost: {}".format(meanRecCost,meanAutoCost))
 
             if(np.isnan(meanValidCost)):
                 print("Nan value")
