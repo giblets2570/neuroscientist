@@ -368,14 +368,14 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
     cost = auto_cost.mean() + rec_cost.mean() + beta * (L1 + L2) #+ alpha * l2
 
     # validation cost
-    valid_output = lasagne.layers.get_output(rec_network, X1_batch, deterministic=True)
+    valid_output = lasagne.layers.get_output(rec_network, X1_batch)
     valid_cost = lasagne.objectives.mse(valid_output, y_batch)
     valid_cost = valid_cost.mean()
 
     # test the performance of the netowork without noise
-    test = lasagne.layers.get_output(rec_network, X1_batch, deterministic=True)
+    test = lasagne.layers.get_output(rec_network, X1_batch)
 
-    all_params = lasagne.layers.get_all_params(rec_network) + lasagne.layers.get_all_params(auto_network1)[2:] + lasagne.layers.get_all_params(auto_network2)[2:]
+    all_params = lasagne.layers.get_all_params(rec_network) + lasagne.layers.get_all_params(auto_network)
     updates = lasagne.updates.adagrad(cost, all_params, l_rate)
     train = theano.function(inputs=[X1_batch, y_batch, l_rate], outputs=cost, updates=updates, allow_input_downcast=True)
     valid = theano.function(inputs=[X1_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
@@ -408,16 +408,16 @@ def main(tetrode_number=TETRODE_NUMBER):
     training = funcs(dataset,rec_network, auto_network)
     print("Done!")
 
-    if(os.path.isfile('end_network_auto_{}'.format(tetrode_number))):
+    if(os.path.isfile('end_network_auto_2_{}'.format(tetrode_number))):
         print("Loading old model")
-        f=open('end_network_auto_{}'.format(tetrode_number),'r')
+        f=open('end_network_auto_2_{}'.format(tetrode_number),'r')
         all_param_values = pickle.load(f)
         f.close()
         lasagne.layers.set_all_param_values(auto_network, all_param_values)
 
-    if(os.path.isfile('end_network_recurrent_{}'.format(tetrode_number))):
+    if(os.path.isfile('end_network_recurrent_2_{}'.format(tetrode_number))):
         print("Loading old model")
-        f=open('end_network_recurrent_{}'.format(tetrode_number),'r')
+        f=open('end_network_recurrent_2_{}'.format(tetrode_number),'r')
         all_param_values = pickle.load(f)
         f.close()
         lasagne.layers.set_all_param_values(rec_network, all_param_values)
@@ -436,13 +436,13 @@ def main(tetrode_number=TETRODE_NUMBER):
             valid_costs = []
 
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
-                d = np.split(dataset['X_train'][start:end],2,axis=-1)
-                cost = training['train'](d[0],d[1],dataset['y_train'][start:end],learning_rate)
+                # d = np.split(dataset['X_train'][start:end],2,axis=-1)
+                cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end],learning_rate)
                 costs.append(cost)
 
             for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
-                d = np.split(dataset['X_valid'][start:end],2,axis=-1)
-                cost = training['valid'](d[0],d[1],dataset['y_valid'][start:end])
+                # d = np.split(dataset['X_valid'][start:end],2,axis=-1)
+                cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
                 valid_costs.append(cost)
 
             if(np.mean(np.asarray(costs,dtype=np.float32)) > 1.00000001*meanTrainCost):
@@ -514,11 +514,11 @@ def main(tetrode_number=TETRODE_NUMBER):
     if(SAVE_MODEL):
         print("Saving model...")
         all_param_values = lasagne.layers.get_all_param_values(auto_network)
-        f=open('end_network_auto_{}'.format(tetrode_number),'w')
+        f=open('end_network_auto_2_{}'.format(tetrode_number),'w')
         pickle.dump(all_param_values, f)
         f.close()
         all_param_values = lasagne.layers.get_all_param_values(rec_network)
-        f=open('end_network_recurrent_{}'.format(tetrode_number),'w')
+        f=open('end_network_recurrent_2_{}'.format(tetrode_number),'w')
         pickle.dump(all_param_values, f)
         f.close()
 
