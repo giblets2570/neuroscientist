@@ -198,7 +198,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         l_dropout = lasagne.layers.DropoutLayer(
             l_hidden_1,
-            p=0.8,
+            p=0.5,
             )
 
 
@@ -275,8 +275,8 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
     # this is the cost of the network when fed throught the noisey network
     auto_train_output = lasagne.layers.get_output(auto_network, X_batch)
     rec_train_output = lasagne.layers.get_output(rec_network, X_batch)
-    auto_cost = lasagne.objectives.mse(auto_train_output, X_batch)
-    rec_cost = lasagne.objectives.mse(rec_train_output, y_batch)
+    auto_cost = lasagne.objectives.squared_error(auto_train_output, X_batch)
+    rec_cost = lasagne.objectives.squared_error(rec_train_output, y_batch)
 
     rho_hat = T.mean(code_output,axis=1)
     L = T.sum(sparsity * T.log(sparsity/rho_hat) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat)))
@@ -287,7 +287,7 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
 
     # validation cost
     valid_output = lasagne.layers.get_output(rec_network, X_batch, deterministic=True)
-    valid_cost = lasagne.objectives.mse(valid_output, y_batch)
+    valid_cost = lasagne.objectives.squared_error(valid_output, y_batch)
     valid_cost = valid_cost.mean()
 
     # test the performance of the netowork without noise
