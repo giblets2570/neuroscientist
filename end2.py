@@ -437,6 +437,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
                 print(dataset['X_train'][start:end].shape)
+                print(dataset['y_train'][start:end].shape)
                 cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end],learning_rate)
                 costs.append(cost)
 
