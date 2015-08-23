@@ -508,7 +508,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
         fig.tight_layout()
 
-        plt.savefig('../position/test/End_Position_test_{}.png'.format(i), bbox_inches='tight')
+        plt.savefig('../position/test/End2_Position_test_{}.png'.format(i), bbox_inches='tight')
         plt.close()
 
     if(SAVE_MODEL):
