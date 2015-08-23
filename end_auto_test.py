@@ -278,7 +278,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
 
 
         ran = np.random.randint(dataset['data'].shape[0],size=10)
-        for j in ran:
+        for s,j in enumerate(ran):
             testing = [dataset['data'][j]]
             # print(testing[0].shape)
             output = dataset['data'][j]
@@ -338,7 +338,7 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
 
             # plt.plot(var2)
             # fig.tight_layout()
-            plt.savefig('auto_models/deep/end_fig{}_{}.png'.format(j,tetrode_number), bbox_inches='tight')
+            plt.savefig('auto_models/deep/end_fig{}_{}.png'.format(s,tetrode_number), bbox_inches='tight')
             plt.close()
 
         # col = [np.argmax(code) for code in codes]
@@ -479,11 +479,11 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         #     # pickle.dump(labels, f)
         #     # f.close()
 
-        # codes_2d = bh_sne(np.asarray(codes,dtype=np.float64))
+        codes_2d = bh_sne(np.asarray(codes,dtype=np.float64))
 
-        # plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=col, alpha=0.8,lw=0)
-        # plt.savefig('dbscan_labels/test/argmax_{}.png'.format(tetrode_number), bbox_inches='tight')
-        # plt.close()
+        plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=dataset['labels'], alpha=0.8,lw=0)
+        plt.savefig('dbscan_labels/test/end_tsne_{}.png'.format(tetrode_number), bbox_inches='tight')
+        plt.close()
 
         # # d = DPGMM(n_components=10, covariance_type='full')
         # d = DPGMM(n_components=15)
