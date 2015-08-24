@@ -286,7 +286,7 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
     auto_cost = auto_cost.mean()
     rec_cost = rec_cost.mean()
 
-    cost = auto_frac * (beta * L + auto_cost) + rec_cost + alpha * l2
+    cost = auto_frac * (beta * L + auto_cost) + rec_cost  #+ alpha * l2
 
 
     # validation cost
@@ -366,11 +366,6 @@ def main(tetrode_number=TETRODE_NUMBER):
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
                 cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end],learning_rate)
                 costs.append(cost)
-                # if(costs[-1] > 1.02*costs[-2]):
-                #     LEARNING_RATE = 0.8*LEARNING_RATE
-                # print(cost)
-
-
 
             for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
                 cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
@@ -382,7 +377,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
             if(np.mean(np.asarray(costs,dtype=np.float32)) > 1.00000001*meanTrainCost):
                 increasing += 1
-            else: 
+            else:
                 increasing = 0
 
             if increasing == 3:
@@ -393,7 +388,6 @@ def main(tetrode_number=TETRODE_NUMBER):
             meanTrainCost = np.mean(np.asarray(costs),dtype=np.float32)
             meanAutoCost = np.mean(np.asarray(auto_costs),dtype=np.float32)
             meanRecCost = np.mean(np.asarray(rec_costs),dtype=np.float32)
-            # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
 
             print("Epoch: {}, Training cost: {}, Validation Cost: {}, learning rate: {}".format(i+1,meanTrainCost,meanValidCost,learning_rate))
             print("Rec cost: {}, Auto cost: {}".format(meanRecCost,meanAutoCost))
@@ -418,7 +412,6 @@ def main(tetrode_number=TETRODE_NUMBER):
     for start, end in zip(range(0, dataset['num_examples_test'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_test'], BATCH_SIZE)):
         prediction = training['predict'](dataset['X_test'][start:end])
         predictions.append(prediction)
-        # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
         actuals.append(dataset['y_test'][start:end])
     points_from = 300
     for i,(actual,prediction) in enumerate(zip(actuals,predictions)):

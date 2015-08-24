@@ -118,7 +118,7 @@ def makeVideo(X, Y):
 	animation.write_gif(VIDEO_NAME, fps=fps)
 
 if __name__=="__main__":
-	x, y, z = getXY(sequenceLength=500)
+	x, y = getXY()
 	print(x.shape)
 	# clip = makeVideo(x,y)
 	# myclip = mpy.VideoFileClip(VIDEO_NAME)
@@ -127,7 +127,12 @@ if __name__=="__main__":
 	# print(data['pos'][1000:1030])
 	# plt.plot(data['pos'])
 	# plt.show()
-	# plt.scatter(x, y)
+	plt.scatter(x, y, lw=0.0, alpha=0.2)
+	# plt.x_axis("x")
+	plt.axis([0,1,0,1])
+	plt.title("Positions of the rat during the trial")
 	# plt.show()
+	plt.savefig("pos.png")
+	plt.close()
 	# with open('pos.txt','w') as f:
 	# 	f.write(str(x) + " " + str(y))

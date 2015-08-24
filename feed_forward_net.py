@@ -4,6 +4,11 @@
 
 from __future__ import print_function
 
+import matplotlib
+matplotlib.use('Agg')
+
+import matplotlib.pyplot as plt
+
 import gzip
 import itertools
 import pickle
@@ -177,7 +182,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     train = theano.function(inputs=[X_batch, y_batch], outputs=cost, updates=updates, allow_input_downcast=True)
     valid = theano.function(inputs=[X_batch, y_batch], outputs=cost, allow_input_downcast=True)
-    predict = theano.function(inputs=[X_batch], outputs=pred, allow_input_downcast=True)
+    predict = theano.function(inputs=[X_batch], outputs=test, allow_input_downcast=True)
 
     return dict(
         train=train,
@@ -220,7 +225,7 @@ def main(tetrode_number=TETRODE_NUMBER):
                 cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
                 valid_costs.append(cost)
 
-            accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == training['predict'](dataset['X_test']))
+            accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
 
             meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32)
             meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
@@ -245,6 +250,16 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     except KeyboardInterrupt:
         pass
+
+
+    code = training['predict']([dataset['X_test'][1000]])
+
+    x_axis = list(np.arange(len(code[0])))
+
+    # sub3.plot(code[0])
+    plt.bar(x_axis, code[0], width=1)
+    plt.savefig("feed_ex.png")
+    plt.close()
 
     if(LOG_EXPERIMENT):
         print("Logging the experiment details...")
