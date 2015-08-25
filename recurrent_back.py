@@ -284,7 +284,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     train = theano.function(inputs=[X_batch, y_batch, l_rate], outputs=cost2, updates=updates, allow_input_downcast=True)
     valid = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost2, allow_input_downcast=True)
-    train_cost = theano.function(inputs=[X_batch, y_batch, l_rate], outputs=cost, allow_input_downcast=True)
+    train_cost = theano.function(inputs=[X_batch, y_batch], outputs=cost, allow_input_downcast=True)
     valid_cost = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
     predict = theano.function(inputs=[X_batch], outputs=test, allow_input_downcast=True)
 
@@ -342,7 +342,7 @@ def main(tetrode_number=TETRODE_NUMBER):
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
                 cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end],learning_rate)
                 costs.append(cost)
-                costs_no_alpha.append(training['train_cost'](dataset['X_train'][start:end],dataset['y_train'][start:end],learning_rate))
+                costs_no_alpha.append(training['train_cost'](dataset['X_train'][start:end],dataset['y_train'][start:end]))
 
 
             for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
