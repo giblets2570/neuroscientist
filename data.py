@@ -115,7 +115,7 @@ def formatData(tetrodeNumber,basename,twoD=False,timed=False):
 
 
 if __name__=="__main__":
-	a, t, f = formatData(10,BASENAME,timed=True)
+	a, t, f = formatData(9,BASENAME,timed=True)
 
 	print(f)
 

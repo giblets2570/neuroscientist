@@ -516,19 +516,19 @@ def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=Fal
 if __name__=="__main__":
 	tetrode = int(sys.argv[1])
 	# duration, result = organiseTetrodeData(int(sys.argv[1]),learned_labels=True,arg=True)
-	duration, result = organiseTetrodeData(tetrode, learned_labels=True)
+	duration, result = organiseTetrodeData(tetrode, learned_labels=True,arg=True)
 	print(result[0]['label'].shape)
-	activationResult, labelResult = newDownsampleData(duration,result,1000.0)
+	# activationResult, labelResult = newDownsampleData(duration,result,1000.0)
 	#going to test the convolution
 	# print(labelResult.shape)
 
-	activationResult = gaussConv(duration*50,activationResult)
-	labelResult = gaussConv(duration*50,labelResult)
+	# activationResult = gaussConv(duration*50,activationResult)
+	# labelResult = gaussConv(duration*50,labelResult)
 
 	# activationResult = normalizeMatrix(activationResult)
-	labelResult = normalizeMatrix(labelResult)
+	# labelResult = normalizeMatrix(labelResult)
 
-	ratemap(activationResult, labelResult, tetrode)
+	# ratemap(activationResult, labelResult, tetrode)
 
 	# trX, tvX, teX, trY, tvY, teY = formatData()
 
