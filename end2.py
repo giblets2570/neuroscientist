@@ -163,11 +163,15 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
             axis=-1
         )
 
+        print("Slice 1 shape: ",lasagne.layers.get_output_shape(l_slice_1))
+
         l_slice_2 = lasagne.layers.SliceLayer(
             l_in,
             indices=slice(200, None),
             axis=-1
         )
+
+        print("Slice 2 shape: ",lasagne.layers.get_output_shape(l_slice_2))
 
         l_reshape_1= lasagne.layers.ReshapeLayer(
             l_slice_1,
@@ -517,11 +521,11 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     if(SAVE_MODEL):
         print("Saving model...")
-        all_param_values = lasagne.layers.get_all_param_values(auto_network)
+        all_param_values = np.asarray(lasagne.layers.get_all_param_values(auto_network),dtype=np.float32)
         f=open('end_network_auto_2_{}'.format(tetrode_number),'w')
         pickle.dump(all_param_values, f)
         f.close()
-        all_param_values = lasagne.layers.get_all_param_values(rec_network)
+        all_param_values = np.asarray(lasagne.layers.get_all_param_values(rec_network),dtype=np.float32)
         f=open('end_network_recurrent_2_{}'.format(tetrode_number),'w')
         pickle.dump(all_param_values, f)
         f.close()
