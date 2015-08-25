@@ -219,7 +219,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         #     W_hid_to_hid=lasagne.init.HeUniform(),
         #     nonlinearity=lasagne.nonlinearities.tanh
         #     )
-        
+
 
         # l_sum = lasagne.layers.ElemwiseSumLayer([l_recurrent, l_recurrent_back])
 
@@ -265,12 +265,14 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     train_output = lasagne.layers.get_output(network, X_batch)
     cost = lasagne.objectives.squared_error(train_output, y_batch)
-    cost = cost.mean() + alpha * l2
+    cost = cost.mean()
+    cost2 = cost + alpha * l2
 
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch, deterministic=True)
     valid_cost = lasagne.objectives.squared_error(valid_output, y_batch)
-    valid_cost = valid_cost.mean() + alpha * l2
+    valid_cost = valid_cost.mean()
+    valid_cost2 = valid_cost + alpha * l2
 
     # test the performance of the netowork without noise
     test = lasagne.layers.get_output(network, X_batch, deterministic=True)
@@ -279,14 +281,18 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     all_params = lasagne.layers.get_all_params(network)
     updates = lasagne.updates.adagrad(cost, all_params, l_rate)
-    
-    train = theano.function(inputs=[X_batch, y_batch, l_rate], outputs=cost, updates=updates, allow_input_downcast=True)
-    valid = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
+
+    train = theano.function(inputs=[X_batch, y_batch, l_rate], outputs=cost2, updates=updates, allow_input_downcast=True)
+    valid = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost2, allow_input_downcast=True)
+    train_cost = theano.function(inputs=[X_batch, y_batch, l_rate], outputs=cost, allow_input_downcast=True)
+    valid_cost = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
     predict = theano.function(inputs=[X_batch], outputs=test, allow_input_downcast=True)
 
     return dict(
         train=train,
         valid=valid,
+        train_cost=train_cost,
+        valid_cost=valid_cost,
         predict=predict
     )
 
@@ -302,7 +308,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     print("Input shape: {}".format(dataset['X_train'].shape))
     print("Output shape: {}".format(dataset['y_train'].shape))
-    
+
     print("Making the model...")
     network = model(dataset['input_shape'],dataset['output_dim'])
     print("Done!")
@@ -330,21 +336,23 @@ def main(tetrode_number=TETRODE_NUMBER):
         for i in range(NUM_EPOCHS):
             costs = []
             valid_costs = []
+            costs_no_alpha = []
+            valid_costs_no_alpha = []
 
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
                 cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end],learning_rate)
                 costs.append(cost)
-                # if(costs[-1] > 1.02*costs[-2]):
-                #     LEARNING_RATE = 0.8*LEARNING_RATE
-                # print(cost)
-            
+                costs_no_alpha.append(training['train_cost'](dataset['X_train'][start:end],dataset['y_train'][start:end],learning_rate))
+
+
             for start, end in zip(range(0, dataset['num_examples_valid'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_valid'], BATCH_SIZE)):
                 cost = training['valid'](dataset['X_valid'][start:end],dataset['y_valid'][start:end])
                 valid_costs.append(cost)
+                valid_costs_no_alpha.append(training['valid_cost'](dataset['X_valid'][start:end],dataset['y_valid'][start:end]))
 
             if(np.mean(np.asarray(costs,dtype=np.float32)) > 1.00000001*meanTrainCost):
                 increasing += 1
-            else: 
+            else:
                 increasing = 0
 
             if increasing == 3:
@@ -353,9 +361,12 @@ def main(tetrode_number=TETRODE_NUMBER):
                 increasing = 0
             meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32) 
             meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
+            meanValidCostNoAlpha = np.mean(np.asarray(valid_costs_no_alpha),dtype=np.float32) 
+            meanTrainCostNoAlpha = np.mean(np.asarray(costs_no_alpha,dtype=np.float32))
             # accuracy = np.mean(np.argmax(dataset['y_test'], axis=1) == np.argmax(training['predict'](dataset['X_test']), axis=1))
 
             print("Epoch: {}, Training cost: {}, Validation Cost: {}, learning rate: {}".format(i+1,meanTrainCost,meanValidCost,learning_rate))
+            print("No alpha: Training cost: {}, Validation Cost: {}".format(meanTrainCostNoAlpha,meanValidCostNoAlpha))
 
             if(np.isnan(meanValidCost)):
                 print("Nan value")
@@ -404,5 +415,4 @@ def main(tetrode_number=TETRODE_NUMBER):
 
 
 if __name__ == '__main__':
-  
     main()
