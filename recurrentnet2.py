@@ -370,7 +370,7 @@ def main(tetrode_number=TETRODE_NUMBER):
     if(SAVE_MODEL):
         print("Saving model...")
         all_param_values = lasagne.layers.get_all_param_values(network)
-        f=open('recurrent_1_network','w')
+        f=open('recurrent_2_network','w')
         pickle.dump(all_param_values, f)
         f.close()
 

@@ -53,7 +53,7 @@ LOG_EXPERIMENT = True
 
 TETRODE_NUMBER = 9
 
-L2_CONSTANT = 0.01
+L2_CONSTANT = 0.001
 
 # Epoch: 246, Accuracy: 0.943329015544, Training cost: 0.109099879861, validation cost: 0.17596784234
 # 20

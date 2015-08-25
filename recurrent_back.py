@@ -63,6 +63,8 @@ TETRODE_NUMBER = 9
 
 SAVE_MODEL = True
 
+L2_CONSTANT = 0.001
+
 def load_data(tetrode_number):
     """
         Get data with labels, split into training and test set.
@@ -244,7 +246,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         return l_out
 
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM,alpha=L2_CONSTANT):
 
     """
         Method the returns the theano functions that are used in 
@@ -258,14 +260,17 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     l_rate = T.scalar()
 
     # this is the cost of the network when fed throught the noisey network
+
+    l2 = lasagne.regularization.regularize_network_params(network,lasagne.regularization.l2)
+
     train_output = lasagne.layers.get_output(network, X_batch)
     cost = lasagne.objectives.mse(train_output, y_batch)
-    cost = cost.mean()
+    cost = cost.mean() + alpha * l2
 
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch, deterministic=True)
     valid_cost = lasagne.objectives.mse(valid_output, y_batch)
-    valid_cost = valid_cost.mean()
+    valid_cost = valid_cost.mean() + alpha * l2
 
     # test the performance of the netowork without noise
     test = lasagne.layers.get_output(network, X_batch, deterministic=True)
