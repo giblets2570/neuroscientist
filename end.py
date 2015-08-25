@@ -286,8 +286,7 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
     auto_cost = auto_cost.mean()
     rec_cost = rec_cost.mean()
 
-    cost = beta * L + auto_cost * rec_cost  #+ alpha * l2
-
+    cost = beta * L + rec_cost + auto_cost * rec_cost  #+ alpha * l2
 
     # validation cost
     valid_output = lasagne.layers.get_output(rec_network, X_batch, deterministic=True)
