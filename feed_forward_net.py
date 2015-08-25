@@ -46,14 +46,17 @@ NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
 MOMENTUM = 0.9
 
-EARLY_STOPPING = False
-STOPPING_RANGE = 10
+EARLY_STOPPING = True
+STOPPING_RANGE = 20
 
 LOG_EXPERIMENT = True
 
 TETRODE_NUMBER = 9
 
-L2_CONSTANT = 0.0001
+L2_CONSTANT = 0.01
+
+# Epoch: 246, Accuracy: 0.943329015544, Training cost: 0.109099879861, validation cost: 0.17596784234
+# 20
 
 CONV = False
 
@@ -110,15 +113,15 @@ def model(input_shape, output_dim, num_hidden_units, p_drop_input, p_drop_hidden
 
     print("Hidden 1 shape: ",lasagne.layers.get_output_shape(l_hidden))
 
-    l_hidden_dropout = lasagne.layers.DropoutLayer(
-        l_hidden,
-        p=p_drop_hidden
-        )
+    # l_hidden_dropout = lasagne.layers.DropoutLayer(
+    #     l_hidden,
+    #     p=p_drop_hidden
+    #     )
 
-    # # print("Hidden drop 1 shape: ",lasagne.layers.get_output_shape(l_hidden_dropout))
+    # # # print("Hidden drop 1 shape: ",lasagne.layers.get_output_shape(l_hidden_dropout))
 
     l_hidden_2 = lasagne.layers.DenseLayer(
-        l_hidden_dropout,
+        l_hidden,
         num_units=num_hidden_units,
         nonlinearity=lasagne.nonlinearities.rectify,
         )
@@ -210,7 +213,9 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     accuracies = []
 
+    trainValid=[]
 
+    k = 0
     print("Begining to train the network...")
     try:
 
@@ -229,6 +234,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
             meanValidCost = np.mean(np.asarray(valid_costs),dtype=np.float32)
             meanTrainCost = np.mean(np.asarray(costs,dtype=np.float32))
+            trainValid.append([meanTrainCost,meanValidCost])
 
             # print("Epoch: {}, Accuracy: {}".format(i+1,accuracy))
             print("Epoch: {}, Accuracy: {}, Training cost: {}, validation cost: {}".format(i+1,accuracy,meanTrainCost,meanValidCost))
@@ -238,14 +244,15 @@ def main(tetrode_number=TETRODE_NUMBER):
                 break
 
             if(EARLY_STOPPING):
-                if(len(accuracies) < STOPPING_RANGE):
-                    accuracies.append(accuracy)
-                else:
-                    test = [k for k in accuracies if k < accuracy]
-                    if not test:
-                        print('Early stopping causing training to finish at epoch {}'.format(i))
-                        break
-                    del accuracies[0]
+                if(len(trainValid) > 2):
+                    if(trainValid[-2][1] < trainValid[-1][1]):
+                        k += 1
+                    else:
+                        k = 0
+                    print(k)
+                    if (k == STOPPING_RANGE):
+                        raise(KeyboardInterrupt)    
+
             accuracies.append(accuracy)
 
     except KeyboardInterrupt:
@@ -258,6 +265,7 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     # sub3.plot(code[0])
     plt.bar(x_axis, code[0], width=1)
+    plt.title("Feed forward net output")
     plt.savefig("feed_ex.png")
     plt.close()
 
@@ -268,6 +276,7 @@ def main(tetrode_number=TETRODE_NUMBER):
             BASENAME = BASENAME,
             NUM_EPOCHS = NUM_EPOCHS,
             BATCH_SIZE = BATCH_SIZE,
+            TRAIN_VALID = str(trainValid),
             NUM_HIDDEN_UNITS = NUM_HIDDEN_UNITS,
             LEARNING_RATE = LEARNING_RATE,
             MOMENTUM = MOMENTUM,
