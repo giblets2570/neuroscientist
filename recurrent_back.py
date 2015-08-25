@@ -264,18 +264,18 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     l2 = lasagne.regularization.regularize_network_params(network,lasagne.regularization.l2)
 
     train_output = lasagne.layers.get_output(network, X_batch)
-    cost = lasagne.objectives.mse(train_output, y_batch)
+    cost = lasagne.objectives.squared_error(train_output, y_batch)
     cost = cost.mean() + alpha * l2
 
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch, deterministic=True)
-    valid_cost = lasagne.objectives.mse(valid_output, y_batch)
+    valid_cost = lasagne.objectives.squared_error(valid_output, y_batch)
     valid_cost = valid_cost.mean() + alpha * l2
 
     # test the performance of the netowork without noise
     test = lasagne.layers.get_output(network, X_batch, deterministic=True)
     pred = T.argmax(test, axis=1)
-    accuracy = T.mean(lasagne.objectives.mse(pred, y_batch), dtype=theano.config.floatX)
+    accuracy = T.mean(lasagne.objectives.squared_error(pred, y_batch), dtype=theano.config.floatX)
 
     all_params = lasagne.layers.get_all_params(network)
     updates = lasagne.updates.adagrad(cost, all_params, l_rate)
