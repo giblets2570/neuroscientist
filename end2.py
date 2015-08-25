@@ -330,7 +330,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         return l_out, l_out_auto
 
 
-def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, alpha=L2_CONSTANT, sparsity=0.01,beta=0.001):
+def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, alpha=L2_CONSTANT, sparsity=0.01,beta=0.00005):
 
     """
         Method the returns the theano functions that are used in 
@@ -373,7 +373,10 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
     L1 = T.sum(sparsity * T.log(sparsity/rho_hat1) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat1)))
     L2 = T.sum(sparsity * T.log(sparsity/rho_hat2) + (1 - sparsity) * T.log((1 - sparsity)/(1 - rho_hat2)))
 
-    cost = auto_cost.mean() + rec_cost.mean() + beta * (L1 + L2) #+ alpha * l2
+    auto_cost = auto_cost.mean()
+    rec_cost = rec_cost.mean()
+
+    cost = beta * (L1 + L2) + rec_cost + auto_cost * rec_cost
 
     # validation cost
     valid_output = lasagne.layers.get_output(rec_network, X1_batch)
@@ -444,8 +447,6 @@ def main(tetrode_number=TETRODE_NUMBER):
             valid_costs = []
 
             for start, end in zip(range(0, dataset['num_examples_train'], BATCH_SIZE), range(BATCH_SIZE, dataset['num_examples_train'], BATCH_SIZE)):
-                print(dataset['X_train'][start:end].shape)
-                print(dataset['y_train'][start:end].shape)
                 cost = training['train'](dataset['X_train'][start:end],dataset['y_train'][start:end],learning_rate)
                 costs.append(cost)
 
@@ -521,11 +522,11 @@ def main(tetrode_number=TETRODE_NUMBER):
 
     if(SAVE_MODEL):
         print("Saving model...")
-        all_param_values = np.asarray(lasagne.layers.get_all_param_values(auto_network),dtype=np.float32)
+        all_param_values = lasagne.layers.get_all_param_values(auto_network)
         f=open('end_network_auto_2_{}'.format(tetrode_number),'w')
         pickle.dump(all_param_values, f)
         f.close()
-        all_param_values = np.asarray(lasagne.layers.get_all_param_values(rec_network),dtype=np.float32)
+        all_param_values = lasagne.layers.get_all_param_values(rec_network)
         f=open('end_network_recurrent_2_{}'.format(tetrode_number),'w')
         pickle.dump(all_param_values, f)
         f.close()
