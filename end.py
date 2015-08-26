@@ -247,7 +247,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         return l_out, l_out_1
 
 
-def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, sparsity=0.01,beta=0.00005,alpha=L2_CONSTANT,auto_frac=10):
+def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, sparsity=0.01,beta=0.00001,alpha=L2_CONSTANT,auto_frac=10):
 
     """
         Method the returns the theano functions that are used in
