@@ -330,7 +330,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         return l_out, l_out_auto
 
 
-def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, alpha=L2_CONSTANT, sparsity=0.01,beta=0.00005):
+def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, momentum=MOMENTUM, alpha=L2_CONSTANT, sparsity=0.01,beta=0.00005,auto_frac=10):
 
     """
         Method the returns the theano functions that are used in 
@@ -376,7 +376,7 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
     auto_cost = auto_cost.mean()
     rec_cost = rec_cost.mean()
 
-    cost = beta * (L1 + L2) + rec_cost + auto_cost * rec_cost
+    cost = beta * (L1 + L2) + rec_cost + auto_frac * auto_cost * rec_cost
 
     # validation cost
     valid_output = lasagne.layers.get_output(rec_network, X1_batch)
