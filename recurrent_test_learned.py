@@ -252,22 +252,22 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     # this is the cost of the network when fed throught the noisey network
     train_output = lasagne.layers.get_output(network, X_batch)
-    cost_array = lasagne.objectives.mse(train_output, y_batch)
+    cost_array = lasagne.objectives.squared_error(train_output, y_batch)
     cost = cost_array.mean()
 
     # validation cost
     valid_output = lasagne.layers.get_output(network, X_batch, deterministic=True)
-    valid_cost_array = lasagne.objectives.mse(valid_output, y_batch)
+    valid_cost_array = lasagne.objectives.squared_error(valid_output, y_batch)
     valid_cost = valid_cost_array.mean()
 
     # test the performance of the netowork without noise
     test = lasagne.layers.get_output(network, X_batch, deterministic=True)
     pred = T.argmax(test, axis=1)
-    accuracy = T.mean(lasagne.objectives.mse(pred, y_batch), dtype=theano.config.floatX)
+    accuracy = T.mean(lasagne.objectives.squared_error(pred, y_batch), dtype=theano.config.floatX)
 
     all_params = lasagne.layers.get_all_params(network)
     updates = lasagne.updates.adagrad(cost, all_params, l_rate)
-    
+
     train = theano.function(inputs=[X_batch, y_batch, l_rate], outputs=cost, updates=updates, allow_input_downcast=True)
     cost_array = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost_array, allow_input_downcast=True)
     valid = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
@@ -389,8 +389,8 @@ def main(tetrode_number=TETRODE_NUMBER):
 
         plt.savefig('../position/learned/Position_{}.png'.format(i), bbox_inches='tight')
         plt.close()
-        makeVideo(prediction,actual,points_from,i)
-        plt.close()
+        # makeVideo(prediction,actual,points_from,i)
+        # plt.close()
 
 def makeVideo(prediction, actual, points_from, number):
 
