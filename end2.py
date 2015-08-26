@@ -391,8 +391,8 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
     train = theano.function(inputs=[X1_batch, y_batch, l_rate], outputs=cost, updates=updates, allow_input_downcast=True)
     valid = theano.function(inputs=[X1_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
     predict = theano.function(inputs=[X1_batch], outputs=test, allow_input_downcast=True)
-    auto_cost = theano.function(inputs=[X_batch], outputs=auto_cost, allow_input_downcast=True)
-    rec_cost = theano.function(inputs=[X_batch, y_batch], outputs=rec_cost, allow_input_downcast=True)
+    auto_cost = theano.function(inputs=[X1_batch], outputs=auto_cost, allow_input_downcast=True)
+    rec_cost = theano.function(inputs=[X1_batch, y_batch], outputs=rec_cost, allow_input_downcast=True)
 
     return dict(
         train=train,
