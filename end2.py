@@ -100,7 +100,7 @@ def load_data(tetrodeRange=[11,12]):
     # X_valid = time[n:m]
     # X_test = time[m:]
 
-    X_train, X_valid, X_test = auto_data(sequenceLength=sequenceLength,tetrodeRange,num_skip=40)
+    X_train, X_valid, X_test = auto_data(sequenceLength=sequenceLength,tetrodeRange=tetrodeRange,num_skip=40)
 
     # X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1])
     # X_valid = X_valid.reshape(X_valid.shape[0],1,X_valid.shape[1])
