@@ -409,7 +409,7 @@ def main(tetrodeRange=[11,12]):
     print("Loading the data...")
     dataset = load_data(tetrodeRange)
     print("Done!")
-
+    tetrode_number = 11
     print("Tetrode number: {}, Num outputs: {}".format(tetrode_number,dataset['output_dim']))
 
     print("Input shape: {}".format(dataset['X_train'].shape))
