@@ -66,7 +66,7 @@ SAVE_MODEL = True
 
 L2_CONSTANT = 0.0001
 
-def load_data(tetrode_number):
+def load_data(tetrodeRange=[11,12]):
     """
         Get data with labels, split into training and test set.
     """
@@ -100,7 +100,7 @@ def load_data(tetrode_number):
     # X_valid = time[n:m]
     # X_test = time[m:]
 
-    X_train, X_valid, X_test = auto_data(sequenceLength=sequenceLength,tetrodeRange=[11,12],num_skip=40)
+    X_train, X_valid, X_test = auto_data(sequenceLength=sequenceLength,tetrodeRange,num_skip=40)
 
     # X_train = X_train.reshape(X_train.shape[0],1,X_train.shape[1])
     # X_valid = X_valid.reshape(X_valid.shape[0],1,X_valid.shape[1])
@@ -402,12 +402,12 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
         rec_cost=rec_cost
     )
 
-def main(tetrode_number=TETRODE_NUMBER):
+def main(tetrodeRange=[11,12]):
     """
         This is the main method that sets up the experiment
     """
     print("Loading the data...")
-    dataset = load_data(tetrode_number)
+    dataset = load_data(tetrodeRange)
     print("Done!")
 
     print("Tetrode number: {}, Num outputs: {}".format(tetrode_number,dataset['output_dim']))
