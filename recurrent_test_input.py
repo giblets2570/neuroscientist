@@ -284,7 +284,7 @@ def main(tetrode_number=TETRODE_NUMBER):
             break
 
     print(cost_arrays)
-    points_from = 0
+    points_from = 1900
 
     print("Plotting the predictions")
 
