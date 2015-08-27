@@ -242,7 +242,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
         The predict function returns out output of the network.
     """
 
-    # symbolic variables 
+    # symbolic variables
     X_batch = T.tensor3()
     y_batch = T.tensor3()
     l_rate = T.scalar()
@@ -264,7 +264,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
 
     all_params = lasagne.layers.get_all_params(network)
     updates = lasagne.updates.adagrad(cost, all_params, l_rate)
-    
+
     train = theano.function(inputs=[X_batch, y_batch, l_rate], outputs=cost, updates=updates, allow_input_downcast=True)
     valid = theano.function(inputs=[X_batch, y_batch], outputs=valid_cost, allow_input_downcast=True)
     predict = theano.function(inputs=[X_batch], outputs=test, allow_input_downcast=True)
