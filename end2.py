@@ -188,7 +188,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         l_code_layer_1 = lasagne.layers.DenseLayer(
             l_hidden_1_1,
-            num_units=50,
+            num_units=10,
             nonlinearity=lasagne.nonlinearities.sigmoid,
             )
 
@@ -230,7 +230,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
 
         l_code_layer_2 = lasagne.layers.DenseLayer(
             l_hidden_2_1,
-            num_units=50,
+            num_units=10,
             nonlinearity=lasagne.nonlinearities.sigmoid,
             )
 
@@ -376,7 +376,7 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
     auto_cost = auto_cost.mean()
     rec_cost = rec_cost.mean()
 
-    cost = beta * (L1 + L2) + rec_cost + auto_cost # * rec_cost * auto_frac
+    cost = rec_cost + auto_cost # * rec_cost * auto_frac  + beta * (L1 + L2) 
 
     # validation cost
     valid_output = lasagne.layers.get_output(rec_network, X1_batch)
