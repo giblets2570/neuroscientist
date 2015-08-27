@@ -130,7 +130,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2,num_hidde
 
     l_code_layer = lasagne.layers.DenseLayer(
         l_hidden_1,
-        num_units=num_code_units,
+        num_units=10,
         nonlinearity=lasagne.nonlinearities.sigmoid,
         )
 
