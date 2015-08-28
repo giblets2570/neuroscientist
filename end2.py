@@ -64,7 +64,7 @@ TETRODE_NUMBER = 11
 
 SAVE_MODEL = True
 
-L2_CONSTANT = 0.0001
+L2_CONSTANT = 0.00001
 
 def load_data(tetrodeRange=[11,12]):
     """
@@ -375,8 +375,8 @@ def funcs(dataset, rec_network, auto_network, batch_size=BATCH_SIZE, learning_ra
 
     auto_cost = auto_cost.mean()
     rec_cost = rec_cost.mean()
-
-    cost = rec_cost + auto_cost # * rec_cost * auto_frac  + beta * (L1 + L2) 
+    l2 = lasagne.regularization.regularize_network_params(network,lasagne.regularization.l2)
+    cost = rec_cost + auto_cost  + alpha * l2 # * rec_cost * auto_frac  + beta * (L1 + L2) 
 
     # validation cost
     valid_output = lasagne.layers.get_output(rec_network, X1_batch)
