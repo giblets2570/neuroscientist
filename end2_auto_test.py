@@ -54,7 +54,7 @@ else:
 
 BASENAME = "../R2192-screening/20141001_R2192_screening"
 
-NUM_EPOCHS = 1
+NUM_EPOCHS = 10
 BATCH_SIZE = 400
 NUM_HIDDEN_UNITS = 100
 LEARNING_RATE = 0.01
@@ -183,7 +183,7 @@ def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, 
     train_output = lasagne.layers.get_output(network, X_batch)
     cost = lasagne.objectives.squared_error(train_output, y_batch) 
     l2 = lasagne.regularization.l2(X_batch)
-    cost = cost.mean() + beta * L #+ alpha * l2
+    cost = cost.mean() #+ beta * L #+ alpha * l2
 
     all_params = lasagne.layers.get_all_params(network)
     updates = lasagne.updates.nesterov_momentum(cost, all_params, learning_rate, momentum)
