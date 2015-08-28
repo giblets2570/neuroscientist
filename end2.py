@@ -64,7 +64,7 @@ TETRODE_NUMBER = 11
 
 SAVE_MODEL = True
 
-L2_CONSTANT = 0.00001
+L2_CONSTANT = 0.0001
 
 def load_data(tetrodeRange=[11,12]):
     """
