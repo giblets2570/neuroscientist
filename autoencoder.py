@@ -90,17 +90,20 @@ def load_data(tetrode_number=TETRODE_NUMBER):
     y_test = X_test
 
     r={}
-    # for x,y in zip(X_test,y_test_labels):
-    #     # print("x: {}".format(x))
-    #     # print("y: {}".format(y))
-    #     _y = list(y)
-    #     if int(_y.index(1.0)) not in r:
-    #         r[int(_y.index(1.0))]=[x]
-    #     else:
-    #         r[int(_y.index(1.0))].append(x)
+    for x,y in zip(X_test,y_test_labels):
+        # print("x: {}".format(x))
+        # print("y: {}".format(y))
+        _y = list(y)
+        if int(_y.index(1.0)) not in r:
+            r[int(_y.index(1.0))]=[x]
+        else:
+            r[int(_y.index(1.0))].append(x)
 
-    # for key in r:
-    #     r[key] = np.asarray(r[key])
+    for key in r:
+        r[key] = np.asarray(r[key])
+
+
+    print([np.asarray(r[key]).shape for key in r])
 
 
     return dict(
