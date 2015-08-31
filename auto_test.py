@@ -276,19 +276,19 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         # NUM_POINTS = 5000
         codes = training['code'](dataset['data'][0:NUM_POINTS])
 
-        # col = [np.argmax(code) for code in codes]
-        # num_col = len(list(set(col)))
-        # already = {}
-        # argmax_labels = []
-        # n = 0
-        # for c in col:
-        #     if not c in already:
-        #         already[c] = n
-        #         # print(already[c])
-        #         n+=1
-        #     argmax_labels.append(already[c])
+        col = [np.argmax(code) for code in codes]
+        num_col = len(list(set(col)))
+        already = {}
+        argmax_labels = []
+        n = 0
+        for c in col:
+            if not c in already:
+                already[c] = n
+                # print(already[c])
+                n+=1
+            argmax_labels.append(already[c])
 
-        # print(len(already))
+        print(len(already))
 
         # f=open('dbscan_labels/test/arg_tetrode_{}.npy'.format(tetrode_number),'w')
         # pickle.dump(argmax_labels, f)
@@ -301,8 +301,6 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         # activations_1 = training['activations_1'](dataset['data'][0:NUM_POINTS])
         # activations_2 = training['activations_2'](dataset['data'][0:NUM_POINTS])
         # codes = training['code'](dataset['data'][0:NUM_POINTS])
-
-
 
         # combined = dataset['data'][0]+dataset['data'][44]
 
@@ -416,11 +414,11 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
         #     # pickle.dump(labels, f)
         #     # f.close()
 
-        # codes_2d = bh_sne(np.asarray(codes,dtype=np.float64))
+        codes_2d = bh_sne(np.asarray(codes,dtype=np.float64))
 
-        # plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=col, alpha=0.8,lw=0)
-        # plt.savefig('dbscan_labels/test/argmax_{}.png'.format(tetrode_number), bbox_inches='tight')
-        # plt.close()
+        plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=col, alpha=0.8,lw=0)
+        plt.savefig('dbscan_labels/test/argmax_{}.png'.format(tetrode_number), bbox_inches='tight')
+        plt.close()
 
         # # d = DPGMM(n_components=10, covariance_type='full')
         # d = DPGMM(n_components=15)
