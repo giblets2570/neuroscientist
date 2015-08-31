@@ -60,6 +60,9 @@ GRAD_CLIP = 100
 
 LOG_EXPERIMENT = True
 
+EARLY_STOPPING = True
+STOPPING_RANGE = 10
+
 TETRODE_NUMBER = 11
 
 SAVE_MODEL = True
@@ -445,6 +448,7 @@ def main(tetrodeRange=[11,12]):
     print("Begining to train the network...")
     epochsDone = 0
     increasing = 0
+    k = 0
     try:
         meanTrainCost = 1000
         for i in range(NUM_EPOCHS):
@@ -489,6 +493,17 @@ def main(tetrodeRange=[11,12]):
 
             trainvalidation.append([meanTrainCost,meanValidCost])
             # accuracies.append(accuracy)
+
+            if(EARLY_STOPPING):
+                if(len(trainValid) > 2):
+                    if(trainValid[-2][1] < trainValid[-1][1]):
+                        k += 1
+                    else:
+                        k = 0
+                    print(k)
+                    if (k == STOPPING_RANGE):
+                        raise(KeyboardInterrupt)
+
 
             epochsDone = epochsDone + 1
     except KeyboardInterrupt:

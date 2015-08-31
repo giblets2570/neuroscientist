@@ -251,7 +251,7 @@ def main(tetrode_number=TETRODE_NUMBER):
                         k = 0
                     print(k)
                     if (k == STOPPING_RANGE):
-                        raise(KeyboardInterrupt)    
+                        raise(KeyboardInterrupt)
 
             accuracies.append(accuracy)
 
