@@ -495,8 +495,8 @@ def main(tetrodeRange=[11,12]):
             # accuracies.append(accuracy)
 
             if(EARLY_STOPPING):
-                if(len(trainValid) > 2):
-                    if(trainValid[-2][1] < trainValid[-1][1]):
+                if(len(trainvalidation) > 2):
+                    if(trainvalidation[-2][1] < trainvalidation[-1][1]):
                         k += 1
                     else:
                         k = 0
