@@ -13,7 +13,8 @@ import pickle
 from moviepy.video.io.bindings import mplfig_to_npimage
 import moviepy.editor as mpy
 
-BASENAME = "../R2192-screening/20141001_R2192_screening"
+# BASENAME = "../R2192-screening/20141001_R2192_screening"
+BASENAME = "../R2192/20140110_R2192_track1"
 
 def getTotalInputDimension(tetrodeNumber=9,endTetrode=16,basename=BASENAME):
 	"""
@@ -514,10 +515,11 @@ def formatData(tetrodes=[9,10,11,12,13,14,15,16],sequenceLength=2000,testing=Fal
 	return trX, tvX, teX, trY, tvY, teY
 
 if __name__=="__main__":
-	tetrode = int(sys.argv[1])
-	# duration, result = organiseTetrodeData(int(sys.argv[1]),learned_labels=True,arg=True)
-	duration, result = organiseTetrodeData(tetrode, learned_labels=True)
-	print(result[0]['label'].shape)
+	# tetrode = int(sys.argv[1])
+	# # duration, result = organiseTetrodeData(int(sys.argv[1]),learned_labels=True,arg=True)
+	# duration, result = organiseTetrodeData(tetrode, learned_labels=True)
+	# print(result[0]['label'].shape)
+	print(getTotalInputDimension())
 	# activationResult, labelResult = newDownsampleData(duration,result,1000.0)
 	#going to test the convolution
 	# print(labelResult.shape)
