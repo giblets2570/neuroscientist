@@ -71,6 +71,8 @@ NUM_POINTS = 100000
 
 L2_CONSTANT = 0.0000
 
+DIMM = 0
+
 # MODEL_FILENAME = "auto_models/deep/auto_network_"
 MODEL_FILENAME = "auto_models/deep/auto_network_"
 
@@ -97,7 +99,7 @@ def load_data(tetrode_number=TETRODE_NUMBER):
     for key in r:
         r[key] = np.asarray(r[key])
 
-
+    print("CASWELLS {}".format(labels.shape[-1]))
     labels = np.asarray([np.argmax(y) for y in labels])
     return dict(
         data=data,
@@ -149,7 +151,7 @@ def model(input_shape, output_dim, num_hidden_units,num_hidden_units_2,num_hidde
 
     return l_out
 
-def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.01, beta=0.00005, momentum=MOMENTUM, alpha=L2_CONSTANT):
+def funcs(dataset, network, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, sparsity=0.01, beta=0.0002, momentum=MOMENTUM, alpha=L2_CONSTANT):
 
     """
         Method the returns the theano functions that are used in
@@ -450,15 +452,40 @@ def main(tetrode_number=TETRODE_NUMBER,num_hidden_units=100,num_hidden_units_2=3
                 min_samples = min_samples+diff
             except SyntaxError:
                 break
-
+        plt.title("Number of found clusters: {}".format(num_labels))
         plt.scatter(codes_2d[:, 0], codes_2d[:, 1], c=labels[0:NUM_POINTS],lw=0)
         plt.savefig('dbscan_labels/test/dbscan_{}_labeled.png'.format(tetrode_number), bbox_inches='tight')
         plt.close()
 
-        f=open('dbscan_labels/test/tetrode_{}.npy'.format(tetrode_number),'w')
-        pickle.dump(labels, f)
-        f.close()
-
+        t = []
+        sizes = []
+        for i in range(12):
+            total = 0.0
+            all_same = {}
+            # print("Dim: {}".format(i))
+            for k,j in enumerate(list(dataset['labels'])):
+                # print(j)
+                # print(i)
+                if j == i:
+                    total += 1.0
+                    if labels[k] in all_same:
+                        all_same[labels[k]] += 1.0
+                    else:
+                        all_same[labels[k]] = 1.0
+            d = []
+            sizes.append(total)
+            for key in all_same:
+                d.append(all_same[key])
+            if(len(d) > 0):
+                d = np.asarray(d)
+                m = np.max(d)
+                print("ave: {}".format(m/total))
+                t.append(m/total)
+        answer = np.mean([i*j/(np.sum(np.asarray(sizes))) for i,j in zip(t,sizes)])
+        t = np.asarray(t)
+        t = t.mean()
+        print("t: {}".format(t))
+        print("answer: {}".format(answer))
 
 if __name__ == '__main__':
     main()

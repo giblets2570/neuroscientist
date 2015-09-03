@@ -209,7 +209,7 @@ def model(input_shape, output_dim, num_hidden_units=NUM_HIDDEN_UNITS, num_recurr
         #     W_hid_to_hid=lasagne.init.HeUniform(),
         #     nonlinearity=lasagne.nonlinearities.tanh
         #     )
-        
+
 
         # l_sum = lasagne.layers.ElemwiseSumLayer([l_recurrent, l_recurrent_back])
 
